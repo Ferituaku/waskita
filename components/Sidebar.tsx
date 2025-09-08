@@ -11,6 +11,7 @@ import {
   RefreshCw,
   LogOut,
 } from "lucide-react";
+import Image from "next/image";
 
 const navLinks = [
   { href: "/beranda", label: "Beranda", icon: Home },
@@ -25,10 +26,16 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className="bg-[#5C110E] text-white w-72 flex-shrink-0 flex-col min-h-screen hidden md:flex">
-      <div className="p-6 border-b border-white/20">
-        <h1 className="text-3xl font-bold tracking-wider text-center">
-          WASKITA
-        </h1>
+      <div className="p-2 border-b border-white/20">
+        <div className="flex justify-center">
+          <Image
+            src="/logo-waskitabystophiva(putih).png"
+            alt="Waskita Logo"
+            width={180}
+            height={60}
+            priority
+          />
+        </div>
       </div>
       <nav className="flex-1 px-4 py-6 space-y-2">
         {navLinks.map(({ href, label, icon: Icon }) => {
