@@ -1,12 +1,21 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+    <main className="flex min-h-screen bg-amber-50 flex-col items-center justify-center p-24">
       <div className="text-center">
-        <h1 className="text-5xl font-bold text-red-600">WASKITA</h1>
-        <p className="mt-4 text-lg text-gray-700">
-          Selamat datang di Wadah Sadar Kesehatan Kita.
+        <div className="text-center">
+          <Image
+            src="/logo-waskitabystophiva.png"
+            alt="Waskita Logo"
+            width={440} // Sesuaikan lebar logo
+            height={50} // Sesuaikan tinggi logo
+            priority
+          />
+        </div>
+        <p className="mt-4 text-lg text-red-700">
+          Selamat datang di Wadah Sadar Kesehatan Tembalang.
         </p>
         <div className="mt-8">
           <Link

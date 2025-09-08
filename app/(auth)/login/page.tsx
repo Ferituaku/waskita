@@ -2,11 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image"; // Menggunakan Image component dari Next.js untuk optimasi
-
-// Pastikan Anda sudah meletakkan logo di folder /public/images/
-import LogoWaskita from "@/public/images/logo-waskita.png";
-
+import Image from "next/image";
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
