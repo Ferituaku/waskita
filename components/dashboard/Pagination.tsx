@@ -1,28 +1,87 @@
-import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+"use client";
 
-const Pagination: React.FC = () => {
+import React from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
+
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
+  const handlePageClick = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      onPageChange(page);
+    }
+  };
+
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
+
   return (
-    <div className="flex items-center justify-center space-x-2 mt-8 text-black">
-      <button className="p-2 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed">
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-      <button className="px-4 py-2 rounded-md text-sm font-medium bg-[#5C110E] text-white">
-        1
-      </button>
-      <button className="px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200">
-        2
-      </button>
-      <button className="px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200">
-        3
-      </button>
-      <span className="px-4 py-2 text-sm">...</span>
-      <button className="px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200">
-        10
-      </button>
-      <button className="p-2 rounded-md hover:bg-gray-200">
-        <ChevronRight className="w-5 h-5" />
-      </button>
+    <div className="flex justify-center items-center mt-6 text-sm">
+      <nav className="flex items-center space-x-1 text-gray-600">
+        <button
+          onClick={() => handlePageClick(1)}
+          disabled={currentPage === 1}
+          className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="First page"
+        >
+          <ChevronsLeft size={16} />
+        </button>
+        <button
+          onClick={() => handlePageClick(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Previous page"
+        >
+          <ChevronLeft size={16} />
+        </button>
+
+        {pageNumbers.map((number) => (
+          <button
+            key={number}
+            onClick={() => handlePageClick(number)}
+            className={`px-3 py-1 rounded-md ${
+              currentPage === number
+                ? "font-bold text-red-600 bg-red-100"
+                : "hover:bg-gray-100"
+            }`}
+            aria-current={currentPage === number ? "page" : undefined}
+          >
+            {number}
+          </button>
+        ))}
+
+        <button
+          onClick={() => handlePageClick(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Next page"
+        >
+          <ChevronRight size={16} />
+        </button>
+        <button
+          onClick={() => handlePageClick(totalPages)}
+          disabled={currentPage === totalPages}
+          className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Last page"
+        >
+          <ChevronsRight size={16} />
+        </button>
+      </nav>
     </div>
   );
 };

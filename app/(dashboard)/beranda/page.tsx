@@ -1,11 +1,15 @@
+"use client";
+
 import MaterialCard from "@/components/dashboard/MaterialCard";
 import Pagination from "@/components/dashboard/Pagination";
 import TabFilter from "@/components/dashboard/TabFilter";
 import Header from "@/components/Header";
-import React from "react";
+import React, { useState } from "react";
 
 const BerandaPage: React.FC = () => {
   // Mock data for materials
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
   const materials = [
     {
       category: "Edukasi",
@@ -53,6 +57,11 @@ const BerandaPage: React.FC = () => {
       imageUrl: "/tangan.jpg",
     },
   ];
+  const totalPages = Math.ceil(materials.length / itemsPerPage);
+  const paginatedMaterials = materials.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -70,12 +79,16 @@ const BerandaPage: React.FC = () => {
         <TabFilter tabs={["Semua", "Edukasi", "Artikel", "Video"]} />
 
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-          {materials.map((material, index) => (
+          {paginatedMaterials.map((material, index) => (
             <MaterialCard key={index} {...material} />
           ))}
         </section>
 
-        <Pagination />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </>
   );
