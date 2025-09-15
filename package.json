@@ -27,7 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "daisyui": "^5.1.8",
+    "daisyui": "^5.1.12",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "mini-css-extract-plugin": "^2.9.4",

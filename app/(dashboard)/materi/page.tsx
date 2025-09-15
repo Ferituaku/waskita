@@ -80,7 +80,7 @@ const MateriPage: React.FC = () => {
                   type="text"
                   id="judul"
                   defaultValue={modal.data?.judul || ""}
-                  className="mt-1 block w-full text-gray-600 input input-bordered"
+                  className="mt-1 block w-full text-gray-600 input input-bordered focus:ring-gray-200"
                   placeholder="Masukkan judul materi"
                 />
               </div>
@@ -141,7 +141,7 @@ const MateriPage: React.FC = () => {
                 <input
                   type="file"
                   id="cover-file"
-                  className="file-input file-input-bordered file-input-primary w-full mt-1"
+                  className="file-input file-input-bordered border-2 border-gray-500 file-input-primary text-gray-600 w-full mt-1"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-4">
@@ -152,7 +152,10 @@ const MateriPage: React.FC = () => {
                 >
                   Batal
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button
+                  type="submit"
+                  className="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
+                >
                   Upload
                 </button>
               </div>
@@ -227,10 +230,19 @@ const MateriPage: React.FC = () => {
                 />
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>Entries per Page:</span>
-                <button className="bg-red-600 text-white font-semibold py-1 px-3 rounded-md">
-                  10
-                </button>
+                <label htmlFor="entries-per-page" className="whitespace-nowrap">
+                  Entries per Page:
+                </label>
+                <select
+                  id="entries-per-page"
+                  className="select select-sm select-bordered text-white p-1 bg-red-600 hover:bg-red-700 rounded-xl w-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                  defaultValue={10}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
               </div>
             </div>
           </div>
@@ -279,9 +291,15 @@ const MateriPage: React.FC = () => {
                         onClick={() =>
                           setModal({ isOpen: true, type: "cover", data: item })
                         }
-                        className="bg-gray-200 rounded-md w-24 h-16 flex items-center justify-center text-gray-500 text-xs font-medium hover:bg-gray-300 hover:text-gray-600 transition-colors"
+                        className="relative group bg-gray-200 rounded-md w-24 h-16 flex items-center justify-center text-gray-500 text-xs font-medium hover:bg-gray-300 hover:text-gray-300 transition-colors"
                       >
                         Cover
+                        <span className="absolute items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Pencil
+                            size={16}
+                            className="text-gray-500 group-hover:text-gray-700"
+                          ></Pencil>
+                        </span>
                       </button>
                     </td>
                     <td className="p-4 font-medium text-gray-800 max-w-sm">
