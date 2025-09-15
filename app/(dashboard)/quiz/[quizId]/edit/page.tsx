@@ -17,7 +17,7 @@ interface Question {
   correctAnswerId: number | null;
 }
 
-// Mock data awal untuk memulai
+// Mock data awal untuk memulai (belum terintgrasi db dari backend)
 const mockQuestions: Question[] = [
   {
     id: 1,
@@ -97,7 +97,7 @@ export default function QuizEditPage({
 
   const handleSaveChanges = () => {
     console.log("Saving changes:", questions);
-    // Implement save logic here, e.g., API call
+    //implementasiin logika handle simpan dia punya perubahan disini, e.g., API call
   };
 
   return (
@@ -105,7 +105,10 @@ export default function QuizEditPage({
       {/* Header Halaman */}
       <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <Link href="/quiz" className="btn btn-ghost btn-circle">
+          <Link
+            href="/quiz"
+            className="btn  btn-circle hover:text-gray-500 hover:bg-gray-300 text-gray-700 font-medium py-2 px-2 rounded-lg flex items-center gap-2 transition-colors duration-200"
+          >
             <ArrowLeft size={24} />
           </Link>
           <div>
@@ -115,7 +118,10 @@ export default function QuizEditPage({
             </p>
           </div>
         </div>
-        <button onClick={handleSaveChanges} className="btn btn-info text-white">
+        <button
+          onClick={handleSaveChanges}
+          className="btn bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center gap-2"
+        >
           Simpan Perubahan
         </button>
       </header>
@@ -141,9 +147,12 @@ export default function QuizEditPage({
               ))}
               <button
                 onClick={handleAddQuestion}
-                className="btn btn-outline btn-gray-900 w-full mt-4"
+                className="btn text-gray-700 bg-yellow-200 w-full mt-4 col-span-1 flex items-center justify-center gap-1 rounded-lg hover:bg-yellow-300 transition-colors duration-200"
               >
-                <Plus size={16} className="mr-2" /> Tambah Soal Baru
+                <span>
+                  <Plus size={20} className="mr-2" />
+                </span>
+                Tambah Soal Baru
               </button>
             </div>
           </aside>
@@ -164,7 +173,7 @@ export default function QuizEditPage({
                     <textarea
                       id="questionText"
                       rows={4}
-                      className="textarea textarea-bordered w-full text-base"
+                      className="textarea border-1 border-gray-800  rounded-lg p-1 textarea-bordered w-full text-gray-700"
                       placeholder="Contoh: Apa itu HIV?"
                       value={activeQuestion.questionText}
                       onChange={(e) =>
@@ -196,7 +205,7 @@ export default function QuizEditPage({
                           />
                           <input
                             type="text"
-                            className="input input-bordered flex-1"
+                            className="input input-bordered text-gray-600 flex-1"
                             placeholder={`Pilihan ${option.id}`}
                             value={option.text}
                             onChange={(e) =>
@@ -215,9 +224,12 @@ export default function QuizEditPage({
                     </div>
                     <button
                       onClick={handleAddOption}
-                      className="btn btn-ghost btn-sm text-gray-900 mt-4"
+                      className="btn text-gray-700 bg-yellow-200 w-full mt-4 col-span-1 flex items-center justify-center gap-1 rounded-lg hover:bg-yellow-300 transition-colors duration-200"
                     >
-                      <Plus size={16} className="mr-1" /> Tambah Pilihan Jawaban
+                      <span>
+                        <Plus size={20} className="mr-2" />
+                      </span>
+                      Tambah Soal Baru
                     </button>
                   </div>
                 </div>
