@@ -1,3 +1,5 @@
+"use client";
+
 import React, { Fragment } from "react";
 import { Search, User, Users, LogOut } from "lucide-react";
 import Link from "next/link";
@@ -10,8 +12,10 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ title }) => {
   return (
     <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
+      {/* Judul */}
       <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
 
+      {/* Search Box */}
       <div className="relative w-full max-w-md hidden md:block">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
@@ -21,12 +25,12 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         />
       </div>
 
+      {/* User Profile Dropdown */}
       <div className="flex items-center gap-4">
         <span className="font-semibold text-gray-700 hidden sm:block">
           Nama Pengguna
         </span>
 
-        {/* Profile dropdown */}
         <Menu as="div" className="relative">
           <div>
             <Menu.Button className="relative flex max-w-xs items-center rounded-full bg-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">
@@ -38,6 +42,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
               />
             </Menu.Button>
           </div>
+
           <Transition
             as={Fragment}
             enter="transition ease-out duration-100"
@@ -61,6 +66,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                   </Link>
                 )}
               </Menu.Item>
+
               <Menu.Item>
                 {({ active }) => (
                   <Link
@@ -74,19 +80,18 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                   </Link>
                 )}
               </Menu.Item>
+
               <Menu.Item>
                 {({ active }) => (
-                  <Link href="/login">
-                    <button
-                      onClick={() => console.log("User logged out")}
-                      className={`${
-                        active ? "bg-gray-100" : ""
-                      } flex w-full items-center px-4 py-2 text-sm text-gray-700`}
-                    >
-                      <LogOut className="mr-3 h-4 w-4" />
-                      <span>Logout</span>
-                    </button>
-                  </Link>
+                  <button
+                    onClick={() => console.log("User logged out")}
+                    className={`${
+                      active ? "bg-gray-100" : ""
+                    } flex w-full items-center px-4 py-2 text-sm text-gray-700`}
+                  >
+                    <LogOut className="mr-3 h-4 w-4" />
+                    <span>Logout</span>
+                  </button>
                 )}
               </Menu.Item>
             </Menu.Items>
