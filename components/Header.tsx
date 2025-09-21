@@ -13,11 +13,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
 
       <div className="relative w-full max-w-md hidden md:block">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600" />
         <input
           type="text"
           placeholder="Jelajahi Halaman..."
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full pl-10 pr-4 py-2 text-gray-400 border border-gray-600 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </div>
 
@@ -28,69 +28,73 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
         {/* Profile dropdown */}
         <Menu as="div" className="relative">
-          <div>
-            <Menu.Button className="relative flex max-w-xs items-center rounded-full bg-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">
-              <span className="sr-only">Open user menu</span>
-              <img
-                className="h-10 w-10 rounded-full object-cover"
-                src="https://i.pravatar.cc/40"
-                alt="User Avatar"
-              />
-            </Menu.Button>
-          </div>
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-75"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
-          >
-            <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-              <Menu.Item>
-                {({ active }) => (
-                  <Link
-                    href="/profile/edit"
-                    className={`${
-                      active ? "bg-gray-100" : ""
-                    } flex items-center px-4 py-2 text-sm text-gray-700`}
-                  >
-                    <User className="mr-3 h-4 w-4" />
-                    <span>Edit Profile</span>
-                  </Link>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <Link
-                    href="/users"
-                    className={`${
-                      active ? "bg-gray-100" : ""
-                    } flex items-center px-4 py-2 text-sm text-gray-700`}
-                  >
-                    <Users className="mr-3 h-4 w-4" />
-                    <span>User Manajemen</span>
-                  </Link>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <Link href="/login">
-                    <button
-                      onClick={() => console.log("User logged out")}
-                      className={`${
-                        active ? "bg-gray-100" : ""
-                      } flex w-full items-center px-4 py-2 text-sm text-gray-700`}
-                    >
-                      <LogOut className="mr-3 h-4 w-4" />
-                      <span>Logout</span>
-                    </button>
-                  </Link>
-                )}
-              </Menu.Item>
-            </Menu.Items>
-          </Transition>
+          {({ open }) => (
+            <>
+              <div>
+                <button className="relative flex max-w-xs items-center rounded-full bg-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">
+                  <span className="sr-only">Open user menu</span>
+                  <img
+                    className="h-10 w-10 rounded-full object-cover"
+                    src="https://i.pravatar.cc/40"
+                    alt="User Avatar"
+                  />
+                </button>
+              </div>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <Link
+                        href="/profile/edit"
+                        className={`${
+                          active ? "bg-gray-100" : ""
+                        } flex items-center px-4 py-2 text-sm text-gray-700`}
+                      >
+                        <User className="mr-3 h-4 w-4" />
+                        <span>Edit Profile</span>
+                      </Link>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <Link
+                        href="/users"
+                        className={`${
+                          active ? "bg-gray-100" : ""
+                        } flex items-center px-4 py-2 text-sm text-gray-700`}
+                      >
+                        <Users className="mr-3 h-4 w-4" />
+                        <span>User Manajemen</span>
+                      </Link>
+                    )}
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <Link href="/login">
+                        <button
+                          onClick={() => console.log("User logged out")}
+                          className={`${
+                            active ? "bg-gray-100" : ""
+                          } flex w-full items-center px-4 py-2 text-sm text-gray-700`}
+                        >
+                          <LogOut className="mr-3 h-4 w-4" />
+                          <span>Logout</span>
+                        </button>
+                      </Link>
+                    )}
+                  </Menu.Item>
+                </Menu.Items>
+              </Transition>
+            </>
+          )}
         </Menu>
       </div>
     </header>

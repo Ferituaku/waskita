@@ -1,3 +1,4 @@
+"use client";
 import Header from "@/components/Header";
 import VideoCard from "@/components/dashboard/VideoCard";
 import Image from "next/image";
