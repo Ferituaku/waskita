@@ -14,8 +14,14 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+interface VideoEdukasi {
+  id: number;
+  judul: string;
+  link: string;
+  tanggalDitambahkan: string;
+}
 
-const mockVideoData = [
+const mockVideoData: VideoEdukasi[] = [
   {
     id: 1,
     judul: "Memahami HIV & AIDS dalam 5 Menit",
@@ -43,7 +49,7 @@ const VideoEdukasiPage: React.FC = () => {
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: ModalType | null;
-    data?: any;
+    data?: VideoEdukasi | null;
   }>({
     isOpen: false,
     type: null,
@@ -131,9 +137,9 @@ const VideoEdukasiPage: React.FC = () => {
             title="Konfirmasi Hapus"
           >
             <p className="text-sm text-gray-600">
-              Apakah Anda yakin ingin menghapus video{" "}
+              {`Apakah Anda yakin ingin menghapus video `}
               <span className="font-bold text-gray-800">
-                "{modal.data?.judul}"
+                {`"${modal.data?.judul}"`} {/* Perbaikan di sini */}
               </span>
               ?
               <br />

@@ -15,7 +15,14 @@ import {
   Trash2,
 } from "lucide-react";
 
-const mockData = [
+// Definisikan interface untuk item materi
+interface MateriItem {
+  id: number;
+  judul: string;
+  tipe: string;
+}
+
+const mockData: MateriItem[] = [
   {
     id: 1,
     judul:
@@ -47,7 +54,7 @@ const MateriPage: React.FC = () => {
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: ModalType | null;
-    data?: any;
+    data?: MateriItem | null;
   }>({
     isOpen: false,
     type: null,
@@ -170,9 +177,9 @@ const MateriPage: React.FC = () => {
             title="Konfirmasi Hapus"
           >
             <p className="text-sm text-gray-600">
-              Apakah Anda yakin ingin menghapus materi{" "}
+              {`Apakah Anda yakin ingin menghapus materi `}
               <span className="font-bold text-gray-800">
-                "{modal.data?.judul}"
+                {`"${modal.data?.judul}"`} {/* Perbaikan di sini */}
               </span>
               ?
               <br />

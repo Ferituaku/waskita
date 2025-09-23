@@ -2,6 +2,7 @@ import React, { Fragment } from "react";
 import { Search, User, Users, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Menu, Transition } from "@headlessui/react";
+import Image from "next/image";
 
 interface HeaderProps {
   title: string;
@@ -28,13 +29,15 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
         {/* Profile dropdown */}
         <Menu as="div" className="relative">
-          {({ open }) => (
+          {() => (
             <>
               <div>
                 <button className="relative flex max-w-xs items-center rounded-full bg-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary">
                   <span className="sr-only">Open user menu</span>
-                  <img
+                  <Image
                     className="h-10 w-10 rounded-full object-cover"
+                    height={40}
+                    width={40}
                     src="https://i.pravatar.cc/40"
                     alt="User Avatar"
                   />

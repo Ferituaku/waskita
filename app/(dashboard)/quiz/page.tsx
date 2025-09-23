@@ -17,7 +17,13 @@ import {
   Trash2,
 } from "lucide-react";
 
-const mockQuizList = [
+interface QuizItem {
+  id: number;
+  judul: string;
+  register: number;
+}
+
+const mockQuizList: QuizItem[] = [
   { id: 1, judul: "QUIZ 1: Bahaya AIDS", register: 60 },
   { id: 2, judul: "QUIZ 2: Pencegahan AIDS", register: 60 },
   { id: 3, judul: "QUIZ 3: Apa itu AIDS", register: 60 },
@@ -32,14 +38,15 @@ const QuizPage: React.FC = () => {
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: ModalType | null;
-    data?: any;
+    data?: QuizItem | null;
   }>({
     isOpen: false,
     type: null,
     data: null,
   });
 
-  const closeModal = () => setModal({ isOpen: false, type: null, data: null });
+  const closeModal = () =>
+    setModal({ isOpen: false, type: null, data: null });
 
   const renderModalContent = () => {
     if (!modal.isOpen) return null;
@@ -161,9 +168,9 @@ const QuizPage: React.FC = () => {
             title="Konfirmasi Hapus"
           >
             <p className="text-sm text-gray-600">
-              Apakah Anda yakin ingin menghapus kuis{" "}
+              {`Apakah Anda yakin ingin menghapus kuis `}
               <span className="font-bold text-gray-800">
-                "{modal.data?.judul}"
+                {`"${modal.data?.judul}"`}
               </span>
               ?
               <br />

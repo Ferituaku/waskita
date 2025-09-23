@@ -16,7 +16,14 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-const mockUsers = [
+interface UserItem {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
+const mockUsers: UserItem[] = [
   { id: 1, name: "Budi Santoso", email: "budi.s@example.com", role: "Admin" },
   { id: 2, name: "Ani Lestari", email: "ani.l@example.com", role: "User" },
   { id: 3, name: "Candra Wijaya", email: "candra.w@example.com", role: "User" },
@@ -31,14 +38,15 @@ const UsersPage: React.FC = () => {
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: ModalType | null;
-    data?: any;
+    data?: UserItem | null;
   }>({
     isOpen: false,
     type: null,
     data: null,
   });
 
-  const closeModal = () => setModal({ isOpen: false, type: null, data: null });
+  const closeModal = () =>
+    setModal({ isOpen: false, type: null, data: null });
 
   const renderModalContent = () => {
     if (!modal.isOpen) return null;
@@ -125,9 +133,9 @@ const UsersPage: React.FC = () => {
             title="Konfirmasi Hapus"
           >
             <p className="text-sm text-gray-600">
-              Apakah Anda yakin ingin menghapus pengguna{" "}
+              {`Apakah Anda yakin ingin menghapus pengguna `}
               <span className="font-bold text-gray-800">
-                "{modal.data?.name}"
+                {`"${modal.data?.name}"`} {/* Perbaikan di sini */}
               </span>
               ?
               <br />
