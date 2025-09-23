@@ -301,33 +301,10 @@ const QuizPage: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/quiz/${item.id}`}
-                          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
                         >
-                          <Eye size={14} />
-                          <span>View</span>
+                          ▶ Play
                         </Link>
-                        <button
-                          onClick={() =>
-                            setModal({ isOpen: true, type: "edit", data: item })
-                          }
-                          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
-                        >
-                          <Pencil size={14} />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          onClick={() =>
-                            setModal({
-                              isOpen: true,
-                              type: "delete",
-                              data: item,
-                            })
-                          }
-                          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
-                        >
-                          <Trash2 size={14} />
-                          <span>Hapus</span>
-                        </button>
                       </div>
                     </td>
                   </tr>

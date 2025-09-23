@@ -1,0 +1,25 @@
+{
+  "data": [
+
+    {
+      "question": "Which of the following fluids can transmit HIV?",
+      "choices": [
+        "Blood, semen, vaginal fluids, breast milk",
+        "Sweat and tears",
+        "Saliva and urine",
+        "None of the above"
+      ],
+      "answer": "Blood, semen, vaginal fluids, breast milk"
+    },
+    {
+      "question": "Can HIV be cured completely?",
+      "choices": [
+        "No, but treatment can control it",
+        "Yes, with antibiotics",
+        "Yes, with vaccines",
+        "No, and there is no treatment available"
+      ],
+      "answer": "No, but treatment can control it"
+    }
+  ]
+}

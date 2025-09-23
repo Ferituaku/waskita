@@ -1,0 +1,34 @@
+{
+  "data": [
+    {
+      "question": "What does AIDS stand for?",
+      "choices": [
+        "Acquired Immune Deficiency Syndrome",
+        "Auto Immune Disease Syndrome",
+        "Advanced Infection Disorder System",
+        "Acute Immune Disease Symptoms"
+      ],
+      "answer": "Acquired Immune Deficiency Syndrome"
+    },
+    {
+      "question": "Which virus causes AIDS?",
+      "choices": [
+        "HIV (Human Immunodeficiency Virus)",
+        "HBV (Hepatitis B Virus)",
+        "HPV (Human Papillomavirus)",
+        "HSV (Herpes Simplex Virus)"
+      ],
+      "answer": "HIV (Human Immunodeficiency Virus)"
+    },
+    {
+      "question": "How is HIV most commonly transmitted?",
+      "choices": [
+        "Through unprotected sexual contact",
+        "Through sharing food",
+        "Through mosquito bites",
+        "Through casual contact like hugging"
+      ],
+      "answer": "Through unprotected sexual contact"
+    }
+  ]
+}
