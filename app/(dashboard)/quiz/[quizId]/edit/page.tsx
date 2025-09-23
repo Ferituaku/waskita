@@ -16,7 +16,11 @@ interface Question {
   options: AnswerOption[];
   correctAnswerId: number | null;
 }
-
+interface QuizEditPageProps {
+  params: {
+    quizId: string;
+  };
+}
 // Mock data awal untuk memulai (belum terintgrasi db dari backend)
 const mockQuestions: Question[] = [
   {
@@ -42,11 +46,7 @@ const mockQuestions: Question[] = [
   },
 ];
 
-export default function QuizEditPage({
-  params,
-}: {
-  params: { quizId: string };
-}) {
+export default function QuizEditPage({ params }: QuizEditPageProps) {
   const [questions, setQuestions] = useState<Question[]>(mockQuestions);
   const [activeQuestionId, setActiveQuestionId] = useState<number | null>(
     mockQuestions[0]?.id || null
