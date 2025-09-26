@@ -131,7 +131,7 @@ export default function QuizEditPage({
                   onClick={() => setActiveQuestionId(question.id_soal)}
                   className={`w-full text-left p-3 rounded-md font-medium transition-colors duration-200 ${
                     activeQuestionId === question.id_soal
-                      ? "bg-red-100 text-primary"
+                      ? "bg-red-100 text-gray-500"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                 >
@@ -140,7 +140,7 @@ export default function QuizEditPage({
               ))}
               <button
                 onClick={handleAddQuestion}
-                className="btn btn-outline btn-primary w-full mt-4"
+                className="w-full mt-4 rounded-3xl py-2 px-4 bg-red-600 text-white font-semibold flex items-center justify-center gap-2 transition-colors duration-200 hover:bg-red-700"
               >
                 <Plus size={16} className="mr-2" /> Tambah Soal Baru
               </button>
@@ -163,7 +163,7 @@ export default function QuizEditPage({
                     <textarea
                       id="questionText"
                       rows={4}
-                      className="textarea textarea-bordered w-full text-base"
+                      className="textarea text-gray-400 w-full text-base focus:ring-2 focus:ring-red-500"
                       placeholder="Contoh: Apa itu HIV?"
                       value={activeQuestion.pertanyaan}
                       onChange={(e) => handleQuestionTextChange(e.target.value)}
@@ -178,12 +178,12 @@ export default function QuizEditPage({
                       {activeQuestionAnswers.map((option) => (
                         <div
                           key={option.id_jawaban}
-                          className="flex items-center gap-3"
+                          className="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2"
                         >
                           <input
                             type="radio"
                             name={`question-${activeQuestion.id_soal}`}
-                            className="radio radio-primary"
+                            className="radio accent-red-600"
                             checked={option.is_correct}
                             onChange={() =>
                               handleSetCorrectAnswer(option.id_jawaban)
@@ -191,7 +191,7 @@ export default function QuizEditPage({
                           />
                           <input
                             type="text"
-                            className="input input-bordered flex-1"
+                            className="input input-bordered text-gray-400 flex-1 focus:ring-2 focus:ring-red-500"
                             placeholder={`Pilihan Jawaban`}
                             value={option.teks_jawaban}
                             onChange={(e) =>
@@ -205,8 +205,9 @@ export default function QuizEditPage({
                             onClick={() =>
                               handleDeleteOption(option.id_jawaban)
                             }
-                            className="btn btn-ghost btn-square text-gray-400 hover:text-red-500 hover:bg-red-50"
+                            className="btn btn-square text-gray-400 hover:text-red-600 hover:bg-red-100 transition-colors"
                             aria-label="Hapus pilihan"
+                            type="button"
                           >
                             <Trash2 size={20} />
                           </button>
@@ -215,7 +216,8 @@ export default function QuizEditPage({
                     </div>
                     <button
                       onClick={handleAddOption}
-                      className="btn btn-ghost btn-sm text-primary mt-4"
+                      className="btn btn-ghost btn-sm text-red-600 mt-4 hover:bg-red-50 transition-colors"
+                      type="button"
                     >
                       <Plus size={16} className="mr-1" /> Tambah Pilihan Jawaban
                     </button>
