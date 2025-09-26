@@ -2,13 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Header from "../../../components/Header";
-import Pagination from "../../../components/dashboard/Pagination";
-import Modal from "../../../components/Modal";
+import Header from "@/components/Header";
+import Pagination from "@/components/dashboard/Pagination";
+import Modal from "@/components/Modal";
 import {
   Plus,
   Search,
-  FileImage,
   AlignJustify,
   Users,
   Wrench,
@@ -16,20 +15,7 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-
-interface QuizItem {
-  id: number;
-  judul: string;
-  register: number;
-}
-
-const mockQuizList: QuizItem[] = [
-  { id: 1, judul: "QUIZ 1: Bahaya AIDS", register: 60 },
-  { id: 2, judul: "QUIZ 2: Pencegahan AIDS", register: 60 },
-  { id: 3, judul: "QUIZ 3: Apa itu AIDS", register: 60 },
-  { id: 4, judul: "QUIZ 4: Mengenal AIDS", register: 78 },
-  { id: 5, judul: "QUIZ 5: Ciri-Ciri AIDS", register: 88 },
-];
+import { mockJudul } from "../../../lib/mock-data";
 
 type ModalType = "add" | "edit" | "delete" | "cover";
 
@@ -38,15 +24,14 @@ const QuizPage: React.FC = () => {
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: ModalType | null;
-    data?: QuizItem | null;
+    data?: any;
   }>({
     isOpen: false,
     type: null,
     data: null,
   });
 
-  const closeModal = () =>
-    setModal({ isOpen: false, type: null, data: null });
+  const closeModal = () => setModal({ isOpen: false, type: null, data: null });
 
   const renderModalContent = () => {
     if (!modal.isOpen) return null;
@@ -72,28 +57,15 @@ const QuizPage: React.FC = () => {
                   type="text"
                   id="judul"
                   defaultValue={modal.data?.judul || ""}
-                  className="mt-1 block w-full input input-bordered"
+                  className="text-gray-400 mt-1 block w-full input input-bordered"
                   placeholder="Masukkan judul kuis"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="cover-file"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Cover Kuis
-                </label>
-                <input
-                  type="file"
-                  id="cover-file"
-                  className="file-input file-input-bordered file-input bg-gray-400 p-1 rounded-lg mt-1"
                 />
               </div>
               {modal.type === "edit" && (
                 <div className="pt-2">
                   <Link
-                    href={`/quiz/${modal.data?.id}/edit`}
-                    className="btn border-1 rounded-xl bg-blue-600 p-2 text-sm w-full"
+                    href={`/quiz/${modal.data?.id_judul}/edit`}
+                    className="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-48 rounded-lg flex items-center gap-2 transition-colors duration-200"
                   >
                     Kelola Soal & Jawaban
                   </Link>
@@ -168,9 +140,9 @@ const QuizPage: React.FC = () => {
             title="Konfirmasi Hapus"
           >
             <p className="text-sm text-gray-600">
-              {`Apakah Anda yakin ingin menghapus kuis `}
+              Apakah Anda yakin ingin menghapus kuis{" "}
               <span className="font-bold text-gray-800">
-                {`"${modal.data?.judul}"`}
+                "{modal.data?.judul}"
               </span>
               ?
               <br />
@@ -198,6 +170,8 @@ const QuizPage: React.FC = () => {
         return null;
     }
   };
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const entriesOptions = [5, 10, 20, 50];
 
   return (
     <>
@@ -228,18 +202,17 @@ const QuizPage: React.FC = () => {
                 />
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <label htmlFor="entries-per-page" className="whitespace-nowrap">
-                  Entries per Page:
-                </label>
+                <span>Entries per Page:</span>
                 <select
-                  id="entries-per-page"
-                  className="select select-sm select-bordered text-white p-1 bg-red-600 hover:bg-red-700 rounded-xl w-13 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                  defaultValue={10}
+                  className="bg-red-600 text-white font-semibold py-1 px-1 rounded-md focus:outline-none"
+                  value={entriesPerPage}
+                  onChange={(e) => setEntriesPerPage(Number(e.target.value))}
                 >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
+                  {entriesOptions.map((opt) => (
+                    <option key={opt} value={opt} className="text-black">
+                      {opt}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -255,17 +228,12 @@ const QuizPage: React.FC = () => {
                   </th>
                   <th scope="col" className="p-4">
                     <div className="flex items-center gap-2">
-                      <FileImage size={16} /> Cover
-                    </div>
-                  </th>
-                  <th scope="col" className="p-4">
-                    <div className="flex items-center gap-2">
                       <AlignJustify size={16} /> Judul
                     </div>
                   </th>
                   <th scope="col" className="p-4 w-40">
                     <div className="flex items-center gap-2">
-                      <Users size={16} /> Register
+                      <Users size={16} /> Tanggal Terbuat
                     </div>
                   </th>
                   <th scope="col" className="p-4 w-60">
@@ -276,38 +244,26 @@ const QuizPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {mockQuizList.map((item, index) => (
+                {mockJudul.map((item, index) => (
                   <tr
-                    key={item.id}
+                    key={item.id_judul}
                     className="bg-white border-b last:border-b-0 hover:bg-gray-50 align-middle"
                   >
                     <td className="p-4 font-medium text-gray-900">
                       {(currentPage - 1) * 10 + index + 1}
                     </td>
-                    <td className="p-4">
-                      <button
-                        onClick={() =>
-                          setModal({ isOpen: true, type: "cover", data: item })
-                        }
-                        className="relative group bg-gray-200 rounded-md w-24 h-16 flex items-center justify-center text-gray-500 text-xs font-medium hover:bg-gray-300 hover:text-gray-300 transition-colors"
-                      >
-                        Cover
-                        <span className="absolute items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Pencil
-                            size={16}
-                            className="text-gray-500 group-hover:text-gray-700"
-                          ></Pencil>
-                        </span>
-                      </button>
-                    </td>
                     <td className="p-4 font-medium text-gray-800 max-w-sm">
                       {item.judul}
                     </td>
-                    <td className="p-4">{item.register}</td>
+                    <td className="p-4">
+                      {item.tanggal_terbuat instanceof Date
+                        ? item.tanggal_terbuat.toLocaleDateString()
+                        : item.tanggal_terbuat}
+                    </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         <Link
-                          href={`/quiz/${item.id}`}
+                          href={`/quiz/${item.id_judul}`}
                           className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
                         >
                           <Eye size={14} />
