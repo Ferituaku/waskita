@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Header from "../../../../components/Header";
+import Header from "@/components/Header";
 import Pagination from "../../../../components/dashboard/Pagination";
 import { ArrowLeft } from "lucide-react";
 
@@ -34,7 +34,7 @@ const QuizDetailPage: React.FC = () => {
                 Menampilkan daftar peserta yang telah menyelesaikan kuis.
               </p>
             </div>
-            <Link href="/quiz" className="btn bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200">
+            <Link href="/quiz" className="btn btn-ghost">
               <ArrowLeft size={20} />
               <span>Kembali</span>
             </Link>
