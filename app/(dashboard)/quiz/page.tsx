@@ -1,40 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Header from "../../../components/Header";
-import Pagination from "../../../components/dashboard/Pagination";
-import Modal from "../../../components/Modal";
-import {
-  Plus,
-  Search,
-  FileImage,
-  AlignJustify,
-  Users,
-  Wrench,
-  Eye,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import Header from "@/components/Header";
+import Pagination from "@/components/dashboard/Pagination";
+import Modal from "@/components/Modal";
+import { Plus, Eye, Pencil, Trash2 } from "lucide-react";
 
 interface QuizItem {
-  id: number;
+  id_judul: number;
   judul: string;
-  register: number;
+  jumlah_registrasi: number;
+  cover?: string | null;
 }
 
-const mockQuizList: QuizItem[] = [
-  { id: 1, judul: "QUIZ 1: Bahaya AIDS", register: 60 },
-  { id: 2, judul: "QUIZ 2: Pencegahan AIDS", register: 60 },
-  { id: 3, judul: "QUIZ 3: Apa itu AIDS", register: 60 },
-  { id: 4, judul: "QUIZ 4: Mengenal AIDS", register: 78 },
-  { id: 5, judul: "QUIZ 5: Ciri-Ciri AIDS", register: 88 },
-];
-
-type ModalType = "add" | "edit" | "delete" | "cover";
+type ModalType = "add" | "edit" | "delete";
 
 const QuizPage: React.FC = () => {
+  const [quizList, setQuizList] = useState<QuizItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: ModalType | null;
@@ -45,8 +30,65 @@ const QuizPage: React.FC = () => {
     data: null,
   });
 
+  // Fetch data dari backend
+  const fetchQuiz = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/quiz/judul");
+      const data = await res.json();
+      setQuizList(data);
+    } catch (err) {
+      console.error("Gagal ambil data kuis:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchQuiz();
+  }, []);
+
   const closeModal = () =>
     setModal({ isOpen: false, type: null, data: null });
+
+  // Tambah / Update
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const judul = formData.get("judul") as string;
+
+    if (modal.type === "add") {
+      await fetch("/api/quiz/judul", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ judul, jumlah_registrasi: 0, cover: null }),
+      });
+    } else if (modal.type === "edit" && modal.data) {
+      await fetch(`/api/quiz/judul/${modal.data.id_judul}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          judul,
+          jumlah_registrasi: modal.data.jumlah_registrasi,
+          cover: modal.data.cover,
+        }),
+      });
+    }
+
+    closeModal();
+    fetchQuiz();
+  };
+
+  // Delete
+  const handleDelete = async () => {
+    if (modal.data) {
+      await fetch(`/api/quiz/judul/${modal.data.id_judul}`, {
+        method: "DELETE",
+      });
+      closeModal();
+      fetchQuiz();
+    }
+  };
 
   const renderModalContent = () => {
     if (!modal.isOpen) return null;
@@ -60,7 +102,7 @@ const QuizPage: React.FC = () => {
             onClose={closeModal}
             title={modal.type === "add" ? "Tambah Kuis Baru" : "Edit Kuis"}
           >
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSave}>
               <div>
                 <label
                   htmlFor="judul"
@@ -71,90 +113,26 @@ const QuizPage: React.FC = () => {
                 <input
                   type="text"
                   id="judul"
+                  name="judul"
                   defaultValue={modal.data?.judul || ""}
                   className="mt-1 block w-full input input-bordered"
                   placeholder="Masukkan judul kuis"
+                  required
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="cover-file"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Cover Kuis
-                </label>
-                <input
-                  type="file"
-                  id="cover-file"
-                  className="file-input file-input-bordered file-input bg-gray-400 p-1 rounded-lg mt-1"
-                />
-              </div>
-              {modal.type === "edit" && (
-                <div className="pt-2">
-                  <Link
-                    href={`/quiz/${modal.data?.id}/edit`}
-                    className="btn border-1 rounded-xl bg-blue-600 p-2 text-sm w-full"
-                  >
-                    Kelola Soal & Jawaban
-                  </Link>
-                </div>
-              )}
               <div className="flex justify-end gap-2 pt-4">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="btn text-gray-500 bg-gray-200 hover:bg-gray-300 py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
+                  className="btn text-gray-500 bg-gray-200 hover:bg-gray-300 py-2 px-4 rounded-lg"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
+                  className="btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"
                 >
                   Simpan
-                </button>
-              </div>
-            </form>
-          </Modal>
-        );
-      case "cover":
-        return (
-          <Modal
-            isOpen={modal.isOpen}
-            onClose={closeModal}
-            title="Ganti Cover Kuis"
-          >
-            <p className="text-sm text-gray-500 mb-4">
-              Mengganti cover untuk:{" "}
-              <span className="font-semibold">{modal.data?.judul}</span>
-            </p>
-            <form className="space-y-4">
-              <div>
-                <label
-                  htmlFor="cover-file"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Upload file baru
-                </label>
-                <input
-                  type="file"
-                  id="cover-file"
-                  className="file-input text-gray-400 hover:text-gray-700 file-input-bordered file-input-primary w-full mt-1"
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="btn text-gray-500 bg-gray-200 hover:bg-gray-300 py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
-                >
-                  Upload
                 </button>
               </div>
             </form>
@@ -168,26 +146,24 @@ const QuizPage: React.FC = () => {
             title="Konfirmasi Hapus"
           >
             <p className="text-sm text-gray-600">
-              {`Apakah Anda yakin ingin menghapus kuis `}
+              Apakah Anda yakin ingin menghapus kuis{" "}
               <span className="font-bold text-gray-800">
-                {`"${modal.data?.judul}"`}
+                "{modal.data?.judul}"
               </span>
               ?
-              <br />
-              Tindakan ini tidak dapat dibatalkan.
             </p>
             <div className="flex justify-end gap-2 pt-6">
               <button
                 type="button"
                 onClick={closeModal}
-                className="btn text-gray-500 bg-gray-200 hover:bg-gray-300 py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
+                className="btn text-gray-500 bg-gray-200 hover:bg-gray-300 py-2 px-4 rounded-lg"
               >
                 Batal
               </button>
               <button
                 type="button"
-                onClick={closeModal}
-                className="btn bg-red-600 hover:bg-red-400 text-white py-2 px-3 rounded-lg flex items-center gap-2 transition-colors duration-200"
+                onClick={handleDelete}
+                className="btn bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg"
               >
                 Ya, Hapus
               </button>
@@ -215,135 +191,74 @@ const QuizPage: React.FC = () => {
               <Plus size={20} />
               <span>Tambah Data</span>
             </button>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600"
-                  size={20}
-                />
-                <input
-                  type="text"
-                  placeholder="Jelajahi Halaman..."
-                  className="pl-12 pr-4 py-2 border text-gray-500 border-gray-300 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-red-500"
-                />
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <label htmlFor="entries-per-page" className="whitespace-nowrap">
-                  Entries per Page:
-                </label>
-                <select
-                  id="entries-per-page"
-                  className="select select-sm select-bordered text-white p-1 bg-red-600 hover:bg-red-700 rounded-xl w-13 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                  defaultValue={10}
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-              </div>
-            </div>
           </div>
 
           {/* Data Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-700">
-              <thead className="text-xs text-gray-800 font-semibold border-b-2 border-gray-200">
-                <tr>
-                  <th scope="col" className="p-4 w-12 text-left">
-                    No
-                  </th>
-                  <th scope="col" className="p-4">
-                    <div className="flex items-center gap-2">
-                      <FileImage size={16} /> Cover
-                    </div>
-                  </th>
-                  <th scope="col" className="p-4">
-                    <div className="flex items-center gap-2">
-                      <AlignJustify size={16} /> Judul
-                    </div>
-                  </th>
-                  <th scope="col" className="p-4 w-40">
-                    <div className="flex items-center gap-2">
-                      <Users size={16} /> Register
-                    </div>
-                  </th>
-                  <th scope="col" className="p-4 w-60">
-                    <div className="flex items-center gap-2">
-                      <Wrench size={16} /> Action
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockQuizList.map((item, index) => (
-                  <tr
-                    key={item.id}
-                    className="bg-white border-b last:border-b-0 hover:bg-gray-50 align-middle"
-                  >
-                    <td className="p-4 font-medium text-gray-900">
-                      {(currentPage - 1) * 10 + index + 1}
-                    </td>
-                    <td className="p-4">
-                      <button
-                        onClick={() =>
-                          setModal({ isOpen: true, type: "cover", data: item })
-                        }
-                        className="relative group bg-gray-200 rounded-md w-24 h-16 flex items-center justify-center text-gray-500 text-xs font-medium hover:bg-gray-300 hover:text-gray-300 transition-colors"
-                      >
-                        Cover
-                        <span className="absolute items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Pencil
-                            size={16}
-                            className="text-gray-500 group-hover:text-gray-700"
-                          ></Pencil>
-                        </span>
-                      </button>
-                    </td>
-                    <td className="p-4 font-medium text-gray-800 max-w-sm">
-                      {item.judul}
-                    </td>
-                    <td className="p-4">{item.register}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/quiz/${item.id}`}
-                          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
-                        >
-                          <Eye size={14} />
-                          <span>View</span>
-                        </Link>
-                        <button
-                          onClick={() =>
-                            setModal({ isOpen: true, type: "edit", data: item })
-                          }
-                          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
-                        >
-                          <Pencil size={14} />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          onClick={() =>
-                            setModal({
-                              isOpen: true,
-                              type: "delete",
-                              data: item,
-                            })
-                          }
-                          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
-                        >
-                          <Trash2 size={14} />
-                          <span>Hapus</span>
-                        </button>
-                      </div>
-                    </td>
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left text-gray-700">
+                <thead className="text-xs text-gray-800 font-semibold border-b-2 border-gray-200">
+                  <tr>
+                    <th className="p-4 w-12 text-left">No</th>
+                    <th className="p-4">Judul</th>
+                    <th className="p-4 w-40">Register</th>
+                    <th className="p-4 w-60">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {quizList.map((item, index) => (
+                    <tr
+                      key={item.id_judul}
+                      className="bg-white border-b last:border-b-0 hover:bg-gray-50 align-middle"
+                    >
+                      <td className="p-4 font-medium text-gray-900">
+                        {(currentPage - 1) * 10 + index + 1}
+                      </td>
+                      <td className="p-4">{item.judul}</td>
+                      <td className="p-4">{item.jumlah_registrasi}</td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/quiz/${item.id_judul}`}
+                            className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-md text-xs"
+                          >
+                            <Eye size={14} />Edit Soal
+                          </Link>
+                          <button
+                            onClick={() =>
+                              setModal({
+                                isOpen: true,
+                                type: "edit",
+                                data: item,
+                              })
+                            }
+                            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-md text-xs"
+                          >
+                            <Pencil size={14} /> Edit
+                          </button>
+                          <button
+                            onClick={() =>
+                              setModal({
+                                isOpen: true,
+                                type: "delete",
+                                data: item,
+                              })
+                            }
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md text-xs"
+                          >
+                            <Trash2 size={14} /> Hapus
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-          {/* Pagination */}
           <Pagination
             currentPage={currentPage}
             totalPages={5}
