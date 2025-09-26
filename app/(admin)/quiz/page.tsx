@@ -5,7 +5,19 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Pagination from "@/components/dashboard/Pagination";
 import Modal from "@/components/Modal";
-import { Plus, Eye, Pencil, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Search,
+  AlignJustify,
+  Users,
+  Wrench,
+  Eye,
+  Pencil,
+  Trash2,
+} from "lucide-react";
+import { mockJudul } from "../../../lib/mock-data";
+
+type ModalType = "add" | "edit" | "delete" | "cover";
 
 interface QuizItem {
   id_judul: number;
@@ -14,8 +26,6 @@ interface QuizItem {
   cover?: string | null;
 }
 
-type ModalType = "add" | "edit" | "delete";
-
 const QuizPage: React.FC = () => {
   const [quizList, setQuizList] = useState<QuizItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,7 +33,7 @@ const QuizPage: React.FC = () => {
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: ModalType | null;
-    data?: QuizItem | null;
+    data?: any;
   }>({
     isOpen: false,
     type: null,
@@ -115,11 +125,21 @@ const QuizPage: React.FC = () => {
                   id="judul"
                   name="judul"
                   defaultValue={modal.data?.judul || ""}
-                  className="mt-1 block w-full input input-bordered"
+                  className="text-gray-400 mt-1 block w-full input input-bordered"
                   placeholder="Masukkan judul kuis"
                   required
                 />
               </div>
+              {modal.type === "edit" && (
+                <div className="pt-2">
+                  <Link
+                    href={`/quiz/${modal.data?.id_judul}/edit`}
+                    className="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-48 rounded-lg flex items-center gap-2 transition-colors duration-200"
+                  >
+                    Kelola Soal & Jawaban
+                  </Link>
+                </div>
+              )}
               <div className="flex justify-end gap-2 pt-4">
                 <button
                   type="button"
@@ -174,6 +194,8 @@ const QuizPage: React.FC = () => {
         return null;
     }
   };
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const entriesOptions = [5, 10, 20, 50];
 
   return (
     <>
@@ -191,20 +213,111 @@ const QuizPage: React.FC = () => {
               <Plus size={20} />
               <span>Tambah Data</span>
             </button>
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <Search
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600"
+                  size={20}
+                />
+                <input
+                  type="text"
+                  placeholder="Jelajahi Halaman..."
+                  className="pl-12 pr-4 py-2 border text-gray-500 border-gray-300 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>Entries per Page:</span>
+                <select
+                  className="bg-red-600 text-white font-semibold py-1 px-1 rounded-md focus:outline-none"
+                  value={entriesPerPage}
+                  onChange={(e) => setEntriesPerPage(Number(e.target.value))}
+                >
+                  {entriesOptions.map((opt) => (
+                    <option key={opt} value={opt} className="text-black">
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
 
           {/* Data Table */}
-          {loading ? (
-            <p>Loading...</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left text-gray-700">
-                <thead className="text-xs text-gray-800 font-semibold border-b-2 border-gray-200">
-                  <tr>
-                    <th className="p-4 w-12 text-left">No</th>
-                    <th className="p-4">Judul</th>
-                    <th className="p-4 w-40">Register</th>
-                    <th className="p-4 w-60">Action</th>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-700">
+              <thead className="text-xs text-gray-800 font-semibold border-b-2 border-gray-200">
+                <tr>
+                  <th scope="col" className="p-4 w-12 text-left">
+                    No
+                  </th>
+                  <th scope="col" className="p-4">
+                    <div className="flex items-center gap-2">
+                      <AlignJustify size={16} /> Judul
+                    </div>
+                  </th>
+                  <th scope="col" className="p-4 w-40">
+                    <div className="flex items-center gap-2">
+                      <Users size={16} /> Tanggal Terbuat
+                    </div>
+                  </th>
+                  <th scope="col" className="p-4 w-60">
+                    <div className="flex items-center gap-2">
+                      <Wrench size={16} /> Action
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {mockJudul.map((item, index) => (
+                <thead>
+                  <tr
+                    key={item.id_judul}
+                    className="bg-white border-b last:border-b-0 hover:bg-gray-50 align-middle"
+                  >
+                    <td className="p-4 font-medium text-gray-900">
+                      {(currentPage - 1) * 10 + index + 1}
+                    </td>
+                    <td className="p-4 font-medium text-gray-800 max-w-sm">
+                      {item.judul}
+                    </td>
+                    <td className="p-4">
+                      {item.tanggal_terbuat instanceof Date
+                        ? item.tanggal_terbuat.toLocaleDateString()
+                        : item.tanggal_terbuat}
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/quiz/${item.id_judul}`}
+                          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
+                        >
+                          <Eye size={14} />
+                          <span>View</span>
+                        </Link>
+                        <button
+                          onClick={() =>
+                            setModal({ isOpen: true, type: "edit", data: item })
+                          }
+                          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
+                        >
+                          <Pencil size={14} />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          onClick={() =>
+                            setModal({
+                              isOpen: true,
+                              type: "delete",
+                              data: item,
+                            })
+                          }
+                          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
+                        >
+                          <Trash2 size={14} />
+                          <span>Hapus</span>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 </thead>
                 <tbody>

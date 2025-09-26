@@ -1,8 +1,8 @@
-import mysql from "mysql2/promise";
+import mysql from 'mysql2/promise';
 
-export const pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "", // ganti password MySQL kamu
-  database: "waskita",      // ganti sesuai nama DB
+export const db = mysql.createPool({
+  host: 'localhost',
+  user: 'root',       
+  password: '',       
+  database: 'waskita_db'
 });

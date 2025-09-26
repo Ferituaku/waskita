@@ -5,15 +5,20 @@ interface MaterialCardProps {
   category: string;
   title: string;
   imageUrl: string;
+  onClick?: () => void; // Add optional onClick handler
 }
 
 const MaterialCard: React.FC<MaterialCardProps> = ({
   category,
   title,
   imageUrl,
+  onClick,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden group cursor-pointer transform hover:-translate-y-1 transition-transform duration-300">
+    <div 
+      className="bg-white rounded-lg shadow-md overflow-hidden group cursor-pointer transform hover:-translate-y-1 transition-transform duration-300"
+      onClick={onClick}
+    >
       <div className="relative h-48 w-full">
         <Image src={imageUrl} alt={title} layout="fill" objectFit="cover" />
       </div>
