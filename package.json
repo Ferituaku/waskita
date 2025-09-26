@@ -17,6 +17,7 @@
     "@heroui/theme": "^2.4.21",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",
+    "mysql2": "^3.15.1",
     "next": "15.5.2",
     "postcss": "^8.5.6",
     "react": "19.1.0",

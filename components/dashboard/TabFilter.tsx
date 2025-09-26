@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 interface TabFilterProps {
   tabs: string[];
+  activeTab?: string;
   onTabChange?: (tab: string) => void;
 }
 
