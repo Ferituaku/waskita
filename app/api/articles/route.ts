@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db';
+import { db } from '@/lib/db'
 
 // GET - Ambil semua artikel dari database
 export async function GET() {
@@ -34,5 +34,94 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating article:', error);
     return NextResponse.json({ success: false, error: 'Failed to create article' }, { status: 500 });
+  }
+}
+
+// PUT - Update artikel berdasarkan ID
+export async function PUT(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Article ID is required' }, { status: 400 });
+    }
+
+    const { title, content, category, image_url } = await request.json();
+
+    if (!title || !content || !category) {
+      return NextResponse.json({ success: false, error: 'Title, content, and category are required' }, { status: 400 });
+    }
+
+    // Cek apakah artikel dengan ID tersebut ada
+    const [existingArticle]: any = await db.query(
+      'SELECT id FROM articles WHERE id = ?',
+      [id]
+    );
+
+    if (existingArticle.length === 0) {
+      return NextResponse.json({ success: false, error: 'Article not found' }, { status: 404 });
+    }
+
+    // Update artikel
+    const [result]: any = await db.query(
+      `UPDATE articles 
+       SET title = ?, content = ?, category = ?, image_url = ?, updated_at = NOW()
+       WHERE id = ?`,
+      [title, content, category, image_url || '/default-image.jpg', id]
+    );
+
+    if (result.affectedRows === 0) {
+      return NextResponse.json({ success: false, error: 'Failed to update article' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Article updated successfully',
+      data: { id: parseInt(id), title, content, category, image_url }
+    });
+  } catch (error) {
+    console.error('Error updating article:', error);
+    return NextResponse.json({ success: false, error: 'Failed to update article' }, { status: 500 });
+  }
+}
+
+// DELETE - Hapus artikel berdasarkan ID
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Article ID is required' }, { status: 400 });
+    }
+
+    // Cek apakah artikel dengan ID tersebut ada
+    const [existingArticle]: any = await db.query(
+      'SELECT id FROM articles WHERE id = ?',
+      [id]
+    );
+
+    if (existingArticle.length === 0) {
+      return NextResponse.json({ success: false, error: 'Article not found' }, { status: 404 });
+    }
+
+    // Hapus artikel
+    const [result]: any = await db.query(
+      'DELETE FROM articles WHERE id = ?',
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return NextResponse.json({ success: false, error: 'Failed to delete article' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Article deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting article:', error);
+    return NextResponse.json({ success: false, error: 'Failed to delete article' }, { status: 500 });
   }
 }
