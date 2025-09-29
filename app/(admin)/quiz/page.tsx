@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import Header from "@/components/Header";
 import Pagination from "@/components/dashboard/Pagination";
 import Modal from "@/components/Modal";
+import SkeletonTable from "@/components/SkeletonTable";
+import { Judul } from "@/types/quiz";
 import {
   Plus,
   Search,
@@ -15,92 +19,124 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
-import { mockJudul } from "../../../lib/mock-data";
 
-type ModalType = "add" | "edit" | "delete" | "cover";
-
-interface QuizItem {
-  id_judul: number;
-  judul: string;
-  jumlah_registrasi: number;
-  cover?: string | null;
-}
+type ModalType = "add" | "edit" | "delete";
 
 const QuizPage: React.FC = () => {
-  const [quizList, setQuizList] = useState<QuizItem[]>([]);
+  const [quizList, setQuizList] = useState<Judul[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [modal, setModal] = useState<{
     isOpen: boolean;
     type: ModalType | null;
-    data?: any;
+    data?: Judul;
   }>({
     isOpen: false,
     type: null,
-    data: null,
+    data: undefined,
   });
 
-  // Fetch data dari backend
-  const fetchQuiz = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/quiz/judul");
-      const data = await res.json();
-      setQuizList(data);
-    } catch (err) {
-      console.error("Gagal ambil data kuis:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const router = useRouter();
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const entriesOptions = [5, 10, 20, 50];
 
   useEffect(() => {
+    const fetchQuiz = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/quiz/judul");
+        if (!res.ok) throw new Error("Gagal mengambil data");
+        const data = await res.json();
+        setQuizList(data);
+      } catch (err) {
+        console.error("Gagal ambil data kuis:", err);
+        toast.error("Gagal mengambil daftar kuis.");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchQuiz();
   }, []);
 
   const closeModal = () =>
-    setModal({ isOpen: false, type: null, data: null });
+    setModal({ isOpen: false, type: null, data: undefined });
 
-  // Tambah / Update
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const judul = formData.get("judul") as string;
 
-    if (modal.type === "add") {
-      await fetch("/api/quiz/judul", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ judul, jumlah_registrasi: 0, cover: null }),
-      });
-    } else if (modal.type === "edit" && modal.data) {
-      await fetch(`/api/quiz/judul/${modal.data.id_judul}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          judul,
-          jumlah_registrasi: modal.data.jumlah_registrasi,
-          cover: modal.data.cover,
-        }),
-      });
-    }
+    const promise =
+      modal.type === "add"
+        ? fetch("/api/quiz/judul", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ judul }),
+          })
+        : fetch(`/api/quiz/judul/${modal.data?.id_judul}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ judul }),
+          });
 
-    closeModal();
-    fetchQuiz();
+    toast.promise(promise, {
+      loading: "Menyimpan...",
+      success: (res) => {
+        if (!res.ok) throw new Error("Gagal menyimpan.");
+        closeModal();
+        router.refresh(); // Re-fetch server-side props, updating the list
+        return modal.type === "add"
+          ? "Kuis berhasil dibuat!"
+          : "Kuis berhasil diperbarui!";
+      },
+      error: "Gagal menyimpan kuis.",
+    });
   };
 
-  // Delete
   const handleDelete = async () => {
     if (modal.data) {
-      await fetch(`/api/quiz/judul/${modal.data.id_judul}`, {
+      const promise = fetch(`/api/quiz/judul/${modal.data.id_judul}`, {
         method: "DELETE",
       });
-      closeModal();
-      fetchQuiz();
+
+      toast.promise(promise, {
+        loading: "Menghapus...",
+        success: (res) => {
+          if (!res.ok) throw new Error("Gagal menghapus.");
+          closeModal();
+          router.refresh();
+          return "Kuis berhasil dihapus!";
+        },
+        error: "Gagal menghapus kuis.",
+      });
     }
+  };
+
+  const filteredQuizList = useMemo(() => {
+    return quizList.filter((quiz) =>
+      quiz.judul.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [quizList, searchQuery]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredQuizList.length / entriesPerPage);
+  const paginatedQuiz = filteredQuizList.slice(
+    (currentPage - 1) * entriesPerPage,
+    currentPage * entriesPerPage
+  );
+
+  const formatDate = (dateString?: string | Date) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
   };
 
   const renderModalContent = () => {
+    // ... (modal rendering logic remains the same, with slight adjustments)
     if (!modal.isOpen) return null;
 
     switch (modal.type) {
@@ -125,7 +161,7 @@ const QuizPage: React.FC = () => {
                   id="judul"
                   name="judul"
                   defaultValue={modal.data?.judul || ""}
-                  className="text-gray-400 mt-1 block w-full input input-bordered"
+                  className="text-gray-700 mt-1 block w-full input input-bordered"
                   placeholder="Masukkan judul kuis"
                   required
                 />
@@ -134,9 +170,9 @@ const QuizPage: React.FC = () => {
                 <div className="pt-2">
                   <Link
                     href={`/quiz/${modal.data?.id_judul}/edit`}
-                    className="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-48 rounded-lg flex items-center gap-2 transition-colors duration-200"
+                    className="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
                   >
-                    Kelola Soal & Jawaban
+                    <Wrench size={16} /> Kelola Soal & Jawaban
                   </Link>
                 </div>
               )}
@@ -170,7 +206,7 @@ const QuizPage: React.FC = () => {
               <span className="font-bold text-gray-800">
                 "{modal.data?.judul}"
               </span>
-              ?
+              ? Tindakan ini tidak dapat diurungkan.
             </p>
             <div className="flex justify-end gap-2 pt-6">
               <button
@@ -194,21 +230,18 @@ const QuizPage: React.FC = () => {
         return null;
     }
   };
-  const [entriesPerPage, setEntriesPerPage] = useState(10);
-  const entriesOptions = [5, 10, 20, 50];
 
   return (
     <>
       <Header title="Quiz" />
       <div className="p-6">
         <div className="bg-white rounded-xl shadow-lg p-6">
-          {/* Action Bar */}
           <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
             <button
               onClick={() =>
-                setModal({ isOpen: true, type: "add", data: null })
+                setModal({ isOpen: true, type: "add", data: undefined })
               }
-              className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
+              className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
             >
               <Plus size={20} />
               <span>Tambah Data</span>
@@ -221,19 +254,28 @@ const QuizPage: React.FC = () => {
                 />
                 <input
                   type="text"
-                  placeholder="Jelajahi Halaman..."
-                  className="pl-12 pr-4 py-2 border text-gray-500 border-gray-300 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  placeholder="Cari judul kuis..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 pr-4 py-2 border text-gray-700 border-gray-300 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>Entries per Page:</span>
                 <select
-                  className="bg-red-600 text-white font-semibold py-1 px-1 rounded-md focus:outline-none"
+                  className="bg-red-600 hover:bg-red-800 text-white font-semibold py-1 px-3 rounded-md focus:outline-none"
                   value={entriesPerPage}
-                  onChange={(e) => setEntriesPerPage(Number(e.target.value))}
+                  onChange={(e) => {
+                    setEntriesPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
                 >
                   {entriesOptions.map((opt) => (
-                    <option key={opt} value={opt} className="text-black">
+                    <option
+                      key={opt}
+                      value={opt}
+                      className="bg-white text-black"
+                    >
                       {opt}
                     </option>
                   ))}
@@ -242,7 +284,6 @@ const QuizPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Data Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left text-gray-700">
               <thead className="text-xs text-gray-800 font-semibold border-b-2 border-gray-200">
@@ -255,7 +296,7 @@ const QuizPage: React.FC = () => {
                       <AlignJustify size={16} /> Judul
                     </div>
                   </th>
-                  <th scope="col" className="p-4 w-40">
+                  <th scope="col" className="p-4 w-48">
                     <div className="flex items-center gap-2">
                       <Users size={16} /> Tanggal Terbuat
                     </div>
@@ -267,120 +308,91 @@ const QuizPage: React.FC = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                {mockJudul.map((item, index) => (
-                <thead>
-                  <tr
-                    key={item.id_judul}
-                    className="bg-white border-b last:border-b-0 hover:bg-gray-50 align-middle"
-                  >
-                    <td className="p-4 font-medium text-gray-900">
-                      {(currentPage - 1) * 10 + index + 1}
-                    </td>
-                    <td className="p-4 font-medium text-gray-800 max-w-sm">
-                      {item.judul}
-                    </td>
-                    <td className="p-4">
-                      {item.tanggal_terbuat instanceof Date
-                        ? item.tanggal_terbuat.toLocaleDateString()
-                        : item.tanggal_terbuat}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/quiz/${item.id_judul}`}
-                          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
-                        >
-                          <Eye size={14} />
-                          <span>View</span>
-                        </Link>
-                        <button
-                          onClick={() =>
-                            setModal({ isOpen: true, type: "edit", data: item })
-                          }
-                          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
-                        >
-                          <Pencil size={14} />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          onClick={() =>
-                            setModal({
-                              isOpen: true,
-                              type: "delete",
-                              data: item,
-                            })
-                          }
-                          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
-                        >
-                          <Trash2 size={14} />
-                          <span>Hapus</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </thead>
+              {loading ? (
+                <SkeletonTable rows={5} cols={4} />
+              ) : (
                 <tbody>
-                  {quizList.map((item, index) => (
-                    <tr
-                      key={item.id_judul}
-                      className="bg-white border-b last:border-b-0 hover:bg-gray-50 align-middle"
-                    >
-                      <td className="p-4 font-medium text-gray-900">
-                        {(currentPage - 1) * 10 + index + 1}
-                      </td>
-                      <td className="p-4">{item.judul}</td>
-                      <td className="p-4">{item.jumlah_registrasi}</td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/quiz/${item.id_judul}`}
-                            className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-md text-xs"
-                          >
-                            <Eye size={14} />Edit Soal
-                          </Link>
-                          <button
-                            onClick={() =>
-                              setModal({
-                                isOpen: true,
-                                type: "edit",
-                                data: item,
-                              })
-                            }
-                            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-md text-xs"
-                          >
-                            <Pencil size={14} /> Edit
-                          </button>
-                          <button
-                            onClick={() =>
-                              setModal({
-                                isOpen: true,
-                                type: "delete",
-                                data: item,
-                              })
-                            }
-                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-md text-xs"
-                          >
-                            <Trash2 size={14} /> Hapus
-                          </button>
-                        </div>
+                  {paginatedQuiz.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="text-center py-8 text-gray-400"
+                      >
+                        {searchQuery
+                          ? `Tidak ada kuis dengan judul "${searchQuery}".`
+                          : "Tidak ada data kuis."}
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    paginatedQuiz.map((item, index) => (
+                      <tr
+                        key={item.id_judul}
+                        className="bg-white border-b last:border-b-0 hover:bg-gray-50 align-middle"
+                      >
+                        <td className="p-4 font-medium text-gray-900">
+                          {(currentPage - 1) * entriesPerPage + index + 1}
+                        </td>
+                        <td className="p-4 font-medium text-gray-800 max-w-sm truncate">
+                          {item.judul}
+                        </td>
+                        <td className="p-4">
+                          {formatDate(item.tanggal_terbuat)}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Link
+                              href={`/quiz/${item.id_judul}`}
+                              className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
+                            >
+                              <Eye size={14} />
+                              <span>View</span>
+                            </Link>
+                            <button
+                              onClick={() =>
+                                setModal({
+                                  isOpen: true,
+                                  type: "edit",
+                                  data: item,
+                                })
+                              }
+                              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
+                            >
+                              <Pencil size={14} />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              onClick={() =>
+                                setModal({
+                                  isOpen: true,
+                                  type: "delete",
+                                  data: item,
+                                })
+                              }
+                              className="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-3 rounded-md flex items-center gap-1.5 text-xs transition-colors"
+                            >
+                              <Trash2 size={14} />
+                              <span>Hapus</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
-              </table>
-            </div>
-          )}
+              )}
+            </table>
+          </div>
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={5}
-            onPageChange={setCurrentPage}
-          />
+          {!loading && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </div>
       </div>
 
-      {/* Render Modals */}
       {renderModalContent()}
     </>
   );
