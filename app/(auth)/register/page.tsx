@@ -4,6 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+// 1. Impor toast dari react-toastify
+import { toast } from "react-toastify";
+// 2. Impor CSS jika belum di-load di layout utama
+import "react-toastify/dist/ReactToastify.css";
 
 const Logo = () => (
   <div className="flex justify-center mb-8">
@@ -28,7 +32,8 @@ export default function RegisterPage() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert("Password tidak cocok!");
+      // Ganti alert dengan toast.error
+      toast.error("Password tidak cocok!");
       return;
     }
 
@@ -47,20 +52,34 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Gagal mendaftar!");
+        // Ganti alert dengan toast.error
+        toast.error(data.message || "Gagal mendaftar!");
         return;
       }
 
-      alert("Registrasi berhasil! Silakan login.");
-      router.push("/login");
+      // Ganti alert dengan toast.success
+      toast.success(
+        "Registrasi berhasil! Anda akan diarahkan ke halaman login."
+      );
+
+      // Beri sedikit jeda agar user bisa melihat notifikasi sebelum redirect
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000); // Jeda 2 detik
     } catch (err) {
       console.error("❌ Error:", err);
-      alert("Terjadi kesalahan server!");
+      // Ganti alert dengan toast.error
+      toast.error("Terjadi kesalahan pada server!");
     }
   };
 
   return (
     <>
+      {/* ToastContainer tidak perlu diletakkan di sini jika sudah ada di layout.tsx.
+        Menempatkannya di layout utama adalah praktik terbaik.
+      */}
+      {/* <ToastContainer /> */}
+
       <Logo />
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Nama Lengkap */}
