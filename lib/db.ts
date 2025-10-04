@@ -58,6 +58,24 @@ CREATE TABLE IF NOT EXISTS \`articles\` (
   PRIMARY KEY (\`id\`)
 );`;
 
+const CREATE_USERS_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS \`users\` (
+  \`id\` INT NOT NULL AUTO_INCREMENT,
+  \`name\` VARCHAR(100) NOT NULL,
+  \`email\` VARCHAR(100) NOT NULL UNIQUE,
+  \`password\` VARCHAR(255) NULL,
+  \`role\` ENUM('admin', 'user', 'manager') NOT NULL DEFAULT 'user',
+  \`phone_number\` VARCHAR(20) NULL,
+  \`profile_picture\` VARCHAR(255) NULL DEFAULT '/default-profile.jpg',
+  \`status\` ENUM('active', 'inactive', 'banned') NOT NULL DEFAULT 'active',
+  \`google_id\` VARCHAR(255) NULL,
+  \`email_verified\` BOOLEAN NOT NULL DEFAULT 0,
+  \`last_login\` DATETIME NULL,
+  \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  \`updated_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (\`id\`)
+);`;
+
 // Singleton pattern to ensure DB initialization runs only once
 let dbPromise: Promise<mysql.Pool> | null = null;
 let isInitialized = false;
