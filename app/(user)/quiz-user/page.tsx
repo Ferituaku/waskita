@@ -1,19 +1,49 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { ClipboardCheck, ArrowRight } from "lucide-react";
+import { ClipboardCheck, ArrowRight, AlertTriangle } from "lucide-react";
+import type { Judul } from "@/types/quiz";
 
-const mockQuizzes = [
-  { id: 1, title: "QUIZ 1: Bahaya AIDS", questionCount: 4 },
-  { id: 2, title: "QUIZ 2: Pencegahan AIDS", questionCount: 8 },
-  { id: 3, title: "QUIZ 3: Apa itu AIDS", questionCount: 12 },
-  { id: 4, title: "QUIZ 4: Mengenal AIDS", questionCount: 10 },
-  { id: 5, title: "QUIZ 5: Ciri-Ciri AIDS", questionCount: 15 },
-];
+const SkeletonCard: React.FC = () => (
+  <div className="bg-white rounded-lg shadow-md animate-pulse">
+    <div className="p-6">
+      <div className="flex items-center mb-4">
+        <div className="bg-gray-200 p-3 rounded-full w-12 h-12"></div>
+      </div>
+      <div className="h-5 bg-gray-200 rounded w-3/4 mb-3"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+    </div>
+    <div className="bg-gray-100 p-4 mt-auto border-t border-gray-200">
+      <div className="h-5 bg-gray-200 rounded w-1/3"></div>
+    </div>
+  </div>
+);
 
 const QuizListPage: React.FC = () => {
+  const [quizzes, setQuizzes] = useState<Judul[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchQuizzes = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/quiz/judul");
+        if (!res.ok) throw new Error("Gagal memuat daftar kuis.");
+        const data: Judul[] = await res.json();
+        setQuizzes(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuizzes();
+  }, []);
+
   return (
     <>
       <Header title="Quiz" />
@@ -27,35 +57,57 @@ const QuizListPage: React.FC = () => {
           </p>
         </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockQuizzes.map((quiz) => (
-            <Link
-              href={`/quiz-user/${quiz.id}`}
-              key={quiz.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden group transform hover:-translate-y-1 transition-transform duration-300 flex flex-col"
-            >
-              <div className="p-6 flex-grow">
-                <div className="flex items-center mb-4">
-                  <div className="bg-red-100 p-3 rounded-full">
-                    <ClipboardCheck className="w-6 h-6 text-red-800" />
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md flex items-center gap-4">
+            <AlertTriangle className="w-6 h-6" />
+            <div>
+              <p className="font-bold">Terjadi Kesalahan</p>
+              <p>{error}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {quizzes.length > 0 ? (
+              quizzes.map((quiz) => (
+                <Link
+                  href={`/quiz-user/${quiz.id_judul}`}
+                  key={quiz.id_judul}
+                  className="bg-white rounded-lg shadow-md overflow-hidden group transform hover:-translate-y-1 transition-transform duration-300 flex flex-col"
+                >
+                  <div className="p-6 flex-grow">
+                    <div className="flex items-center mb-4">
+                      <div className="bg-red-100 p-3 rounded-full">
+                        <ClipboardCheck className="w-6 h-6 text-red-800" />
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-800 group-hover:text-red-600 transition-colors duration-200 mb-2">
+                      {quiz.judul}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {quiz.questionCount} Soal
+                    </p>
                   </div>
-                </div>
-                <h3 className="text-lg font-bold text-gray-800 group-hover:text-primary-hover transition-colors duration-200 mb-2">
-                  {quiz.title}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {quiz.questionCount} Soal
-                </p>
-              </div>
-              <div className="bg-gray-50 p-4 mt-auto border-t border-gray-200 flex justify-between items-center">
-                <span className="font-semibold text-gray-500">
-                  Kerjakan Kuis
-                </span>
-                <ArrowRight className="w-5 h-5 text-gray-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
-              </div>
-            </Link>
-          ))}
-        </div>
+                  <div className="bg-gray-50 p-4 mt-auto border-t border-gray-200 flex justify-between items-center">
+                    <span className="font-semibold text-red-600">
+                      Kerjakan Kuis
+                    </span>
+                    <ArrowRight className="w-5 h-5 text-red-600 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <p className="text-gray-500 col-span-full text-center py-8">
+                Saat ini belum ada kuis yang tersedia.
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
