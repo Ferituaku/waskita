@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 
 // GET - Ambil semua artikel dari database
 export async function GET() {
   try {
+    const db = await getDb();
     const [rows] = await db.query('SELECT * FROM articles ORDER BY created_at DESC');
     return NextResponse.json({ success: true, data: rows });
   } catch (error) {
@@ -21,6 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Title, content, and category are required' }, { status: 400 });
     }
 
+    const db = await getDb();
     const [result]: any = await db.query(
       `INSERT INTO articles (title, content, category, image_url, created_at, updated_at)
        VALUES (?, ?, ?, ?, NOW(), NOW())`,
@@ -52,6 +54,8 @@ export async function PUT(request: NextRequest) {
     if (!title || !content || !category) {
       return NextResponse.json({ success: false, error: 'Title, content, and category are required' }, { status: 400 });
     }
+
+    const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
     const [existingArticle]: any = await db.query(
@@ -95,6 +99,8 @@ export async function DELETE(request: NextRequest) {
     if (!id) {
       return NextResponse.json({ success: false, error: 'Article ID is required' }, { status: 400 });
     }
+
+    const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
     const [existingArticle]: any = await db.query(

@@ -61,19 +61,61 @@ CREATE TABLE IF NOT EXISTS \`hasil_kuis\` (
     ON DELETE CASCADE
 );`;
 
+const CREATE_ARTICLES_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS \`articles\` (
+  \`id\` INT NOT NULL AUTO_INCREMENT,
+  \`title\` VARCHAR(255) NOT NULL,
+  \`content\` TEXT NOT NULL,
+  \`category\` VARCHAR(100) NOT NULL,
+  \`image_url\` VARCHAR(255) NULL DEFAULT '/default-image.jpg',
+  \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  \`updated_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (\`id\`)
+);`;
+
+const CREATE_USERS_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS \`users\` (
+  \`id\` INT NOT NULL AUTO_INCREMENT,
+  \`name\` VARCHAR(100) NOT NULL,
+  \`email\` VARCHAR(100) NOT NULL UNIQUE,
+  \`password\` VARCHAR(255) NULL,
+  \`role\` ENUM('admin', 'user') NOT NULL DEFAULT 'user',
+  \`phone_number\` VARCHAR(20) NULL,
+  \`profile_picture\` VARCHAR(255) NULL DEFAULT '/default-profile.jpg',
+  \`status\` ENUM('active', 'inactive', 'banned') NOT NULL DEFAULT 'active',
+  \`google_id\` VARCHAR(255) NULL,
+  \`email_verified\` BOOLEAN NOT NULL DEFAULT 0,
+  \`last_login\` DATETIME NULL,
+  \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  \`updated_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (\`id\`)
+);`;
+
 // Singleton pattern to ensure DB initialization runs only once
 let dbPromise: Promise<mysql.Pool> | null = null;
+let isInitialized = false;
 
 async function initializeDatabase(): Promise<mysql.Pool> {
+  if (isInitialized && dbPromise) {
+    return dbPromise;
+  }
+
   try {
+    console.log("🔄 Initializing database connection...");
+
     // 1. Connect to MySQL server without selecting a database
     const tempConnection = await mysql.createConnection({
       host: dbConfig.host,
       user: dbConfig.user,
       password: dbConfig.password,
     });
+
+    console.log("✅ Connected to MySQL server");
+
     // 2. Create the database if it doesn't exist
     await tempConnection.query(CREATE_DATABASE_SQL);
+    console.log(`✅ Database '${dbConfig.database}' is ready`);
+
     await tempConnection.end();
 
     // 3. Create a connection pool to the specific database
@@ -84,15 +126,32 @@ async function initializeDatabase(): Promise<mysql.Pool> {
       queueLimit: 0,
     });
 
-    // 4. Create tables if they don't exist
-    await pool.query(CREATE_JUDUL_TABLE_SQL);
-    await pool.query(CREATE_SOAL_TABLE_SQL);
-    await pool.query(CREATE_JAWABAN_TABLE_SQL);
+    // 4. Create tables if they don't exist (SYNCHRONOUSLY)
+    console.log("🔄 Creating tables...");
 
-    console.log("Database and tables are ready.");
+    await pool.query(CREATE_JUDUL_TABLE_SQL);
+    console.log('✅ Table "judul" is ready');
+
+    await pool.query(CREATE_SOAL_TABLE_SQL);
+    console.log('✅ Table "soal" is ready');
+
+    await pool.query(CREATE_JAWABAN_TABLE_SQL);
+    console.log('✅ Table "jawaban" is ready');
+
+    await pool.query(CREATE_ARTICLES_TABLE_SQL);
+    console.log('✅ Table "articles" is ready');
+
+    await pool.query(CREATE_USERS_TABLE_SQL);
+    console.log('✅ Table "articles" is ready');
+
+    isInitialized = true;
+    console.log("✅ Database and all tables are ready.");
+
     return pool;
   } catch (error) {
-    console.error("Failed to initialize database:", error);
+    console.error("❌ Failed to initialize database:", error);
+    dbPromise = null;
+    isInitialized = false;
     throw error;
   }
 }
