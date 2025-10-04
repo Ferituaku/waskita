@@ -10,71 +10,98 @@ const Logo = () => (
     <Image
       src="/logo-waskitabystophiva.png"
       alt="Waskita Logo"
-      width={300} // Sesuaikan lebar logo
-      height={50} // Sesuaikan tinggi logo
+      width={300}
+      height={50}
       priority
     />
   </div>
 );
 
 export default function RegisterPage() {
-  const [fullName, setFullName] = useState("");
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  // const router = useRouter();
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
-      alert("Passwords don't match!");
+      alert("Password tidak cocok!");
       return;
     }
-    console.log({ fullName, username, password });
-    // On successful registration, navigate to login
-    // router.push('/login');
+
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role: "user", // default role
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Gagal mendaftar!");
+        return;
+      }
+
+      alert("Registrasi berhasil! Silakan login.");
+      router.push("/login");
+    } catch (err) {
+      console.error("❌ Error:", err);
+      alert("Terjadi kesalahan server!");
+    }
   };
 
   return (
     <>
       <Logo />
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* nama lengkap */}
+        {/* Nama Lengkap */}
         <div>
           <label
             className="block text-sm font-medium text-gray-700 mb-1"
-            htmlFor="fullName"
+            htmlFor="name"
           >
             Nama Lengkap
           </label>
           <input
-            id="fullName"
+            id="name"
             type="text"
             placeholder="Masukkan nama lengkap Anda"
             className="block w-full text-black px-4 py-3 border border-gray-300 rounded-3xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
         </div>
-        {/* username dan password */}
+
+        {/* Email */}
         <div>
           <label
-            htmlFor="username"
+            htmlFor="email"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Username
+            Email
           </label>
           <input
-            id="username"
-            type="text"
-            placeholder="Masukkan nama lengkap Anda"
+            id="email"
+            type="email"
+            placeholder="Masukkan email Anda"
             className="block w-full text-black px-4 py-3 border border-gray-300 rounded-3xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
+
+        {/* Password */}
         <div>
           <label
             htmlFor="password"
@@ -92,12 +119,14 @@ export default function RegisterPage() {
             required
           />
         </div>
+
+        {/* Konfirmasi Password */}
         <div>
           <label
-            htmlFor="password"
+            htmlFor="confirmPassword"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Password
+            Konfirmasi Password
           </label>
           <input
             id="confirmPassword"
@@ -109,16 +138,18 @@ export default function RegisterPage() {
             required
           />
         </div>
+
+        {/* Tombol Submit */}
         <div className="pt-2">
           <button
             type="submit"
             className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-lg font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
           >
-            {" "}
             BUAT AKUN
           </button>
         </div>
       </form>
+
       <p className="mt-8 text-center text-sm text-gray-600">
         Sudah memiliki akun?{" "}
         <Link
