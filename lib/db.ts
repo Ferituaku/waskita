@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS \`users\` (
   \`name\` VARCHAR(100) NOT NULL,
   \`email\` VARCHAR(100) NOT NULL UNIQUE,
   \`password\` VARCHAR(255) NULL,
-  \`role\` ENUM('admin', 'user', 'manager') NOT NULL DEFAULT 'user',
+  \`role\` ENUM('admin', 'user') NOT NULL DEFAULT 'user',
   \`phone_number\` VARCHAR(20) NULL,
   \`profile_picture\` VARCHAR(255) NULL DEFAULT '/default-profile.jpg',
   \`status\` ENUM('active', 'inactive', 'banned') NOT NULL DEFAULT 'active',
@@ -124,6 +124,9 @@ async function initializeDatabase(): Promise<mysql.Pool> {
     console.log('✅ Table "jawaban" is ready');
     
     await pool.query(CREATE_ARTICLES_TABLE_SQL);
+    console.log('✅ Table "articles" is ready');
+
+    await pool.query(CREATE_USERS_TABLE_SQL);
     console.log('✅ Table "articles" is ready');
 
     isInitialized = true;
