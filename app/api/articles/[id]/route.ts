@@ -13,6 +13,7 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Article ID is required' }, { status: 400 });
     }
 
+    const db = await getDb();
     const [rows]: any = await db.query(
       'SELECT * FROM articles WHERE id = ?',
       [id]
@@ -46,6 +47,8 @@ export async function PUT(
     if (!title || !content || !category) {
       return NextResponse.json({ success: false, error: 'Title, content, and category are required' }, { status: 400 });
     }
+
+    const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
     const [existingArticle]: any = await db.query(
@@ -98,6 +101,8 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'Article ID is required' }, { status: 400 });
     }
 
+    const db = await getDb();
+
     // Cek apakah artikel dengan ID tersebut ada
     const [existingArticle]: any = await db.query(
       'SELECT id, title FROM articles WHERE id = ?',
@@ -147,6 +152,8 @@ export async function PATCH(
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ success: false, error: 'No fields to update' }, { status: 400 });
     }
+
+    const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
     const [existingArticle]: any = await db.query(
