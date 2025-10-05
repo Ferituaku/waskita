@@ -1,61 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import { Check, X, Triangle, Square, Circle, Star } from "lucide-react";
+import type { Judul, Soal, Jawaban } from "@/types/quiz";
 
-// Mock data for the quiz - in a real app, nanti nya di-fetch dari backend
-const quizData = {
-  id: 1,
-  title: "QUIZ 1: Bahaya AIDS",
-  questions: [
-    {
-      id: 1,
-      questionText: "Apa kepanjangan dari HIV?",
-      options: [
-        { id: 1, text: "Human Immunodeficiency Virus" },
-        { id: 2, text: "Human Infection Virus" },
-        { id: 3, text: "Hepatitis Infection Virus" },
-        { id: 4, text: "Highly Infectious Virus" },
-      ],
-      correctAnswerId: 1,
-    },
-    {
-      id: 2,
-      questionText: "Bagaimana cara penularan HIV yang paling umum?",
-      options: [
-        { id: 1, text: "Melalui udara" },
-        { id: 2, text: "Berjabat tangan" },
-        { id: 3, text: "Hubungan seksual tanpa pengaman" },
-        { id: 4, text: "Gigitan nyamuk" },
-      ],
-      correctAnswerId: 3,
-    },
-    {
-      id: 3,
-      questionText:
-        "Tes HIV apa yang paling umum digunakan untuk deteksi awal?",
-      options: [
-        { id: 1, text: "Tes PCR" },
-        { id: 2, text: "Tes Antibodi (ELISA)" },
-        { id: 3, text: "Tes Kultur Virus" },
-        { id: 4, text: "Tes Darah Lengkap" },
-      ],
-      correctAnswerId: 2,
-    },
-    {
-      id: 4,
-      questionText: "Apa nama terapi obat untuk menekan perkembangan HIV?",
-      options: [
-        { id: 1, text: "Kemoterapi" },
-        { id: 2, text: "Antibiotik" },
-        { id: 3, text: "Terapi Antiretroviral (ART)" },
-        { id: 4, text: "Vaksinasi" },
-      ],
-      correctAnswerId: 3,
-    },
-  ],
-};
+// Define the structure for the quiz data used by the component
+interface QuizData {
+  id: number;
+  title: string;
+  questions: {
+    id: number;
+    questionText: string;
+    options: { id: number; text: string }[];
+    correctAnswerId: number;
+  }[];
+}
 
 const colors = [
   "bg-red-500 hover:bg-red-600",
@@ -78,18 +39,119 @@ export default function UserQuizPage({
 }: {
   params: { quizId: string };
 }) {
+  const [quizData, setQuizData] = useState<QuizData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [gameState, setGameState] = useState<GameState>("start");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalQuestions = quizData.questions.length;
-  const currentQuestion = quizData.questions[currentQuestionIndex];
+  const quizId = parseInt(params.quizId, 10);
 
-  const handleStartQuiz = () => {
-    setGameState("playing");
-  };
+  const fetchAndStructureQuizData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // 1. Fetch quiz title
+      const judulRes = await fetch(`/api/quiz/judul/${quizId}`);
+      if (!judulRes.ok) throw new Error("Kuis tidak ditemukan.");
+      const judulData: Judul = await judulRes.json();
+
+      // 2. Fetch questions for the quiz
+      const soalRes = await fetch(`/api/quiz/soal?id_judul=${quizId}`);
+      if (!soalRes.ok) throw new Error("Gagal memuat soal kuis.");
+      const soalData: Soal[] = await soalRes.json();
+
+      if (soalData.length === 0) {
+        throw new Error("Kuis ini belum memiliki soal.");
+      }
+
+      // 3. Fetch answers for all questions in parallel
+      const jawabanPromises = soalData.map((soal) =>
+        fetch(`/api/quiz/jawaban?id_soal=${soal.id_soal}`).then((res) => {
+          if (!res.ok)
+            throw new Error(
+              `Gagal memuat jawaban untuk soal ID ${soal.id_soal}`
+            );
+          return res.json();
+        })
+      );
+      const jawabanArrays: Jawaban[][] = await Promise.all(jawabanPromises);
+
+      // 4. Structure the data
+      const structuredQuestions = soalData.map((soal, index) => {
+        const options = jawabanArrays[index];
+        const correctOption = options.find((opt) => opt.is_correct);
+        if (!correctOption) {
+          console.warn(
+            `Soal "${soal.pertanyaan}" tidak memiliki jawaban yang benar.`
+          );
+          // Fallback: mark the first option as correct if none is set
+          // In a real scenario, you might want to handle this more robustly
+        }
+
+        return {
+          id: soal.id_soal,
+          questionText: soal.pertanyaan,
+          options: options.map((opt) => ({
+            id: opt.id_jawaban,
+            text: opt.teks_jawaban,
+          })),
+          correctAnswerId: correctOption?.id_jawaban || options[0]?.id_jawaban,
+        };
+      });
+
+      setQuizData({
+        id: judulData.id_judul,
+        title: judulData.judul,
+        questions: structuredQuestions,
+      });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [quizId]);
+
+  useEffect(() => {
+    fetchAndStructureQuizData();
+  }, [fetchAndStructureQuizData]);
+
+  // Effect to handle score submission
+  useEffect(() => {
+    const submitScore = async () => {
+      if (gameState === "finished" && !isSubmitting && quizData) {
+        setIsSubmitting(true);
+        try {
+          const res = await fetch("/api/quiz/results", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              quizId: quizData.id,
+              namaPeserta: "Peserta", // Can be replaced with actual user name
+              nilai: score,
+            }),
+          });
+          if (!res.ok) throw new Error("Gagal menyimpan skor.");
+          toast.success("Skor berhasil disimpan!");
+        } catch (err: any) {
+          toast.error(err.message);
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+    };
+    submitScore();
+  }, [gameState, score, quizData, isSubmitting]);
+
+  const totalQuestions = quizData?.questions.length || 0;
+  const currentQuestion = quizData?.questions[currentQuestionIndex];
+
+  const handleStartQuiz = () => setGameState("playing");
 
   const handleRestartQuiz = () => {
     setGameState("start");
@@ -100,7 +162,7 @@ export default function UserQuizPage({
   };
 
   const handleSelectAnswer = (optionId: number) => {
-    if (isAnswered) return;
+    if (isAnswered || !currentQuestion) return;
 
     setSelectedAnswer(optionId);
     setIsAnswered(true);
@@ -121,23 +183,46 @@ export default function UserQuizPage({
   };
 
   const getButtonClass = (optionId: number) => {
-    if (!isAnswered) {
+    if (!isAnswered || !currentQuestion) {
       return colors[optionId % 4];
     }
-
-    if (optionId === currentQuestion.correctAnswerId) {
-      return "bg-green-600"; // Always show correct answer in green
-    }
-
+    if (optionId === currentQuestion.correctAnswerId) return "bg-green-600";
     if (
       optionId === selectedAnswer &&
       optionId !== currentQuestion.correctAnswerId
-    ) {
-      return "bg-red-700 opacity-70"; // Show selected incorrect answer in red
-    }
-
-    return "bg-gray-500 opacity-50"; // Other options
+    )
+      return "bg-red-700 opacity-70";
+    return "bg-gray-500 opacity-50";
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-100">
+        <span className="loading loading-spinner loading-lg text-red-800"></span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 text-center">
+        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">
+            Terjadi Kesalahan
+          </h1>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Link
+            href="/quiz-user"
+            className="btn btn-primary bg-red-800 text-white hover:bg-red-900"
+          >
+            Kembali ke Daftar Kuis
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!quizData) return null; // Should be covered by error state
 
   // UI for Start Screen
   if (gameState === "start") {
@@ -187,18 +272,26 @@ export default function UserQuizPage({
           <div className="flex flex-col md:flex-row gap-4">
             <button
               onClick={handleRestartQuiz}
-              className="w-full bg-red-800  text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 hover:bg-red-900"
+              className="w-full bg-red-800 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 hover:bg-red-900"
             >
               Coba Lagi
             </button>
             <Link
-              href="/quiz"
+              href="/quiz-user"
               className="w-full flex items-center justify-center bg-white border border-red-800 text-red-800 font-bold py-3 px-6 rounded-full transition-colors duration-300 hover:bg-red-50"
             >
               Kembali ke Daftar Kuis
             </Link>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 text-center">
+        <p className="text-gray-600">Soal tidak dapat dimuat.</p>
       </div>
     );
   }
@@ -216,7 +309,8 @@ export default function UserQuizPage({
           href="/quiz-user"
           className="flex items-center text-red-700 gap-2 py-2 px-3 rounded-lg hover:bg-white/40 transition-colors"
         >
-          <X size={20} /> <span className="hidden sm:inline text-red-700">Keluar</span>
+          <X size={20} />{" "}
+          <span className="hidden sm:inline text-red-700">Keluar</span>
         </Link>
       </header>
 

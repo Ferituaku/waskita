@@ -1,1 +1,4 @@
-npm install mysql2      
+mysql2      
+jose
+bcryptjs jsonwebtoken
+--save-dev @types/jsonwebtoken @types/bcryptjs

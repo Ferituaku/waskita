@@ -42,21 +42,22 @@ const QuizPage: React.FC = () => {
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const entriesOptions = [5, 10, 20, 50];
 
+  const fetchQuiz = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/quiz/judul");
+      if (!res.ok) throw new Error("Gagal mengambil data");
+      const data = await res.json();
+      setQuizList(data);
+    } catch (err) {
+      console.error("Gagal ambil data kuis:", err);
+      toast.error("Gagal mengambil daftar kuis.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchQuiz = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/quiz/judul");
-        if (!res.ok) throw new Error("Gagal mengambil data");
-        const data = await res.json();
-        setQuizList(data);
-      } catch (err) {
-        console.error("Gagal ambil data kuis:", err);
-        toast.error("Gagal mengambil daftar kuis.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchQuiz();
   }, []);
 
@@ -86,7 +87,7 @@ const QuizPage: React.FC = () => {
       success: (res) => {
         if (!res.ok) throw new Error("Gagal menyimpan.");
         closeModal();
-        router.refresh(); // Re-fetch server-side props, updating the list
+        fetchQuiz(); // Re-fetch server-side props, updating the list
         return modal.type === "add"
           ? "Kuis berhasil dibuat!"
           : "Kuis berhasil diperbarui!";
@@ -106,7 +107,7 @@ const QuizPage: React.FC = () => {
         success: (res) => {
           if (!res.ok) throw new Error("Gagal menghapus.");
           closeModal();
-          router.refresh();
+          fetchQuiz(); // Update the list after deletion
           return "Kuis berhasil dihapus!";
         },
         error: "Gagal menghapus kuis.",
@@ -137,7 +138,6 @@ const QuizPage: React.FC = () => {
   };
 
   const renderModalContent = () => {
-    // ... (modal rendering logic remains the same, with slight adjustments)
     if (!modal.isOpen) return null;
 
     switch (modal.type) {
@@ -220,7 +220,7 @@ const QuizPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleDelete}
-                className="btn bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded-lg"
+                className="btn bg-red-600 hover:bg-red-800 text-white py-2 px-3 rounded-lg"
               >
                 Ya, Hapus
               </button>

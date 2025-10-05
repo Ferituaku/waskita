@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={`${inter.className} bg-gray-50`}>{children}  <ChatBot /> </body>
+      <body className={`${inter.className} bg-gray-50`}>{children}</body>
     </html>
   );
 }

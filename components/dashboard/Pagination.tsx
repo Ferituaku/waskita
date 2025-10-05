@@ -25,9 +25,54 @@ const Pagination: React.FC<PaginationProps> = ({
     }
   };
 
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
+  const getPageNumbers = () => {
+    const pageNumbers: (number | string)[] = [];
+
+    // If total pages is 7 or less, show all numbers
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+      return pageNumbers;
+    }
+
+    // Logic for more than 7 pages
+    // Current page is near the beginning
+    if (currentPage < 5) {
+      pageNumbers.push(1, 2, 3, 4, 5, "...", totalPages);
+    }
+    // Current page is near the end
+    else if (currentPage > totalPages - 4) {
+      pageNumbers.push(
+        1,
+        "...",
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages
+      );
+    }
+    // Current page is in the middle
+    else {
+      pageNumbers.push(
+        1,
+        "...",
+        currentPage - 1,
+        currentPage,
+        currentPage + 1,
+        "...",
+        totalPages
+      );
+    }
+
+    return pageNumbers;
+  };
+
+  const pageNumbers = getPageNumbers();
+
+  if (totalPages <= 1) {
+    return null;
   }
 
   return (
@@ -50,20 +95,30 @@ const Pagination: React.FC<PaginationProps> = ({
           <ChevronLeft size={16} />
         </button>
 
-        {pageNumbers.map((number) => (
-          <button
-            key={number}
-            onClick={() => handlePageClick(number)}
-            className={`px-3 py-1 rounded-md ${
-              currentPage === number
-                ? "font-bold text-red-600 bg-red-100"
-                : "hover:bg-gray-100"
-            }`}
-            aria-current={currentPage === number ? "page" : undefined}
-          >
-            {number}
-          </button>
-        ))}
+        {pageNumbers.map((number, index) =>
+          typeof number === "string" ? (
+            <span
+              key={`dots-${index}`}
+              className="px-3 py-1 text-gray-400"
+              aria-hidden="true"
+            >
+              ...
+            </span>
+          ) : (
+            <button
+              key={number}
+              onClick={() => handlePageClick(number)}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === number
+                  ? "font-bold text-red-600 bg-red-100"
+                  : "hover:bg-gray-100"
+              }`}
+              aria-current={currentPage === number ? "page" : undefined}
+            >
+              {number}
+            </button>
+          )
+        )}
 
         <button
           onClick={() => handlePageClick(currentPage + 1)}
