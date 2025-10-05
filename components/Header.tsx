@@ -124,7 +124,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 </HeadlessMenu.Item>
                 <HeadlessMenu.Item>
                   {({ active }) => (
-                    <button
+                    <Link
+                      href="/login"
                       onClick={() => console.log("User logged out")}
                       className={[
                         "w-full text-left flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm",
@@ -135,7 +136,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                     >
                       <LogOut className="h-4 w-4" />
                       <span>Logout</span>
-                    </button>
+                    </Link>
                   )}
                 </HeadlessMenu.Item>
               </HeadlessMenu.Items>
