@@ -9,6 +9,7 @@ import Pagination from "@/components/dashboard/Pagination";
 import Modal from "@/components/Modal";
 import SkeletonTable from "@/components/SkeletonTable";
 import { Judul } from "@/types/quiz";
+
 import {
   Plus,
   Search,
@@ -394,6 +395,8 @@ const QuizPage: React.FC = () => {
       </div>
 
       {renderModalContent()}
+
+   
     </>
   );
 };
