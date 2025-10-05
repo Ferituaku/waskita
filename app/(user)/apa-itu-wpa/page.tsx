@@ -7,8 +7,9 @@ const ApaItuWPAPage: React.FC = () => {
   return (
     <>
       <Header title="Apa Itu WPA?" />
-      <div className="p-4 md:p-8 bg-[#eeeeee] min-h-screen">
-        <section className="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+      {/* Menggunakan warna dari sistem Tailwind untuk konsistensi */}
+      <div className="min-h-screen bg-slate-50 px-5 py-6 md:px-8 md:py-10">
+        <section className="bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-6 py-6 md:px-10 md:py-10 mb-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
             <div className="md:col-span-1">
               <Image
@@ -16,14 +17,19 @@ const ApaItuWPAPage: React.FC = () => {
                 alt="HIV/AIDS Awareness"
                 width={600}
                 height={400}
-                className="rounded-lg  object-cover w-full"
+                className="rounded-xl object-cover w-full"
               />
             </div>
+
             <div className="md:col-span-2">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
+              {/* 1. Terapkan font-display untuk judul utama */}
+              <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 tracking-tight mb-4">
+                {" "}
                 Apa Itu WPA (Warga Peduli AIDS)?
               </h2>
-              <p className="text-gray-600 leading-relaxed">
+              {/* 2. Sedikit menggelapkan warna teks untuk kontras yang lebih baik */}
+              <p className="text-slate-600 leading-relaxed">
+                {" "}
                 Warga Peduli AIDS (WPA) adalah sekelompok anggota masyarakat
                 yang secara sukarela dan sadar berperan aktif dalam upaya
                 pencegahan dan penanggulangan HIV/AIDS di lingkungannya. Mereka
@@ -31,7 +37,8 @@ const ApaItuWPAPage: React.FC = () => {
                 mengurangi stigma, dan memberikan dukungan kepada Orang dengan
                 HIV/AIDS (ODHA).
               </p>
-              <p className="text-gray-600 leading-relaxed mt-4">
+              <p className="text-slate-600 leading-relaxed mt-4">
+                {" "}
                 Keberadaan WPA sangat penting untuk membangun lingkungan yang
                 kondusif dan suportif, di mana setiap orang dapat mengakses
                 informasi, layanan tes, dan pengobatan tanpa rasa takut atau
@@ -40,22 +47,24 @@ const ApaItuWPAPage: React.FC = () => {
             </div>
           </div>
         </section>
+
         <section>
-          <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
+          <h3 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight mb-6">
+            {" "}
             Video Penjelasan Tentang WPA
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <VideoCard
               thumbnailUrl="/hiv-awareness.png"
-              title="Memahami Peran WPA di Masyarakat"
+              title="Understanding the Role of WPA in Society"
             />
             <VideoCard
               thumbnailUrl="/hiv-awareness.png"
-              title="Langkah-langkah Menjadi WPA"
+              title="Steps to Becoming a WPA"
             />
             <VideoCard
               thumbnailUrl="/hiv-awareness.png"
-              title="Kisah Inspiratif dari WPA"
+              title="Inspirational Stories from WPAs"
             />
           </div>
         </section>

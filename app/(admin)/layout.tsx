@@ -12,10 +12,13 @@ export default function DashboardLayout({
       {/* ===== 1. SIDEBAR DITAMPILKAN DI SINI ===== */}
       <Sidebar />
 
-      <main className="flex-1 h-screen overflow-y-auto">
+      <main
+        className="flex-1 h-screen overflow-y-auto px-5 py-6 md:px-8 md:py-8
+            transition-all duration-300"
+      >
         {/* ===== 2. KONTEN HALAMAN AKAN DI-RENDER DI SINI ===== */}
         <Toaster position="top-right" reverseOrder={false} />
-        {children}
+        <div className="mx-auto max-w-7xl">{children}</div>
       </main>
     </div>
   );
