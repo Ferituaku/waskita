@@ -110,8 +110,12 @@ export default function UserQuizPage({
         title: judulData.judul,
         questions: structuredQuestions,
       });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      let message = "Terjadi kesalahan";
+      if (err instanceof Error) {
+        message = err.message;
+      }
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -138,8 +142,13 @@ export default function UserQuizPage({
           });
           if (!res.ok) throw new Error("Gagal menyimpan skor.");
           toast.success("Skor berhasil disimpan!");
-        } catch (err: any) {
-          toast.error(err.message);
+        } catch (err) {
+          // Ganti `err: any` menjadi `err`
+          let message = "Gagal menyimpan skor.";
+          if (err instanceof Error) {
+            message = err.message;
+          }
+          toast.error(message);
         } finally {
           setIsSubmitting(false);
         }

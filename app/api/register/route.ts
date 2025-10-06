@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { getDb } from "@/lib/db"; 
-import jwt from "jsonwebtoken";
+import { getDb } from "@/lib/db";
+import { RowDataPacket } from "mysql2";
 
-const JWT_SECRET = process.env.JWT_SECRET || "secretkey";
+interface User extends RowDataPacket {
+  id: number;
+  email: string;
+}
 
 export async function POST(req: Request) {
   try {
@@ -11,9 +14,15 @@ export async function POST(req: Request) {
     const db = await getDb();
 
     // cek apakah user sudah ada
-    const [existing] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
-    if ((existing as any[]).length > 0) {
-      return NextResponse.json({ message: "Email already registered" }, { status: 400 });
+    const [existing] = await db.query<User[]>(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
+    if (existing.length > 0) {
+      return NextResponse.json(
+        { message: "Email already registered" },
+        { status: 400 }
+      );
     }
 
     // hash password

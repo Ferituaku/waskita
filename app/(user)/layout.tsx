@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <SidebarProvider>
         <Sidebar />
 
-        <main className="flex-1 h-screen overflow-y-auto  transition-all duration-300">
+        <main className="flex-1 h-screen overflow-y-auto transition-all duration-300">
           {/* ===== 2. KONTEN HALAMAN AKAN DI-RENDER DI SINI ===== */}
           <Toaster position="top-right" reverseOrder={false} />
           {children}

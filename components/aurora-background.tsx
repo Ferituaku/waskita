@@ -17,15 +17,10 @@ export default function AuroraBackground({
       // Define brand palette locally via CSS variables to keep styles cohesive and easy to tweak
       style={
         {
-          // Warm, inviting palette
-          // Cream base
-          ["--brand-cream" as any]: "#FFF5E1",
-          // Soft red
-          ["--brand-accent" as any]: "#E85D5A",
-          // Warm orange
-          ["--brand-primary" as any]: "#FF7A3D",
-          // Deep neutral for subtle depth if needed
-          ["--brand-deep" as any]: "#1E1B16",
+          "--brand-cream": "#FFF5E1",
+          "--brand-accent": "#E85D5A",
+          "--brand-primary": "#FF7A3D",
+          "--brand-deep": "#1E1B16",
         } as React.CSSProperties
       }
     >

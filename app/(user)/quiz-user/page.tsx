@@ -35,8 +35,12 @@ const QuizListPage: React.FC = () => {
         if (!res.ok) throw new Error("Gagal memuat daftar kuis.");
         const data: Judul[] = await res.json();
         setQuizzes(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        let message = "Gagal memuat daftar kuis.";
+        if (err instanceof Error) {
+          message = err.message;
+        }
+        setError(message);
       } finally {
         setLoading(false);
       }

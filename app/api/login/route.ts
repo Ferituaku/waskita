@@ -2,8 +2,18 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { getDb } from "@/lib/db";
+import { RowDataPacket } from "mysql2";
 
 const JWT_SECRET = process.env.JWT_SECRET || "secretkey";
+
+interface User extends RowDataPacket {
+  id: number;
+  email: string;
+  name: string;
+  nama: string; // jaga-jaga jika ada kolom 'nama'
+  password?: string;
+  role: "admin" | "user";
+}
 
 export async function POST(req: Request) {
   try {
@@ -20,19 +30,24 @@ export async function POST(req: Request) {
     const db = await getDb();
 
     // Query user dari database
-    const [rows] = await db.query("SELECT * FROM users WHERE email = ?", [
-      email,
-    ]);
-    const users = rows as any[];
-
-    if (users.length === 0) {
+    const [rows] = await db.query<User[]>(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
+    if (rows.length === 0) {
       return NextResponse.json(
         { message: "Email atau password salah" },
         { status: 401 }
       );
     }
 
-    const user = users[0];
+    const user = rows[0];
+    if (!user.password) {
+      return NextResponse.json(
+        { message: "Konfigurasi akun tidak valid" },
+        { status: 500 }
+      );
+    }
 
     // Verifikasi password
     const isValid = await bcrypt.compare(password, user.password);
@@ -48,7 +63,7 @@ export async function POST(req: Request) {
       {
         id: user.id,
         email: user.email,
-        name: user.name || user.nama, // sesuaikan dengan kolom di DB
+        name: user.name || user.nama,
         role: user.role,
       },
       JWT_SECRET,

@@ -8,13 +8,17 @@ export default function ChatBot() {
   const [open, setOpen] = useState(false);
   const [popup, setPopup] = useState<string | null>(null);
   const [messages, setMessages] = useState([
-    { sender: "bot", text: "🇮🇩 Halo! Aku asisten virtual Waskita. Ada yang bisa aku bantu hari ini?" },
+    {
+      sender: "bot",
+      text: "🇮🇩 Halo! Aku asisten virtual Waskita. Ada yang bisa aku bantu hari ini?",
+    },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = () =>
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   useEffect(scrollToBottom, [messages]);
 
   const handleSend = async () => {
@@ -42,7 +46,10 @@ export default function ChatBot() {
     } catch {
       setMessages([
         ...newMessages,
-        { sender: "bot", text: "⚠️ Ups, koneksi bermasalah. Coba lagi nanti ya!" },
+        {
+          sender: "bot",
+          text: "⚠️ Ups, koneksi bermasalah. Coba lagi nanti ya!",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -115,7 +122,9 @@ export default function ChatBot() {
                     {/* crop text panjang */}
                     {msg.text.length > 300 ? (
                       <div className="flex flex-col gap-1">
-                        <p className="line-clamp-5 overflow-hidden">{msg.text}</p>
+                        <p className="line-clamp-5 overflow-hidden">
+                          {msg.text}
+                        </p>
                         <button
                           onClick={() => setPopup(msg.text)}
                           className="flex items-center gap-1 text-[10px] text-red-600 hover:text-red-700 font-medium"
@@ -143,19 +152,21 @@ export default function ChatBot() {
 
             {/* Quick Questions */}
             <div className="flex flex-wrap gap-1 px-3 pb-2 bg-white/80 border-t border-gray-100">
-              {["Apa itu HIV?", "Cara penularan?", "Apakah bisa sembuh?"].map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleQuickAsk(q)}
-                  className="bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 text-[11px] rounded-full border border-red-100 transition"
-                >
-                  {q}
-                </button>
-              ))}
+              {["Apa itu HIV?", "Cara penularan?", "Apakah bisa sembuh?"].map(
+                (q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleQuickAsk(q)}
+                    className="bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 text-[11px] rounded-full border border-red-100 transition"
+                  >
+                    {q}
+                  </button>
+                )
+              )}
             </div>
 
             {/* Input */}
-            <div className="border-t border-gray-200 bg-white/70 p-2 flex items-center gap-2">
+            <div className="border-t text-slate-600 border-gray-200 bg-white/70 p-2 flex items-center gap-2">
               <input
                 type="text"
                 value={input}
@@ -200,8 +211,12 @@ export default function ChatBot() {
               >
                 <X size={20} />
               </button>
-              <h3 className="text-red-600 font-semibold text-base">Jawaban Lengkap</h3>
-              <p className="whitespace-pre-line text-sm leading-relaxed">{popup}</p>
+              <h3 className="text-red-600 font-semibold text-base">
+                Jawaban Lengkap
+              </h3>
+              <p className="whitespace-pre-line text-sm leading-relaxed">
+                {popup}
+              </p>
             </motion.div>
           </motion.div>
         )}

@@ -7,8 +7,6 @@ import {
   BookOpenText,
   ClipboardCheck,
   Youtube,
-  RefreshCw,
-  LogOut,
   ChevronsLeft,
   ChevronsRight,
   CircleQuestionMark,
@@ -153,27 +151,6 @@ const Sidebar: React.FC = () => {
               </div>
             </button>
           </div>
-          {/* Logout link */}
-          {/* <div className="px-3 py-3">
-            <Link
-              href="/login"
-              onClick={closeMobile}
-              className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2 text-gray-200",
-                "hover:bg-white/5 hover:text-white transition-colors duration-150",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
-                isDesktopCollapsed && "md:justify-center"
-              )}
-              title={isDesktopCollapsed ? "Logout" : undefined}
-            >
-              <LogOut className="h-5 w-5 opacity-90 flex-shrink-0" />
-              <span
-                className={cn("font-medium", isDesktopCollapsed && "md:hidden")}
-              >
-                Logout
-              </span>
-            </Link>
-          </div> */}
         </div>
       </aside>
     </>

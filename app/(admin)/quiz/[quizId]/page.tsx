@@ -39,8 +39,12 @@ const QuizDetailPage: React.FC = () => {
         if (!resultsRes.ok) throw new Error(`Gagal memuat hasil kuis`);
         const resultsData: QuizResult[] = await resultsRes.json();
         setResults(resultsData);
-      } catch (err: any) {
-        setError(err.message || "Terjadi kesalahan");
+      } catch (err) {
+        let message = "Terjadi kesalahan";
+        if (err instanceof Error) {
+          message = err.message;
+        }
+        setError(message);
         console.error(err);
       } finally {
         setLoading(false);
@@ -73,7 +77,10 @@ const QuizDetailPage: React.FC = () => {
                 Menampilkan daftar peserta yang telah menyelesaikan kuis.
               </p>
             </div>
-            <Link href="/quiz" className="btn text-gray-500 hover:text-gray-700 bg-red-200 hover:bg-red-700 p-2 px-4 rounded-lg flex items-center gap-2">
+            <Link
+              href="/quiz"
+              className="btn text-gray-500 hover:text-gray-700 bg-red-200 hover:bg-red-700 p-2 px-4 rounded-lg flex items-center gap-2"
+            >
               <ArrowLeft size={20} />
               <span>Kembali</span>
             </Link>
