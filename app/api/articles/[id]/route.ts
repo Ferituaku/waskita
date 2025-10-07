@@ -1,5 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { NextRequest, NextResponse } from "next/server";
+import { getDb } from "@/lib/db";
+import { OkPacket, RowDataPacket } from "mysql2";
+
+interface Article extends RowDataPacket {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  image_url: string;
+}
 
 // GET - Ambil artikel berdasarkan ID
 export async function GET(
@@ -8,25 +17,26 @@ export async function GET(
 ) {
   try {
     const { id } = params;
-
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'Article ID is required' }, { status: 400 });
-    }
-
     const db = await getDb();
-    const [rows]: any = await db.query(
-      'SELECT * FROM articles WHERE id = ?',
+    const [rows] = await db.query<Article[]>(
+      "SELECT * FROM articles WHERE id = ?",
       [id]
     );
 
     if (rows.length === 0) {
-      return NextResponse.json({ success: false, error: 'Article not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Article not found" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ success: true, data: rows[0] });
   } catch (error) {
-    console.error('Error fetching article:', error);
-    return NextResponse.json({ success: false, error: 'Database error' }, { status: 500 });
+    console.error("Error fetching article:", error);
+    return NextResponse.json(
+      { success: false, error: "Database error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -37,55 +47,47 @@ export async function PUT(
 ) {
   try {
     const { id } = params;
-
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'Article ID is required' }, { status: 400 });
-    }
-
     const { title, content, category, image_url } = await request.json();
 
     if (!title || !content || !category) {
-      return NextResponse.json({ success: false, error: 'Title, content, and category are required' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Title, content, and category are required" },
+        { status: 400 }
+      );
     }
 
     const db = await getDb();
 
-    // Cek apakah artikel dengan ID tersebut ada
-    const [existingArticle]: any = await db.query(
-      'SELECT id FROM articles WHERE id = ?',
-      [id]
-    );
-
-    if (existingArticle.length === 0) {
-      return NextResponse.json({ success: false, error: 'Article not found' }, { status: 404 });
-    }
-
-    // Update artikel
-    const [result]: any = await db.query(
+    const [result] = await db.query<OkPacket>(
       `UPDATE articles 
        SET title = ?, content = ?, category = ?, image_url = ?, updated_at = NOW()
        WHERE id = ?`,
-      [title, content, category, image_url || '/default-image.jpg', id]
+      [title, content, category, image_url || "/default-image.jpg", id]
     );
 
     if (result.affectedRows === 0) {
-      return NextResponse.json({ success: false, error: 'Failed to update article' }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: "Article not found" },
+        { status: 404 }
+      );
     }
 
-    // Ambil data artikel yang sudah diupdate
-    const [updatedArticle]: any = await db.query(
-      'SELECT * FROM articles WHERE id = ?',
+    const [updatedRows] = await db.query<Article[]>(
+      "SELECT * FROM articles WHERE id = ?",
       [id]
     );
 
     return NextResponse.json({
       success: true,
-      message: 'Article updated successfully',
-      data: updatedArticle[0]
+      message: "Article updated successfully",
+      data: updatedRows[0],
     });
   } catch (error) {
-    console.error('Error updating article:', error);
-    return NextResponse.json({ success: false, error: 'Failed to update article' }, { status: 500 });
+    console.error("Error updating article:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to update article" },
+      { status: 500 }
+    );
   }
 }
 
@@ -98,39 +100,51 @@ export async function DELETE(
     const { id } = params;
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'Article ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Article ID is required" },
+        { status: 400 }
+      );
     }
 
     const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
-    const [existingArticle]: any = await db.query(
-      'SELECT id, title FROM articles WHERE id = ?',
+    const [existingArticle] = await db.query<Article[]>(
+      "SELECT id, title FROM articles WHERE id = ?",
       [id]
     );
 
     if (existingArticle.length === 0) {
-      return NextResponse.json({ success: false, error: 'Article not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Article not found" },
+        { status: 404 }
+      );
     }
 
     // Hapus artikel
-    const [result]: any = await db.query(
-      'DELETE FROM articles WHERE id = ?',
+    const [result] = await db.query<OkPacket>(
+      "DELETE FROM articles WHERE id = ?",
       [id]
     );
 
     if (result.affectedRows === 0) {
-      return NextResponse.json({ success: false, error: 'Failed to delete article' }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: "Failed to delete article" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Article deleted successfully',
-      data: { id: parseInt(id), title: existingArticle[0].title }
+      message: "Article deleted successfully",
+      data: { id: parseInt(id), title: existingArticle[0].title },
     });
   } catch (error) {
-    console.error('Error deleting article:', error);
-    return NextResponse.json({ success: false, error: 'Failed to delete article' }, { status: 500 });
+    console.error("Error deleting article:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to delete article" },
+      { status: 500 }
+    );
   }
 }
 
@@ -143,30 +157,39 @@ export async function PATCH(
     const { id } = params;
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'Article ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Article ID is required" },
+        { status: 400 }
+      );
     }
 
     const updateData = await request.json();
-    
+
     // Cek apakah ada field yang akan diupdate
     if (Object.keys(updateData).length === 0) {
-      return NextResponse.json({ success: false, error: 'No fields to update' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "No fields to update" },
+        { status: 400 }
+      );
     }
 
     const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
     const [existingArticle]: any = await db.query(
-      'SELECT * FROM articles WHERE id = ?',
+      "SELECT * FROM articles WHERE id = ?",
       [id]
     );
 
     if (existingArticle.length === 0) {
-      return NextResponse.json({ success: false, error: 'Article not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Article not found" },
+        { status: 404 }
+      );
     }
 
     // Buat query update dinamis
-    const allowedFields = ['title', 'content', 'category', 'image_url'];
+    const allowedFields = ["title", "content", "category", "image_url"];
     const updateFields: string[] = [];
     const updateValues: any[] = [];
 
@@ -178,34 +201,45 @@ export async function PATCH(
     }
 
     if (updateFields.length === 0) {
-      return NextResponse.json({ success: false, error: 'No valid fields to update' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "No valid fields to update" },
+        { status: 400 }
+      );
     }
 
     // Tambahkan updated_at dan id ke values
-    updateFields.push('updated_at = NOW()');
+    updateFields.push("updated_at = NOW()");
     updateValues.push(id);
 
-    const updateQuery = `UPDATE articles SET ${updateFields.join(', ')} WHERE id = ?`;
-    
+    const updateQuery = `UPDATE articles SET ${updateFields.join(
+      ", "
+    )} WHERE id = ?`;
+
     const [result]: any = await db.query(updateQuery, updateValues);
 
     if (result.affectedRows === 0) {
-      return NextResponse.json({ success: false, error: 'Failed to update article' }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: "Failed to update article" },
+        { status: 500 }
+      );
     }
 
     // Ambil data artikel yang sudah diupdate
     const [updatedArticle]: any = await db.query(
-      'SELECT * FROM articles WHERE id = ?',
+      "SELECT * FROM articles WHERE id = ?",
       [id]
     );
 
     return NextResponse.json({
       success: true,
-      message: 'Article updated successfully',
-      data: updatedArticle[0]
+      message: "Article updated successfully",
+      data: updatedArticle[0],
     });
   } catch (error) {
-    console.error('Error updating article:', error);
-    return NextResponse.json({ success: false, error: 'Failed to update article' }, { status: 500 });
+    console.error("Error updating article:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to update article" },
+      { status: 500 }
+    );
   }
 }

@@ -1,8 +1,12 @@
+// app/layout.tsx
+import type React from "react";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { Toaster } from "react-hot-toast";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
+import { Suspense } from "react";
 import "./globals.css";
-const inter = Inter({ subsets: ["latin"] });
+import { ToastContainer } from "react-toastify";
+import ChatBot from "@/components/chatbot";
 
 export const metadata: Metadata = {
   title: "WASKITA - Edukasi HIV/AIDS",
@@ -16,9 +20,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
-      <Toaster position="top-center" reverseOrder={false} />
-      <body className={`${inter.className} bg-gray-50`}>{children}</body>
+    <html lang="en">
+      <body
+        className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased bg-slate-50 text-slate-800`}
+      >
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        <Suspense fallback={null}>{children}</Suspense>
+        <ChatBot />
+      </body>
     </html>
   );
 }

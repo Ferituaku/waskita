@@ -138,6 +138,9 @@ async function initializeDatabase(): Promise<mysql.Pool> {
     await pool.query(CREATE_JAWABAN_TABLE_SQL);
     console.log('✅ Table "jawaban" is ready');
 
+    await pool.query(CREATE_HASIL_KUIS_TABLE_SQL);
+    console.log('✅ Table "hasil_kuis" is ready');
+
     await pool.query(CREATE_ARTICLES_TABLE_SQL);
     console.log('✅ Table "articles" is ready');
 

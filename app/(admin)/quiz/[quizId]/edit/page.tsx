@@ -61,8 +61,12 @@ export default function QuizEditPage({
         setAnswers([]);
         setInitialAnswers([]);
       }
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      let message = "Terjadi kesalahan";
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -147,9 +151,6 @@ export default function QuizEditPage({
 
   const handleSaveChanges = async () => {
     setSaving(true);
-
-    // 1. Identify new, updated, and deleted questions
-    // CORRECTED: This must send the full `Soal` object, not omitting the id_soal
     const questions_to_add = questions.filter((q) => isTempId(q.id_soal));
     const questions_to_update = questions.filter(
       (q) =>
@@ -166,7 +167,7 @@ export default function QuizEditPage({
     // 2. Identify new, updated, and deleted answers
     const answers_to_add = answers
       .filter((a) => isTempId(a.id_jawaban))
-      .map(({ id_jawaban, ...rest }) => rest);
+      .map(({ ...rest }) => rest);
     const answers_to_update = answers.filter(
       (a) =>
         !isTempId(a.id_jawaban) &&
@@ -203,8 +204,12 @@ export default function QuizEditPage({
       toast.success("Perubahan berhasil disimpan!");
       // Refresh data from server to get new IDs and confirm changes
       await fetchData();
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      let message = "Gagal menyimpan perubahan.";
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      toast.error(message);
     } finally {
       setSaving(false);
     }

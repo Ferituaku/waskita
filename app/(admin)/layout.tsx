@@ -1,20 +1,22 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
+import { Toaster } from "react-hot-toast";
+import { SidebarProvider } from "@/hooks/SidebarContext";
 
-export default function DashboardLayout({
-  children, // <-- {children} adalah properti ajaibnya
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
+  // tambahan logic khusus user di sini jika perlu
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* ===== 1. SIDEBAR DITAMPILKAN DI SINI ===== */}
-      <Sidebar />
+      <SidebarProvider>
+        <Sidebar />
 
-      <main className="flex-1 h-screen overflow-y-auto">
-        {/* ===== 2. KONTEN HALAMAN AKAN DI-RENDER DI SINI ===== */}
-        {children}
-      </main>
+        <main className="flex-1 h-screen overflow-y-auto transition-all duration-300">
+          {/* ===== 2. KONTEN HALAMAN AKAN DI-RENDER DI SINI ===== */}
+          <Toaster position="top-right" reverseOrder={false} />
+          {children}
+        </main>
+      </SidebarProvider>
     </div>
   );
 }

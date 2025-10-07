@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import Header from "@/components/Header";
 import Pagination from "@/components/dashboard/Pagination";
 import Modal from "@/components/Modal";
 import SkeletonTable from "@/components/SkeletonTable";
 import { Judul } from "@/types/quiz";
+
 import {
   Plus,
   Search,
@@ -37,7 +38,8 @@ const QuizPage: React.FC = () => {
     data: undefined,
   });
 
-  const router = useRouter();
+  // const router = useRouter();
+
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const entriesOptions = [5, 10, 20, 50];
 
@@ -204,7 +206,7 @@ const QuizPage: React.FC = () => {
             <p className="text-sm text-gray-600">
               Apakah Anda yakin ingin menghapus kuis{" "}
               <span className="font-bold text-gray-800">
-                "{modal.data?.judul}"
+                &quot;{modal.data?.judul}&quot;
               </span>
               ? Tindakan ini tidak dapat diurungkan.
             </p>

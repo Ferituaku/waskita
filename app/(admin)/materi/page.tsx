@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Header from "@/components/Header";
 import Pagination from "../../../components/dashboard/Pagination";
 import Modal from "@/components/Modal";
+import ChatBot from "@/components/chatbot";
 import {
   Plus,
   Search,
@@ -356,7 +357,12 @@ const MateriPage: React.FC = () => {
 
       {/* Render Modals */}
       {renderModalContent()}
+
+      {/* ✅ Tambahkan komponen ChatBot di sini */}
+      <ChatBot />
     </>
+
+    
   );
 };
 
