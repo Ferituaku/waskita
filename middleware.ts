@@ -36,8 +36,19 @@ export async function middleware(req: NextRequest) {
     const userRole = payload.role as string;
 
     // 🔴 ADMIN ROUTES - Hanya admin yang bisa akses
-    const adminRoutes = ["/materi", "/profile", "/quiz", "/users", "/video-edukasi"];
-    const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route));
+    const adminRoutes = [
+      "/dashboard",
+      "/materi",
+      "/users",
+      "/profile",
+      "/quiz",
+      "/users",
+      "/video-edukasi",
+      "/quiz-user",
+    ];
+    const isAdminRoute = adminRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
 
     if (isAdminRoute && userRole !== "admin") {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
@@ -64,12 +75,13 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     // 🔴 Admin routes
+    "/dashboard/:path*",
     "/materi/:path*",
     "/profile/:path*",
     "/quiz/:path*",
     "/users/:path*",
     "/video-edukasi/:path*",
-    
+
     // 🔵 User routes
     "/apa-itu-wpa/:path*",
     "/beranda/:path*",

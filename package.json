@@ -19,6 +19,8 @@
     "@langchain/community": "^0.3.57",
     "@langchain/google-genai": "^0.2.18",
     "body-parser": "^2.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "framer-motion": "^12.23.12",
@@ -32,7 +34,9 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hot-toast": "^2.6.0",
-    "react-toastify": "^11.0.5"
+    "react-toastify": "^11.0.5",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

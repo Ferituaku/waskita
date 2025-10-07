@@ -6,7 +6,6 @@ import { GeistMono } from "geist/font/mono";
 import { Suspense } from "react";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
-import ChatBot from "@/components/chatbot";
 
 export const metadata: Metadata = {
   title: "WASKITA - Edukasi HIV/AIDS",
@@ -37,7 +36,6 @@ export default function RootLayout({
           theme="light"
         />
         <Suspense fallback={null}>{children}</Suspense>
-        <ChatBot />
       </body>
     </html>
   );

@@ -35,7 +35,7 @@ export default function LoginPage() {
 
       // ✅ Redirect berdasarkan role
       if (data.role === "admin") {
-        router.push("/materi");
+        router.push("/dashboard");
       } else if (data.role === "user") {
         router.push("/beranda");
       } else {

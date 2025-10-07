@@ -40,7 +40,6 @@ export async function POST(request: NextRequest) {
     }
 
     const db = await getDb();
-    // Gunakan <OkPacket> untuk hasil query INSERT/UPDATE/DELETE
     const [result] = await db.query<OkPacket>(
       `INSERT INTO articles (title, content, category, image_url, created_at, updated_at)
        VALUES (?, ?, ?, ?, NOW(), NOW())`,

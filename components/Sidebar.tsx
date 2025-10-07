@@ -1,5 +1,6 @@
 "use client";
 import type React from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,17 +11,36 @@ import {
   ChevronsLeft,
   ChevronsRight,
   CircleQuestionMark,
+  Users,
+  LayoutDashboard,
 } from "lucide-react";
 import Image from "next/image";
 import { useSidebar } from "@/hooks/SidebarContext";
 import { cn } from "@/lib/utils";
 
-const navLinks = [
+// Tipe untuk menu item
+interface NavLink {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+}
+
+// Menu untuk ADMIN
+const adminNavLinks: NavLink[] = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/materi", label: "Materi", icon: BookOpenText },
+  { href: "/quiz", label: "Kelola Quiz", icon: ClipboardCheck },
+  { href: "/video-edukasi", label: "Video Edukasi", icon: Youtube },
+  { href: "/users", label: "Kelola User", icon: Users },
+];
+
+// Menu untuk USER BIASA
+const userNavLinks: NavLink[] = [
   { href: "/beranda", label: "Beranda", icon: Home },
   { href: "/apa-itu-wpa", label: "Apa itu WPA", icon: CircleQuestionMark },
-  { href: "/materi", label: "Materi", icon: BookOpenText },
-  { href: "/quiz", label: "Quiz", icon: ClipboardCheck },
-  { href: "/video-edukasi", label: "Video Edukasi", icon: Youtube },
+  // { href: "/materi", label: "Materi", icon: BookOpenText },
+  { href: "/quiz-user", label: "Quiz", icon: ClipboardCheck },
+  // { href: "/video-edukasi", label: "Video Edukasi", icon: Youtube },
 ];
 
 const Sidebar: React.FC = () => {
@@ -31,6 +51,50 @@ const Sidebar: React.FC = () => {
     closeMobile,
     toggleDesktopCollapse,
   } = useSidebar();
+
+  // State untuk menyimpan role user
+  const [userRole, setUserRole] = useState<"admin" | "user" | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch user data saat component mount
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const response = await fetch("/api/user/me");
+        if (response.ok) {
+          const data = await response.json();
+          setUserRole(data.user.role);
+        }
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserRole();
+  }, []);
+
+  // Pilih navLinks berdasarkan role
+  const navLinks = userRole === "admin" ? adminNavLinks : userNavLinks;
+
+  // Tampilkan loading state
+  if (isLoading) {
+    return (
+      <aside
+        className={cn(
+          "flex flex-col bg-gradient-to-b from-[#5C110E] to-[#3b0a09] text-white border-r border-black/10 shadow-sm",
+          "fixed inset-y-0 left-0 z-50 md:relative md:z-auto",
+          "-translate-x-full md:translate-x-0",
+          isDesktopCollapsed ? "md:w-20" : "w-72"
+        )}
+      >
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <>
@@ -44,7 +108,7 @@ const Sidebar: React.FC = () => {
       <aside
         className={cn(
           // Base styles
-          "flex flex-col bg-gradient-to-b from-[#5C110E] to-[#3b0a09] text-white border-r border-black/10 shadow-sm transition-all duration-300 ease-out ",
+          "flex flex-col bg-gradient-to-b from-[#5C110E] to-[#3b0a09] text-white border-r border-black/10 shadow-sm transition-all duration-300 ease-out",
           // Mobile styles - fixed overlay
           "fixed inset-y-0 left-0 z-50 md:relative md:z-auto",
           // Mobile visibility
@@ -80,7 +144,6 @@ const Sidebar: React.FC = () => {
             <div
               className={cn(
                 "absolute transition-opacity duration-200 ease-out",
-                // UPGRADE: Menggunakan opasitas untuk transisi fade, bukan hidden
                 isDesktopCollapsed ? "opacity-0" : "opacity-100"
               )}
             >
@@ -96,6 +159,22 @@ const Sidebar: React.FC = () => {
           </div>
         </div>
 
+        {/* Badge Role (opsional) */}
+        {!isDesktopCollapsed && userRole && (
+          <div className="px-6 py-3">
+            <div
+              className={cn(
+                "text-xs font-semibold px-3 py-1 rounded-full text-center",
+                userRole === "admin"
+                  ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                  : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+              )}
+            >
+              {userRole === "admin" ? "👑 ADMIN" : "👤 USER"}
+            </div>
+          </div>
+        )}
+
         <nav className="flex-1 px-3 py-6 space-y-1">
           {navLinks.map(({ href, label, icon: Icon }) => {
             const isActive =
@@ -107,7 +186,7 @@ const Sidebar: React.FC = () => {
                 onClick={closeMobile}
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2",
-                  "transition-colors duration-duration-200 ease-out",
+                  "transition-colors duration-200 ease-out",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
                   isActive
                     ? "bg-white/10 text-white ring-1 ring-white/10"
@@ -130,6 +209,7 @@ const Sidebar: React.FC = () => {
             );
           })}
         </nav>
+
         <div className="mt-auto border-t border-white/10">
           {/* Desktop collapse toggle button */}
           <div className="hidden md:block px-3 py-3">
@@ -140,7 +220,7 @@ const Sidebar: React.FC = () => {
                 hover:bg-white/5 hover:text-white transition-colors duration-200 ease-out
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40
               "
-              title={isDesktopCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={isDesktopCollapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
             >
               <div className="w-full flex justify-center items-center">
                 {isDesktopCollapsed ? (
