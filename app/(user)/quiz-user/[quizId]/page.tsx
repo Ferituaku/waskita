@@ -49,6 +49,7 @@ export default function UserQuizPage({
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const quizId = parseInt(params.quizId, 10);
 
@@ -90,8 +91,6 @@ export default function UserQuizPage({
           console.warn(
             `Soal "${soal.pertanyaan}" tidak memiliki jawaban yang benar.`
           );
-          // Fallback: mark the first option as correct if none is set
-          // In a real scenario, you might want to handle this more robustly
         }
 
         return {
@@ -125,25 +124,36 @@ export default function UserQuizPage({
     fetchAndStructureQuizData();
   }, [fetchAndStructureQuizData]);
 
-  // Effect to handle score submission
+  // Updated effect to handle score submission with proper authentication
   useEffect(() => {
     const submitScore = async () => {
-      if (gameState === "finished" && !isSubmitting && quizData) {
+      if (gameState === "finished" && !isSubmitting && !hasSubmitted && quizData) {
         setIsSubmitting(true);
         try {
           const res = await fetch("/api/quiz/results", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include", // Include cookies for authentication
             body: JSON.stringify({
               quizId: quizData.id,
-              namaPeserta: "Peserta", // Can be replaced with actual user name
               nilai: score,
             }),
           });
-          if (!res.ok) throw new Error("Gagal menyimpan skor.");
-          toast.success("Skor berhasil disimpan!");
+
+          if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || "Gagal menyimpan skor.");
+          }
+
+          const data = await res.json();
+          setHasSubmitted(true);
+          
+          if (data.data?.isRetake) {
+            toast.success("Skor berhasil disimpan! (Percobaan ulang)");
+          } else {
+            toast.success("Skor berhasil disimpan!");
+          }
         } catch (err) {
-          // Ganti `err: any` menjadi `err`
           let message = "Gagal menyimpan skor.";
           if (err instanceof Error) {
             message = err.message;
@@ -155,12 +165,15 @@ export default function UserQuizPage({
       }
     };
     submitScore();
-  }, [gameState, score, quizData, isSubmitting]);
+  }, [gameState, score, quizData, isSubmitting, hasSubmitted]);
 
   const totalQuestions = quizData?.questions.length || 0;
   const currentQuestion = quizData?.questions[currentQuestionIndex];
 
-  const handleStartQuiz = () => setGameState("playing");
+  const handleStartQuiz = () => {
+    setGameState("playing");
+    setHasSubmitted(false);
+  };
 
   const handleRestartQuiz = () => {
     setGameState("start");
@@ -168,6 +181,7 @@ export default function UserQuizPage({
     setScore(0);
     setSelectedAnswer(null);
     setIsAnswered(false);
+    setHasSubmitted(false);
   };
 
   const handleSelectAnswer = (optionId: number) => {
@@ -231,7 +245,7 @@ export default function UserQuizPage({
     );
   }
 
-  if (!quizData) return null; // Should be covered by error state
+  if (!quizData) return null;
 
   // UI for Start Screen
   if (gameState === "start") {
@@ -261,6 +275,15 @@ export default function UserQuizPage({
 
   // UI for Finish Screen
   if (gameState === "finished") {
+    const percentage = Math.round((score / totalQuestions) * 100);
+    const getGrade = () => {
+      if (percentage >= 90) return "A";
+      if (percentage >= 80) return "B";
+      if (percentage >= 70) return "C";
+      if (percentage >= 60) return "D";
+      return "E";
+    };
+
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 text-center">
         <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
@@ -270,13 +293,35 @@ export default function UserQuizPage({
           <p className="text-lg text-gray-600 mb-6">
             Kerja bagus telah menyelesaikan kuis.
           </p>
-          <div className="bg-red-50 p-6 rounded-lg mb-8">
+          
+          <div className="bg-red-50 p-6 rounded-lg mb-4">
             <p className="text-xl text-gray-700">Skor Akhir Anda</p>
             <p className="text-6xl font-bold text-red-800 my-2">
               {score}{" "}
               <span className="text-3xl text-gray-500">/ {totalQuestions}</span>
             </p>
+            <div className="mt-4 space-y-2">
+              <p className="text-2xl font-bold text-gray-700">
+                Grade: {getGrade()}
+              </p>
+              <p className="text-lg text-gray-600">
+                Persentase: {percentage}%
+              </p>
+            </div>
           </div>
+
+          {isSubmitting && (
+            <div className="mb-4 text-gray-600">
+              <span className="loading loading-spinner loading-sm mr-2"></span>
+              Menyimpan skor...
+            </div>
+          )}
+
+          {hasSubmitted && (
+            <div className="mb-4 text-green-600 font-semibold">
+              ✓ Skor berhasil disimpan
+            </div>
+          )}
 
           <div className="flex flex-col md:flex-row gap-4">
             <button

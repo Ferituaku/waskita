@@ -24,9 +24,9 @@ async function runInTransaction(
 // Batch update questions and answers for a quiz
 export async function PUT(
   req: Request,
-  { params }: { params: { quizId: string } }
+  { params }: { params: Promise<{ quizId: string }> }
 ) {
-  const { quizId } = params;
+  const { quizId } = await params;
 
   try {
     const db = await getDb();

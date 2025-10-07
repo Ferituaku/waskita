@@ -1,3 +1,4 @@
+//app/(user)/quiz-user/[quizId]/layout.tsx
 import React from "react";
 
 export default function QuizLayout({
@@ -5,7 +6,5 @@ export default function QuizLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // This layout removes the sidebar and provides a clean slate
-  // for the immersive quiz experience.
   return <>{children}</>;
 }
