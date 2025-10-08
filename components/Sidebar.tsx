@@ -90,7 +90,12 @@ const Sidebar: React.FC = () => {
         )}
       >
         <div className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <div className="relative">
+            <div
+              className="w-8 h-8 sm:w-10 sm:h-10 border-4 border-slate-200 border-t-slate-600 rounded-full animate-spin"
+              suppressHydrationWarning
+            ></div>
+          </div>
         </div>
       </aside>
     );

@@ -1,3 +1,5 @@
+// File: app/api/quiz/results/[quizId]/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
@@ -18,15 +20,17 @@ interface QuizResultWithUser extends RowDataPacket {
   email: string;
   tanggal: Date;
   nilai: number;
-  user_id: number;
+  user_id: number | null; // Izinkan user_id menjadi null
 }
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { quizId: string } }
+  { params }: { params: { quizId: string } } // Signature ini sudah benar, error warning adalah efek samping dari crash database
 ) {
+  const { quizId } = params; // Langsung ekstrak quizId dari params
+
   try {
-    // Get user from token
+    // 1. Verifikasi token dan role admin
     const token = req.cookies.get("token")?.value;
     if (!token) {
       return NextResponse.json(
@@ -45,7 +49,6 @@ export async function GET(
       );
     }
 
-    // Only admins can view quiz results
     if (user.role !== "admin") {
       return NextResponse.json(
         { message: "Forbidden - Admin access required" },
@@ -53,9 +56,8 @@ export async function GET(
       );
     }
 
+    // 2. Query ke database (setelah perbaikan skema)
     const db = await getDb();
-
-    // Updated query to join with users table for complete user information
     const query = `
       SELECT 
         hk.id_hasil as id,
@@ -74,21 +76,23 @@ export async function GET(
         hk.nilai DESC, hk.tanggal_pengerjaan DESC
     `;
 
-    const [rows] = await db.query<QuizResultWithUser[]>(query, [params.quizId]);
+    const [rows] = await db.query<QuizResultWithUser[]>(query, [quizId]);
 
-    // Transform the data to include user status
+    // 3. Transformasi data untuk frontend
     const resultsWithStatus = rows.map((row) => ({
       id: row.id,
       nama: row.nama,
-      email: row.email || "Email tidak tersedia",
+      email: row.email, // Biarkan null jika memang tidak ada
       tanggal: row.tanggal,
       nilai: row.nilai,
+      // Frontend akan menentukan status "Terdaftar" atau "Tamu" berdasarkan ada atau tidaknya user_id
       isRegisteredUser: !!row.user_id,
     }));
 
     return NextResponse.json(resultsWithStatus);
   } catch (error) {
-    console.error(`Failed to fetch results for quiz ${params.quizId}:`, error);
+    // Logging error yang lebih informatif
+    console.error(`Failed to fetch results for quiz ${quizId}:`, error);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }

@@ -53,7 +53,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="hidden sm:block text-sm font-medium text-slate-700">
+          <span className="hidden sm:block text-sm font-bold text-slate-700">
             User Name
           </span>
           <HeadlessMenu as="div" className="relative">
