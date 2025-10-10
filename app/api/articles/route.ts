@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { OkPacket, RowDataPacket } from "mysql2"; // Import tipe ini
+import { OkPacket, RowDataPacket } from "mysql2";
 
 interface Article extends RowDataPacket {
   id: number;
@@ -87,7 +87,7 @@ export async function PUT(request: NextRequest) {
     const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
-    const [existingArticle]: any = await db.query(
+    const [existingArticle] = await db.query<Article[]>(
       "SELECT id FROM articles WHERE id = ?",
       [id]
     );
@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update artikel
-    const [result]: any = await db.query(
+    const [result] = await db.query<OkPacket>(
       `UPDATE articles 
        SET title = ?, content = ?, category = ?, image_url = ?, updated_at = NOW()
        WHERE id = ?`,
@@ -144,7 +144,7 @@ export async function DELETE(request: NextRequest) {
     const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
-    const [existingArticle]: any = await db.query(
+    const [existingArticle] = await db.query<Article[]>(
       "SELECT id FROM articles WHERE id = ?",
       [id]
     );
@@ -157,9 +157,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Hapus artikel
-    const [result]: any = await db.query("DELETE FROM articles WHERE id = ?", [
-      id,
-    ]);
+    const [result] = await db.query<OkPacket>(
+      "DELETE FROM articles WHERE id = ?",
+      [id]
+    );
 
     if (result.affectedRows === 0) {
       return NextResponse.json(

@@ -176,7 +176,7 @@ export async function PATCH(
     const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
-    const [existingArticle]: any = await db.query(
+    const [existingArticle] = await db.query<Article[]>(
       "SELECT * FROM articles WHERE id = ?",
       [id]
     );
@@ -191,7 +191,7 @@ export async function PATCH(
     // Buat query update dinamis
     const allowedFields = ["title", "content", "category", "image_url"];
     const updateFields: string[] = [];
-    const updateValues: any[] = [];
+    const updateValues: unknown[] = [];
 
     for (const [key, value] of Object.entries(updateData)) {
       if (allowedFields.includes(key)) {
@@ -215,7 +215,7 @@ export async function PATCH(
       ", "
     )} WHERE id = ?`;
 
-    const [result]: any = await db.query(updateQuery, updateValues);
+    const [result] = await db.query<OkPacket>(updateQuery, updateValues);
 
     if (result.affectedRows === 0) {
       return NextResponse.json(
@@ -225,7 +225,7 @@ export async function PATCH(
     }
 
     // Ambil data artikel yang sudah diupdate
-    const [updatedArticle]: any = await db.query(
+    const [updatedArticle] = await db.query<Article[]>(
       "SELECT * FROM articles WHERE id = ?",
       [id]
     );

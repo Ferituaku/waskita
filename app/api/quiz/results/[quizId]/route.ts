@@ -1,5 +1,3 @@
-// File: app/api/quiz/results/[quizId]/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import jwt from "jsonwebtoken";
@@ -20,14 +18,14 @@ interface QuizResultWithUser extends RowDataPacket {
   email: string;
   tanggal: Date;
   nilai: number;
-  user_id: number | null; // Izinkan user_id menjadi null
+  user_id: number | null;
 }
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { quizId: string } } // Signature ini sudah benar, error warning adalah efek samping dari crash database
+  { params }: { params: { quizId: string } }
 ) {
-  const { quizId } = params; // Langsung ekstrak quizId dari params
+  const { quizId } = params;
 
   try {
     // 1. Verifikasi token dan role admin
@@ -42,7 +40,7 @@ export async function GET(
     let user: UserPayload;
     try {
       user = jwt.verify(token, JWT_SECRET) as UserPayload;
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { message: "Unauthorized - Invalid token" },
         { status: 401 }
@@ -82,16 +80,14 @@ export async function GET(
     const resultsWithStatus = rows.map((row) => ({
       id: row.id,
       nama: row.nama,
-      email: row.email, // Biarkan null jika memang tidak ada
+      email: row.email,
       tanggal: row.tanggal,
       nilai: row.nilai,
-      // Frontend akan menentukan status "Terdaftar" atau "Tamu" berdasarkan ada atau tidaknya user_id
       isRegisteredUser: !!row.user_id,
     }));
 
     return NextResponse.json(resultsWithStatus);
   } catch (error) {
-    // Logging error yang lebih informatif
     console.error(`Failed to fetch results for quiz ${quizId}:`, error);
     return NextResponse.json(
       { message: "Internal Server Error" },

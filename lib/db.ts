@@ -169,7 +169,7 @@ async function initializeDatabase(): Promise<mysql.Pool> {
     try {
       await pool.query(MIGRATE_HASIL_KUIS_SQL);
       console.log('✅ Migration for "hasil_kuis" completed (if needed)');
-    } catch (migrationError) {
+    } catch {
       // Migration might fail if constraints already exist, that's okay
       console.log("ℹ️ Migration skipped or already applied");
     }

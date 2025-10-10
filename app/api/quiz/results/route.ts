@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     let user: UserPayload;
     try {
       user = jwt.verify(token, JWT_SECRET) as UserPayload;
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { message: "Unauthorized - Invalid token" },
         { status: 401 }
@@ -51,9 +51,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { quizId, nilai, namaPeserta } = await req.json();
-
-    // namaPeserta is optional - use it only if provided, otherwise use authenticated user's name
+    const { quizId, nilai } = await req.json();
 
     if (!quizId || nilai === undefined || nilai === null) {
       return NextResponse.json(
@@ -126,7 +124,7 @@ export async function GET(req: NextRequest) {
     let user: UserPayload;
     try {
       user = jwt.verify(token, JWT_SECRET) as UserPayload;
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { message: "Unauthorized - Invalid token" },
         { status: 401 }

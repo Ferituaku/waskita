@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import type { BatchUpdatePayload } from "@/types/quiz";
-import type { Pool, PoolConnection } from "mysql2/promise";
+import type { Pool, PoolConnection, OkPacket } from "mysql2/promise";
 
 // Helper to run operations in a transaction
 async function runInTransaction(
@@ -72,11 +72,11 @@ export async function PUT(
       // Additions: Process new questions and their related answers
       for (const question of questions_to_add) {
         // Insert the new question and get its actual new ID from the DB
-        const [result] = await conn.query(
+        const [result] = await conn.query<OkPacket>(
           "INSERT INTO soal (id_judul, pertanyaan) VALUES (?, ?)",
           [quizId, question.pertanyaan]
         );
-        const newQuestionId = (result as any).insertId;
+        const newQuestionId = result.insertId;
 
         // Find answers that belong to this new question by matching the temporary ID
         const relatedAnswers = answers_to_add.filter(
