@@ -4,7 +4,6 @@ import React from "react";
 import { Slideshow } from "@/components/auth/slideshow";
 import { slides } from "@/components/auth/slides";
 import { motion } from "framer-motion";
-import Logo from "@/components/logo";
 import { cn } from "@/lib/utils";
 
 export default function AuthLayout({

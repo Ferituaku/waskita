@@ -2,12 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
+import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
@@ -35,21 +30,6 @@ export function Slideshow({
   const [paused, setPaused] = React.useState(!autoPlay);
   const [isImageLoading, setIsImageLoading] = React.useState(true);
   const [progress, setProgress] = React.useState(0);
-  const dragX = useMotionValue(0);
-
-  // Keyboard navigation
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") goToPrevious();
-      if (e.key === "ArrowRight") goToNext();
-      if (e.key === " ") {
-        e.preventDefault();
-        togglePause();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [index, paused]);
 
   // Auto-pause when tab is not visible
   React.useEffect(() => {
@@ -111,18 +91,35 @@ export function Slideshow({
     setIsImageLoading(true);
   }, [slides.length]);
 
+  const togglePause = React.useCallback(() => {
+    setPaused((p) => !p);
+  }, []);
+
+  // Keyboard navigation
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") goToPrevious();
+      if (e.key === "ArrowRight") goToNext();
+      if (e.key === " ") {
+        e.preventDefault();
+        togglePause();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goToNext, goToPrevious, togglePause]);
+
   const goToSlide = React.useCallback((i: number) => {
     setIndex(i);
     setProgress(0);
     setIsImageLoading(true);
   }, []);
 
-  const togglePause = React.useCallback(() => {
-    setPaused((p) => !p);
-  }, []);
-
   const handleDragEnd = React.useCallback(
-    (_: any, info: { offset: { x: number } }) => {
+    (
+      _: MouseEvent | TouchEvent | PointerEvent,
+      info: { offset: { x: number } }
+    ) => {
       const threshold = 50;
       if (info.offset.x > threshold) {
         goToPrevious();

@@ -3,10 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-// 1. Impor toast dari react-toastify
 import { toast } from "react-toastify";
-// 2. Impor CSS jika belum di-load di layout utama
 import "react-toastify/dist/ReactToastify.css";
 import Logo from "@/components/logo";
 
