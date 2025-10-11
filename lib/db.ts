@@ -9,6 +9,24 @@ const dbConfig = {
 
 const CREATE_DATABASE_SQL = `CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`;
 
+const CREATE_USERS_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS \`users\` (
+  \`id\` INT NOT NULL AUTO_INCREMENT,
+  \`name\` VARCHAR(100) NOT NULL,
+  \`email\` VARCHAR(100) NOT NULL UNIQUE,
+  \`password\` VARCHAR(255) NULL,
+  \`role\` ENUM('admin', 'user') NOT NULL DEFAULT 'user',
+  \`phone_number\` VARCHAR(20) NULL,
+  \`profile_picture\` VARCHAR(255) NULL DEFAULT '/default-profile.jpg',
+  \`status\` ENUM('active', 'inactive', 'banned') NOT NULL DEFAULT 'active',
+  \`google_id\` VARCHAR(255) NULL,
+  \`email_verified\` BOOLEAN NOT NULL DEFAULT 0,
+  \`last_login\` DATETIME NULL,
+  \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  \`updated_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (\`id\`)
+);`;
+
 const CREATE_JUDUL_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS \`judul\` (
   \`id_judul\` INT NOT NULL AUTO_INCREMENT,
@@ -46,19 +64,26 @@ CREATE TABLE IF NOT EXISTS \`jawaban\` (
     ON DELETE CASCADE
 );`;
 
+// UPDATED: Added user_id column and foreign key to users table
 const CREATE_HASIL_KUIS_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS \`hasil_kuis\` (
   \`id_hasil\` INT NOT NULL AUTO_INCREMENT,
   \`id_judul\` INT NOT NULL,
+  \`user_id\` INT NULL,
   \`nama_peserta\` VARCHAR(255) NOT NULL,
   \`nilai\` INT NOT NULL,
   \`tanggal_pengerjaan\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (\`id_hasil\`),
   INDEX \`fk_hasil_judul_idx\` (\`id_judul\` ASC),
+  INDEX \`fk_hasil_user_idx\` (\`user_id\` ASC),
   CONSTRAINT \`fk_hasil_judul\`
     FOREIGN KEY (\`id_judul\`)
     REFERENCES \`judul\` (\`id_judul\`)
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT \`fk_hasil_user\`
+    FOREIGN KEY (\`user_id\`)
+    REFERENCES \`users\` (\`id\`)
+    ON DELETE SET NULL
 );`;
 
 const CREATE_ARTICLES_TABLE_SQL = `
@@ -75,23 +100,16 @@ CREATE TABLE IF NOT EXISTS \`articles\` (
   PRIMARY KEY (\`id\`)
 );`;
 
-const CREATE_USERS_TABLE_SQL = `
-CREATE TABLE IF NOT EXISTS \`users\` (
-  \`id\` INT NOT NULL AUTO_INCREMENT,
-  \`name\` VARCHAR(100) NOT NULL,
-  \`email\` VARCHAR(100) NOT NULL UNIQUE,
-  \`password\` VARCHAR(255) NULL,
-  \`role\` ENUM('admin', 'user') NOT NULL DEFAULT 'user',
-  \`phone_number\` VARCHAR(20) NULL,
-  \`profile_picture\` VARCHAR(255) NULL DEFAULT '/default-profile.jpg',
-  \`status\` ENUM('active', 'inactive', 'banned') NOT NULL DEFAULT 'active',
-  \`google_id\` VARCHAR(255) NULL,
-  \`email_verified\` BOOLEAN NOT NULL DEFAULT 0,
-  \`last_login\` DATETIME NULL,
-  \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  \`updated_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (\`id\`)
-);`;
+// Migration script to add user_id column if it doesn't exist
+const MIGRATE_HASIL_KUIS_SQL = `
+ALTER TABLE \`hasil_kuis\`
+ADD COLUMN IF NOT EXISTS \`user_id\` INT NULL AFTER \`id_judul\`,
+ADD INDEX IF NOT EXISTS \`fk_hasil_user_idx\` (\`user_id\` ASC),
+ADD CONSTRAINT IF NOT EXISTS \`fk_hasil_user\`
+  FOREIGN KEY (\`user_id\`)
+  REFERENCES \`users\` (\`id\`)
+  ON DELETE SET NULL;
+`;
 
 // Singleton pattern to ensure DB initialization runs only once
 let dbPromise: Promise<mysql.Pool> | null = null;
@@ -131,6 +149,10 @@ async function initializeDatabase(): Promise<mysql.Pool> {
     // 4. Create tables if they don't exist (SYNCHRONOUSLY)
     console.log("🔄 Creating tables...");
 
+    // IMPORTANT: Create users table first (it's referenced by hasil_kuis)
+    await pool.query(CREATE_USERS_TABLE_SQL);
+    console.log('✅ Table "users" is ready');
+
     await pool.query(CREATE_JUDUL_TABLE_SQL);
     console.log('✅ Table "judul" is ready');
 
@@ -143,10 +165,16 @@ async function initializeDatabase(): Promise<mysql.Pool> {
     await pool.query(CREATE_HASIL_KUIS_TABLE_SQL);
     console.log('✅ Table "hasil_kuis" is ready');
 
-    await pool.query(CREATE_ARTICLES_TABLE_SQL);
-    console.log('✅ Table "articles" is ready');
+    // Try to run migration for existing databases
+    try {
+      await pool.query(MIGRATE_HASIL_KUIS_SQL);
+      console.log('✅ Migration for "hasil_kuis" completed (if needed)');
+    } catch {
+      // Migration might fail if constraints already exist, that's okay
+      console.log("ℹ️ Migration skipped or already applied");
+    }
 
-    await pool.query(CREATE_USERS_TABLE_SQL);
+    await pool.query(CREATE_ARTICLES_TABLE_SQL);
     console.log('✅ Table "articles" is ready');
 
     isInitialized = true;

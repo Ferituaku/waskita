@@ -2,6 +2,7 @@ import React from "react";
 import Sidebar from "../../components/Sidebar";
 import { Toaster } from "react-hot-toast";
 import { SidebarProvider } from "@/hooks/SidebarContext";
+import ChatBot from "@/components/chatbot";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   // tambahan logic khusus user di sini jika perlu
@@ -16,6 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Toaster position="top-right" reverseOrder={false} />
           {children}
         </main>
+        <ChatBot />
       </SidebarProvider>
     </div>
   );

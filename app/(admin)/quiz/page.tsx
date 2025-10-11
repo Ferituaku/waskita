@@ -1,3 +1,4 @@
+//app/(admin)/quiz/page.tsx:
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -235,7 +236,7 @@ const QuizPage: React.FC = () => {
 
   return (
     <>
-      <Header title="Quiz" />
+      <Header title="Kelola Quiz" />
       <div className="p-6">
         <div className="bg-white rounded-xl shadow-lg p-6">
           <div className="flex justify-between items-center mb-6 flex-wrap gap-4">

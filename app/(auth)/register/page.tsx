@@ -3,23 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-// 1. Impor toast dari react-toastify
 import { toast } from "react-toastify";
-// 2. Impor CSS jika belum di-load di layout utama
 import "react-toastify/dist/ReactToastify.css";
-
-const Logo = () => (
-  <div className="flex justify-center mb-8">
-    <Image
-      src="/logo-waskitabystophiva.png"
-      alt="Waskita Logo"
-      width={300}
-      height={50}
-      priority
-    />
-  </div>
-);
+import Logo from "@/components/logo";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");

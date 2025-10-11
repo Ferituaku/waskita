@@ -229,7 +229,7 @@ export async function PATCH(
       "file_url",
     ];
     const updateFields: string[] = [];
-    const updateValues: any[] = [];
+    const updateValues: unknown[] = [];
 
     for (const [key, value] of Object.entries(updateData)) {
       if (allowedFields.includes(key)) {
