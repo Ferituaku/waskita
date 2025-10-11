@@ -6,7 +6,9 @@ interface Article extends RowDataPacket {
   id: number;
   title: string;
   content: string;
-  category: string;
+  category: "HIV" | "AIDS";
+  file_type: "text" | "pdf";
+  file_url?: string;
   image_url: string;
 }
 
@@ -47,7 +49,8 @@ export async function PUT(
 ) {
   try {
     const { id } = params;
-    const { title, content, category, image_url } = await request.json();
+    const { title, content, category, image_url, file_type, file_url } =
+      await request.json();
 
     if (!title || !content || !category) {
       return NextResponse.json(
@@ -56,13 +59,29 @@ export async function PUT(
       );
     }
 
+    // Validasi kategori
+    if (category !== "HIV" && category !== "AIDS") {
+      return NextResponse.json(
+        { success: false, error: "Category must be HIV or AIDS" },
+        { status: 400 }
+      );
+    }
+
     const db = await getDb();
 
     const [result] = await db.query<OkPacket>(
       `UPDATE articles 
-       SET title = ?, content = ?, category = ?, image_url = ?, updated_at = NOW()
+       SET title = ?, content = ?, category = ?, image_url = ?, file_type = ?, file_url = ?, updated_at = NOW()
        WHERE id = ?`,
-      [title, content, category, image_url || "/default-image.jpg", id]
+      [
+        title,
+        content,
+        category,
+        image_url || "/default-image.jpg",
+        file_type || "text",
+        file_url || null,
+        id,
+      ]
     );
 
     if (result.affectedRows === 0) {
@@ -176,7 +195,7 @@ export async function PATCH(
     const db = await getDb();
 
     // Cek apakah artikel dengan ID tersebut ada
-    const [existingArticle]: any = await db.query(
+    const [existingArticle] = await db.query<Article[]>(
       "SELECT * FROM articles WHERE id = ?",
       [id]
     );
@@ -188,8 +207,27 @@ export async function PATCH(
       );
     }
 
+    // Validasi kategori jika ada
+    if (
+      updateData.category &&
+      updateData.category !== "HIV" &&
+      updateData.category !== "AIDS"
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Category must be HIV or AIDS" },
+        { status: 400 }
+      );
+    }
+
     // Buat query update dinamis
-    const allowedFields = ["title", "content", "category", "image_url"];
+    const allowedFields = [
+      "title",
+      "content",
+      "category",
+      "image_url",
+      "file_type",
+      "file_url",
+    ];
     const updateFields: string[] = [];
     const updateValues: any[] = [];
 
@@ -215,7 +253,7 @@ export async function PATCH(
       ", "
     )} WHERE id = ?`;
 
-    const [result]: any = await db.query(updateQuery, updateValues);
+    const [result] = await db.query<OkPacket>(updateQuery, updateValues);
 
     if (result.affectedRows === 0) {
       return NextResponse.json(
@@ -225,7 +263,7 @@ export async function PATCH(
     }
 
     // Ambil data artikel yang sudah diupdate
-    const [updatedArticle]: any = await db.query(
+    const [updatedArticle] = await db.query<Article[]>(
       "SELECT * FROM articles WHERE id = ?",
       [id]
     );
