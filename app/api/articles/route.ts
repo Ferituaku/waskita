@@ -6,7 +6,9 @@ interface Article extends RowDataPacket {
   id: number;
   title: string;
   content: string;
-  category: string;
+  category: "HIV" | "AIDS";
+  file_type: "text" | "pdf";
+  file_url?: string;
   image_url: string;
 }
 
@@ -30,7 +32,8 @@ export async function GET() {
 // POST - Tambah artikel baru ke database
 export async function POST(request: NextRequest) {
   try {
-    const { title, content, category, image_url } = await request.json();
+    const { title, content, category, image_url, file_type, file_url } =
+      await request.json();
 
     if (!title || !content || !category) {
       return NextResponse.json(
@@ -39,17 +42,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validasi kategori
+    if (category !== "HIV" && category !== "AIDS") {
+      return NextResponse.json(
+        { success: false, error: "Category must be HIV or AIDS" },
+        { status: 400 }
+      );
+    }
+
     const db = await getDb();
     const [result] = await db.query<OkPacket>(
-      `INSERT INTO articles (title, content, category, image_url, created_at, updated_at)
-       VALUES (?, ?, ?, ?, NOW(), NOW())`,
-      [title, content, category, image_url || "/default-image.jpg"]
+      `INSERT INTO articles (title, content, category, image_url, file_type, file_url, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      [
+        title,
+        content,
+        category,
+        image_url || "/default-image.jpg",
+        file_type || "text",
+        file_url || null,
+      ]
     );
 
     return NextResponse.json(
       {
         success: true,
-        data: { id: result.insertId, title, content, category, image_url },
+        data: {
+          id: result.insertId,
+          title,
+          content,
+          category,
+          image_url,
+          file_type,
+          file_url,
+        },
       },
       { status: 201 }
     );
@@ -75,11 +101,20 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { title, content, category, image_url } = await request.json();
+    const { title, content, category, image_url, file_type, file_url } =
+      await request.json();
 
     if (!title || !content || !category) {
       return NextResponse.json(
         { success: false, error: "Title, content, and category are required" },
+        { status: 400 }
+      );
+    }
+
+    // Validasi kategori
+    if (category !== "HIV" && category !== "AIDS") {
+      return NextResponse.json(
+        { success: false, error: "Category must be HIV or AIDS" },
         { status: 400 }
       );
     }
@@ -102,9 +137,17 @@ export async function PUT(request: NextRequest) {
     // Update artikel
     const [result] = await db.query<OkPacket>(
       `UPDATE articles 
-       SET title = ?, content = ?, category = ?, image_url = ?, updated_at = NOW()
+       SET title = ?, content = ?, category = ?, image_url = ?, file_type = ?, file_url = ?, updated_at = NOW()
        WHERE id = ?`,
-      [title, content, category, image_url || "/default-image.jpg", id]
+      [
+        title,
+        content,
+        category,
+        image_url || "/default-image.jpg",
+        file_type || "text",
+        file_url || null,
+        id,
+      ]
     );
 
     if (result.affectedRows === 0) {
@@ -117,7 +160,15 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Article updated successfully",
-      data: { id: parseInt(id), title, content, category, image_url },
+      data: {
+        id: parseInt(id),
+        title,
+        content,
+        category,
+        image_url,
+        file_type,
+        file_url,
+      },
     });
   } catch (error) {
     console.error("Error updating article:", error);
