@@ -1,5 +1,10 @@
+"use client";
+
 import React from "react";
-import Image from "next/image";
+import { Slideshow } from "@/components/auth/slideshow";
+import { slides } from "@/components/auth/slides";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function AuthLayout({
   children,
@@ -25,7 +30,7 @@ export default function AuthLayout({
               WASKITA
             </h1>
             <p className="text-white text-lg mt-2">
-              Wadah Sinau Kita
+              Wadah Sadar Kesehatan Kita
             </p>
           </div>
         </div>
@@ -35,6 +40,8 @@ export default function AuthLayout({
           <div className="w-full max-w-md">{children}</div>
         </div>
       </div>
-    </div>
+      {/* </div>
+      </div> */}
+    </motion.main>
   );
 }
