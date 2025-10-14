@@ -28,7 +28,7 @@ export default function AuthLayout({
           <div className="absolute inset-0 bg-red-800 bg-opacity-40" />
           <div className="absolute top-10 left-15">
             <h1 className="text-4xl font-bold text-white tracking-wider">
-              WASKITA
+              WASKITA wap wap
             </h1>
             <p className="text-white text-lg mt-2">
               Wadah Sinau Kita. wap wap
