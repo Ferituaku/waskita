@@ -18,10 +18,10 @@ export default function AuthLayout({
         {/* Left Column: Image */}
         <div className="relative hidden md:block">
           <Image
-            src="/images/auth-background.jpg"
+            src="/hiv-awareness.png"
             alt="Gedung perkotaan modern"
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{ objectFit: "cover" }}
             quality={85}
             priority
           />
@@ -31,7 +31,7 @@ export default function AuthLayout({
               WASKITA
             </h1>
             <p className="text-white text-lg mt-2">
-              Wadah Sadar Kesehatan Kita
+              Wadah Sinau Kita.
             </p>
           </div>
         </div>
