@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, useMotionValue } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
