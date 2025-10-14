@@ -5,6 +5,7 @@ import { Slideshow } from "@/components/auth/slideshow";
 import { slides } from "@/components/auth/slides";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -12,7 +13,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-red-800 ">
+    <motion.main className="min-h-screen bg-red-800">
       <div className="grid grid-cols-1 md:grid-cols-2 h-screen">
         {/* Left Column: Image */}
         <div className="relative hidden md:block">
@@ -40,8 +41,6 @@ export default function AuthLayout({
           <div className="w-full max-w-md">{children}</div>
         </div>
       </div>
-      {/* </div>
-      </div> */}
     </motion.main>
   );
 }
