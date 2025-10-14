@@ -31,7 +31,7 @@ export default function AuthLayout({
               WASKITA
             </h1>
             <p className="text-white text-lg mt-2">
-              Wadah Sinau Kita.
+              Wadah Sinau Kita. wap wap
             </p>
           </div>
         </div>
