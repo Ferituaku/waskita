@@ -13,7 +13,7 @@ export default function AuthLayout({
 }) {
   return (
     <motion.main
-      className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-white h-screen"
+      className="min-h-screen grid grid-cols-1 md:grid-cols-2 h-screen"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
@@ -31,7 +31,7 @@ export default function AuthLayout({
         <div
           className={cn(
             "absolute inset-y-0 left-0 right-0 md:right-auto md:w-[calc(100%)]",
-            "bg-white md:bg-white md:rounded-tl-[10rem]"
+            "bg-white md:bg-white p-10 shadow-lg"
           )}
           aria-hidden
         />
