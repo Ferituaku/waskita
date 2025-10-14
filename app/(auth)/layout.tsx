@@ -5,6 +5,7 @@ import { Slideshow } from "@/components/auth/slideshow";
 import { slides } from "@/components/auth/slides";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -40,8 +41,6 @@ export default function AuthLayout({
           {children}
         </div>
       </div>
-      {/* </div>
-      </div> */}
     </motion.main>
   );
 }
