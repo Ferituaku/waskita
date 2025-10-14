@@ -74,7 +74,7 @@ export default function HomePage() {
             suppressHydrationWarning
             className="mt-3 max-w-prose text-pretty font-sans text-base leading-relaxed text-muted-foreground md:text-lg"
           >
-            Selamat datang di Wadah Sadar Kesehatan Tembalang.
+            Selamat datang di Wadah Sinau Kita.
           </motion.p>
 
           <motion.div
