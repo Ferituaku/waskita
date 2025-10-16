@@ -12,6 +12,13 @@ export default function AdminDashboardPage() {
       <div className="min-h-screen bg-slate-50 px-5 py-6 md:px-8 md:py-10">
         {/* Quick Actions */}
         <section aria-labelledby="quick-actions-title" className="space-y-4">
+          <h2
+            id="quick-actions-title"
+            className="text-2xl font-semibold text-gray-800"
+          >
+            Selamat Datang, Admin!
+          </h2>
+
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             <ShortcutCard
               title="Unggah Materi"

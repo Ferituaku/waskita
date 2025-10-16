@@ -8,29 +8,28 @@ interface User extends RowDataPacket {
   name: string;
   email: string;
   role: string;
+  profile_picture?: string;
+  status?: string;
 }
 
-// GET - Fetch all users
 export async function GET(req: Request) {
   try {
     const db = await getDb();
     const [users] = await db.query<User[]>(
-      "SELECT id, name, email, role FROM users ORDER BY id ASC"
+      "SELECT id, name, email, role, profile_picture, status FROM users ORDER BY id ASC"
     );
 
     return NextResponse.json({ users });
   } catch (err) {
-    console.error("❌ Fetch users error:", err);
+    console.error("Fetch users error:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
 
-// POST - Create new user
 export async function POST(req: Request) {
   try {
     const { name, email, password, role } = await req.json();
     
-    // Validasi input
     if (!name || !email || !password) {
       return NextResponse.json(
         { message: "Name, email, and password are required" },
@@ -40,7 +39,6 @@ export async function POST(req: Request) {
 
     const db = await getDb();
 
-    // Cek apakah email sudah ada
     const [existing] = await db.query<User[]>(
       "SELECT * FROM users WHERE email = ?",
       [email]
@@ -53,13 +51,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert user
     const [result] = await db.query<ResultSetHeader>(
-      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-      [name, email, hashedPassword, role || "User"]
+      "INSERT INTO users (name, email, password, role, profile_picture) VALUES (?, ?, ?, ?, ?)",
+      [name, email, hashedPassword, role || "User", "/default-profile.jpg"]
     );
 
     return NextResponse.json({
@@ -67,12 +63,11 @@ export async function POST(req: Request) {
       userId: result.insertId,
     });
   } catch (err) {
-    console.error("❌ Create user error:", err);
+    console.error("Create user error:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
 
-// PUT - Update user
 export async function PUT(req: Request) {
   try {
     const { id, name, email, role, password } = await req.json();
@@ -86,7 +81,6 @@ export async function PUT(req: Request) {
 
     const db = await getDb();
 
-    // Cek apakah email sudah digunakan user lain
     const [existing] = await db.query<User[]>(
       "SELECT * FROM users WHERE email = ? AND id != ?",
       [email, id]
@@ -99,7 +93,6 @@ export async function PUT(req: Request) {
       );
     }
 
-    // Update user (dengan atau tanpa password baru)
     if (password && password.trim() !== "") {
       const hashedPassword = await bcrypt.hash(password, 10);
       await db.query(
@@ -115,12 +108,11 @@ export async function PUT(req: Request) {
 
     return NextResponse.json({ message: "User updated successfully" });
   } catch (err) {
-    console.error("❌ Update user error:", err);
+    console.error("Update user error:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
 
-// DELETE - Delete user
 export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -135,7 +127,6 @@ export async function DELETE(req: Request) {
 
     const db = await getDb();
 
-    // Cek apakah user ada
     const [existing] = await db.query<User[]>(
       "SELECT * FROM users WHERE id = ?",
       [id]
@@ -145,12 +136,11 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // Delete user
     await db.query("DELETE FROM users WHERE id = ?", [id]);
 
     return NextResponse.json({ message: "User deleted successfully" });
   } catch (err) {
-    console.error("❌ Delete user error:", err);
+    console.error("Delete user error:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
