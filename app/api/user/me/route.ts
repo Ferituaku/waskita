@@ -7,7 +7,7 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json(
-        { message: "Tidak ada user yang login" },
+        { message: "Tidak ada user yang login saat ini" },
         { status: 401 }
       );
     }
