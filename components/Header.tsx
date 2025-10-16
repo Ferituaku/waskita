@@ -1,16 +1,103 @@
-import React, { Fragment } from "react";
-import { Search, User, Users, LogOut, Menu } from "lucide-react";
+"use client";
+
+import React, { Fragment, useState, useEffect } from "react";
+import { Search, User, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Menu as HeadlessMenu, Transition } from "@headlessui/react";
-import Image from "next/image";
 import { useSidebar } from "@/hooks/SidebarContext";
 
 interface HeaderProps {
   title: string;
 }
 
+interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  profile_picture?: string;
+  phone_number?: string;
+  status?: string;
+}
+
 const Header: React.FC<HeaderProps> = ({ title }) => {
   const { toggleMobile } = useSidebar();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user profile dari cookie (otomatis)
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch("/api/profile");
+        const data = await response.json();
+
+        if (response.ok) {
+          setUser(data.user);
+        } else {
+          console.error("Failed to fetch profile:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+
+    try {
+      setIsLoggingOut(true);
+
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        router.replace("/login");
+        router.refresh();
+      } else {
+        console.error("Logout failed");
+        router.replace("/login");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      router.replace("/login");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  // Generate display image
+  const getDisplayImage = () => {
+    if (!user) return `https://ui-avatars.com/api/?name=User&size=100&background=random`;
+    
+    // Jika ada profile_picture dan bukan default
+    if (user.profile_picture && user.profile_picture !== '/default-profile.jpg') {
+      // Jika URL eksternal (http/https), gunakan langsung
+      if (user.profile_picture.startsWith('http')) {
+        return user.profile_picture;
+      }
+      // Jika path lokal (uploads), tambahkan base URL
+      return `http://localhost:3000${user.profile_picture}`;
+    }
+    
+    // Fallback ke UI Avatars
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&size=100&background=random`;
+  };
+
+  const displayImage = getDisplayImage();
+  const displayName = user?.name || "User Name";
 
   return (
     <header
@@ -41,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
         <div className="flex items-center gap-3">
           <span className="hidden sm:block text-sm font-bold text-slate-700">
-            User Name
+            {loading ? "Loading..." : displayName}
           </span>
           <HeadlessMenu as="div" className="relative">
             <HeadlessMenu.Button
@@ -52,12 +139,13 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
               "
             >
               <span className="sr-only">Open user menu</span>
-              <Image
+              <img
                 className="h-10 w-10 rounded-full object-cover"
-                height={40}
-                width={40}
-                src="https://i.pravatar.cc/80?img=1"
-                alt="User Avatar"
+                src={displayImage}
+                alt={displayName}
+                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&size=100&background=random`;
+                }}
               />
             </HeadlessMenu.Button>
 
@@ -93,21 +181,25 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                     </Link>
                   )}
                 </HeadlessMenu.Item>
+                
+                <div className="my-1 h-px bg-slate-200" />
+
                 <HeadlessMenu.Item>
                   {({ active }) => (
-                    <Link
-                      href="/login"
-                      onClick={() => console.log("User logged out")}
+                    <button
+                      onClick={handleLogout}
+                      disabled={isLoggingOut}
                       className={[
                         "w-full text-left flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm",
+                        "disabled:opacity-50 disabled:cursor-not-allowed",
                         active
-                          ? "bg-slate-50 text-slate-900"
-                          : "text-slate-700",
+                          ? "bg-red-50 text-red-600"
+                          : "text-slate-700 hover:text-red-600",
                       ].join(" ")}
                     >
                       <LogOut className="h-4 w-4" />
-                      <span>Logout</span>
-                    </Link>
+                      <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                    </button>
                   )}
                 </HeadlessMenu.Item>
               </HeadlessMenu.Items>
