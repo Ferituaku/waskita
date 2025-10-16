@@ -1,6 +1,6 @@
 // tailwind.config.js
-const { heroUI } = require("@heroui/theme");
-const defaultTheme = require("tailwindcss/defaultTheme");
+import { heroUI } from "@heroui/theme";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {

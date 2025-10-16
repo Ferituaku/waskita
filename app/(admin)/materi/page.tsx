@@ -15,7 +15,6 @@ import {
   Pencil,
   Trash2,
   FileText,
-  Upload,
 } from "lucide-react";
 
 interface MateriItem {
@@ -110,7 +109,7 @@ const MateriPage: React.FC = () => {
         });
 
         const uploadResult = await uploadResponse.json();
-        
+
         if (uploadResult.success) {
           imageUrl = uploadResult.url;
         } else {
@@ -132,7 +131,7 @@ const MateriPage: React.FC = () => {
         });
 
         const uploadResult = await uploadResponse.json();
-        
+
         if (uploadResult.success) {
           pdfUrl = uploadResult.url;
           pdfContent = `PDF: ${formData.file.name}`;
@@ -275,7 +274,8 @@ const MateriPage: React.FC = () => {
                           ...formData,
                           file_type: e.target.value as "text" | "pdf",
                           file: null,
-                          content: e.target.value === "pdf" ? "" : formData.content,
+                          content:
+                            e.target.value === "pdf" ? "" : formData.content,
                         })
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:ring-2 focus:ring-red-500 focus:outline-none"
@@ -451,7 +451,7 @@ const MateriPage: React.FC = () => {
             <p className="text-sm text-gray-600">
               Apakah Anda yakin ingin menghapus materi{" "}
               <span className="font-bold text-gray-800">
-                "{modal.data?.title}"
+                &quot;{modal.data?.title}&quot;
               </span>
               ?<br />
               Tindakan ini tidak dapat dibatalkan.
@@ -570,7 +570,11 @@ const MateriPage: React.FC = () => {
                       <td className="p-4">
                         <button
                           onClick={() =>
-                            setModal({ isOpen: true, type: "cover", data: item })
+                            setModal({
+                              isOpen: true,
+                              type: "cover",
+                              data: item,
+                            })
                           }
                           className="relative group bg-gray-200 rounded-md w-24 h-16 flex items-center justify-center text-gray-500 text-xs font-medium hover:bg-gray-300 transition-colors"
                         >
