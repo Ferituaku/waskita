@@ -56,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     try {
       setIsLoggingOut(true);
 
-      const response = await fetch("/api/auth/logout", {
+      const response = await fetch("/api/logout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
