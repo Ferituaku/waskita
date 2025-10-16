@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS \`hasil_kuis\` (
   \`user_id\` INT NULL,
   \`nama_peserta\` VARCHAR(255) NOT NULL,
   \`nilai\` INT NOT NULL,
-  \`grade\` VARCHAR(5) NULL, -- ✅ tambahkan kolom grade
+  \`grade\` INT NOT NULL, -- ✅ tambahkan kolom grade
   \`tanggal_pengerjaan\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (\`id_hasil\`),
   INDEX \`fk_hasil_judul_idx\` (\`id_judul\` ASC),

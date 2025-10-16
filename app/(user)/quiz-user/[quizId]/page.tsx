@@ -45,11 +45,15 @@ export default function UserQuizPage({
 
   const [gameState, setGameState] = useState<GameState>("start");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [score, setScore] = useState(0);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [finalScore, setFinalScore] = useState<{
+    nilai: number;
+    grade: string;
+  } | null>(null);
 
   const quizId = parseInt(params.quizId, 10);
 
@@ -124,7 +128,7 @@ export default function UserQuizPage({
     fetchAndStructureQuizData();
   }, [fetchAndStructureQuizData]);
 
-  // Updated effect to handle score submission with proper authentication
+  // Updated effect to handle score submission with totalQuestions and correctAnswers
   useEffect(() => {
     const submitScore = async () => {
       if (gameState === "finished" && !isSubmitting && !hasSubmitted && quizData) {
@@ -133,10 +137,11 @@ export default function UserQuizPage({
           const res = await fetch("/api/quiz/results", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            credentials: "include", // Include cookies for authentication
+            credentials: "include",
             body: JSON.stringify({
               quizId: quizData.id,
-              nilai: score,
+              totalQuestions: quizData.questions.length,
+              correctAnswers: correctAnswers,
             }),
           });
 
@@ -147,6 +152,14 @@ export default function UserQuizPage({
 
           const data = await res.json();
           setHasSubmitted(true);
+          
+          // Store the calculated score and grade from backend
+          if (data.data) {
+            setFinalScore({
+              nilai: data.data.nilai,
+              grade: data.data.grade,
+            });
+          }
           
           if (data.data?.isRetake) {
             toast.success("Skor berhasil disimpan! (Percobaan ulang)");
@@ -165,7 +178,7 @@ export default function UserQuizPage({
       }
     };
     submitScore();
-  }, [gameState, score, quizData, isSubmitting, hasSubmitted]);
+  }, [gameState, correctAnswers, quizData, isSubmitting, hasSubmitted]);
 
   const totalQuestions = quizData?.questions.length || 0;
   const currentQuestion = quizData?.questions[currentQuestionIndex];
@@ -173,15 +186,17 @@ export default function UserQuizPage({
   const handleStartQuiz = () => {
     setGameState("playing");
     setHasSubmitted(false);
+    setFinalScore(null);
   };
 
   const handleRestartQuiz = () => {
     setGameState("start");
     setCurrentQuestionIndex(0);
-    setScore(0);
+    setCorrectAnswers(0);
     setSelectedAnswer(null);
     setIsAnswered(false);
     setHasSubmitted(false);
+    setFinalScore(null);
   };
 
   const handleSelectAnswer = (optionId: number) => {
@@ -191,7 +206,7 @@ export default function UserQuizPage({
     setIsAnswered(true);
 
     if (optionId === currentQuestion.correctAnswerId) {
-      setScore((prev) => prev + 1);
+      setCorrectAnswers((prev) => prev + 1);
     }
   };
 
@@ -275,13 +290,25 @@ export default function UserQuizPage({
 
   // UI for Finish Screen
   if (gameState === "finished") {
-    const percentage = Math.round((score / totalQuestions) * 100);
-    const getGrade = () => {
-      if (percentage >= 90) return "A";
-      if (percentage >= 80) return "B";
-      if (percentage >= 70) return "C";
-      if (percentage >= 60) return "D";
+    // Use backend calculated score if available, otherwise calculate locally as fallback
+    const displayNilai = finalScore?.nilai ?? Math.round((correctAnswers / totalQuestions) * 100);
+    const displayGrade = finalScore?.grade ?? (() => {
+      if (displayNilai >= 80) return "A";
+      if (displayNilai >= 65) return "B";
+      if (displayNilai >= 50) return "C";
+      if (displayNilai >= 35) return "D";
       return "E";
+    })();
+
+    const getGradeColor = (grade: string) => {
+      switch (grade) {
+        case "A": return "text-green-600";
+        case "B": return "text-blue-600";
+        case "C": return "text-yellow-600";
+        case "D": return "text-orange-600";
+        case "E": return "text-red-600";
+        default: return "text-gray-600";
+      }
     };
 
     return (
@@ -295,17 +322,30 @@ export default function UserQuizPage({
           </p>
           
           <div className="bg-red-50 p-6 rounded-lg mb-4">
-            <p className="text-xl text-gray-700">Skor Akhir Anda</p>
-            <p className="text-6xl font-bold text-red-800 my-2">
-              {score}{" "}
-              <span className="text-3xl text-gray-500">/ {totalQuestions}</span>
-            </p>
-            <div className="mt-4 space-y-2">
-              <p className="text-2xl font-bold text-gray-700">
-                Grade: {getGrade()}
+            <p className="text-xl text-gray-700 mb-2">Hasil Anda</p>
+            
+            {/* Correct Answers Display */}
+            <div className="mb-4 p-4 bg-white rounded-lg">
+              <p className="text-lg text-gray-600">Jawaban Benar</p>
+              <p className="text-4xl font-bold text-gray-800">
+                {correctAnswers}{" "}
+                <span className="text-2xl text-gray-500">/ {totalQuestions}</span>
               </p>
-              <p className="text-lg text-gray-600">
-                Persentase: {percentage}%
+            </div>
+
+            {/* Score Display */}
+            <div className="mb-4 p-4 bg-white rounded-lg">
+              <p className="text-lg text-gray-600">Nilai</p>
+              <p className="text-5xl font-bold text-red-800">
+                {displayNilai}
+              </p>
+            </div>
+
+            {/* Grade Display */}
+            <div className="p-4 bg-white rounded-lg">
+              <p className="text-lg text-gray-600">Grade</p>
+              <p className={`text-6xl font-bold ${getGradeColor(displayGrade)}`}>
+                {displayGrade}
               </p>
             </div>
           </div>
