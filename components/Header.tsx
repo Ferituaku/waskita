@@ -37,20 +37,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           {title}
         </h2>
 
-        <div className="relative w-full max-w-md hidden md:block">
-          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Search pages..."
-            className="
-              w-full pl-10 pr-3 py-2 rounded-xl
-              bg-slate-100 text-slate-700 placeholder:text-slate-500
-              border border-transparent focus:border-slate-300
-              focus:outline-none focus:ring-2 focus:ring-[#5C110E]/30
-              transition-colors
-            "
-          />
-        </div>
+      
 
         <div className="flex items-center gap-3">
           <span className="hidden sm:block text-sm font-bold text-slate-700">

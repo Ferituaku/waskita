@@ -244,9 +244,12 @@ const QuizPage: React.FC = () => {
               onClick={() =>
                 setModal({ isOpen: true, type: "add", data: undefined })
               }
-              className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200"
+              className="group bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2 transition-all duration-200 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 active:scale-95"
             >
-              <Plus size={20} />
+              <Plus
+                size={20}
+                className="group-hover:rotate-90 transition-transform duration-300"
+              />
               <span>Tambah Data</span>
             </button>
             <div className="flex items-center gap-4">
