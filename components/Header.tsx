@@ -109,22 +109,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                 <HeadlessMenu.Item>
                   {({ active }) => (
                     <Link
-                      href="/users"
-                      className={[
-                        "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm",
-                        active
-                          ? "bg-slate-50 text-slate-900"
-                          : "text-slate-700",
-                      ].join(" ")}
-                    >
-                      <Users className="h-4 w-4" />
-                      <span>User Management</span>
-                    </Link>
-                  )}
-                </HeadlessMenu.Item>
-                <HeadlessMenu.Item>
-                  {({ active }) => (
-                    <Link
                       href="/login"
                       onClick={() => console.log("User logged out")}
                       className={[
