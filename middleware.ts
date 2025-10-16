@@ -9,11 +9,8 @@ const JWT_SECRET = new TextEncoder().encode(
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ⛔ Lewati middleware untuk halaman publik
+  // ⛔ Lewati middleware untuk API routes dan static files
   if (
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/register") ||
-    pathname.startsWith("/unauthorized") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/static") ||
@@ -25,6 +22,36 @@ export async function middleware(req: NextRequest) {
 
   const token = req.cookies.get("token")?.value;
 
+  // 🔐 PROTEKSI HALAMAN LOGIN/REGISTER
+  // Jika sudah login, redirect ke dashboard sesuai role
+  if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
+    if (token) {
+      try {
+        const { payload } = await jwtVerify(token, JWT_SECRET);
+        const userRole = payload.role as string;
+
+        // Redirect ke dashboard sesuai role
+        if (userRole === "admin") {
+          return NextResponse.redirect(new URL("/dashboard", req.url));
+        } else {
+          return NextResponse.redirect(new URL("/beranda", req.url));
+        }
+      } catch (err) {
+        // Token invalid, hapus dan biarkan akses login
+        const response = NextResponse.next();
+        response.cookies.delete("token");
+        return response;
+      }
+    }
+    return NextResponse.next();
+  }
+
+  // 🔓 Halaman publik lainnya
+  if (pathname.startsWith("/unauthorized")) {
+    return NextResponse.next();
+  }
+
+  // 🔒 PROTEKSI HALAMAN YANG BUTUH AUTH
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -33,7 +60,7 @@ export async function middleware(req: NextRequest) {
     const { payload } = await jwtVerify(token, JWT_SECRET);
     const userRole = payload.role as string;
 
-    // 🔵 USER ROUTES - Cek dulu yang paling spesifik
+    // 🔵 USER ROUTES
     const userRoutes = ["/quiz-user", "/apa-itu-wpa", "/beranda"];
     const isUserRoute = userRoutes.some((route) => pathname.startsWith(route));
 
@@ -55,6 +82,15 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next();
     }
 
+    // 🏠 ROOT PATH - Redirect ke dashboard sesuai role
+    if (pathname === "/") {
+      if (userRole === "admin") {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      } else {
+        return NextResponse.redirect(new URL("/beranda", req.url));
+      }
+    }
+
     return NextResponse.next();
 
   } catch (err) {
@@ -67,13 +103,13 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/materi/:path*",
-    "/profile/:path*",
-    "/quiz/:path*",
-    "/users/:path*",
-    "/video-edukasi/:path*",
-    "/apa-itu-wpa/:path*",
-    "/beranda/:path*",
-    "/quiz-user/:path*",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
