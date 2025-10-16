@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS \`hasil_kuis\` (
   \`user_id\` INT NULL,
   \`nama_peserta\` VARCHAR(255) NOT NULL,
   \`nilai\` INT NOT NULL,
+  \`grade\` INT NOT NULL, -- ✅ tambahkan kolom grade
   \`tanggal_pengerjaan\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (\`id_hasil\`),
   INDEX \`fk_hasil_judul_idx\` (\`id_judul\` ASC),
@@ -85,6 +86,7 @@ CREATE TABLE IF NOT EXISTS \`hasil_kuis\` (
     REFERENCES \`users\` (\`id\`)
     ON DELETE SET NULL
 );`;
+
 
 const CREATE_ARTICLES_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS \`articles\` (

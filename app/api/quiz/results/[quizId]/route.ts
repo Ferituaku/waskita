@@ -18,6 +18,7 @@ interface QuizResultWithUser extends RowDataPacket {
   email: string;
   tanggal: Date;
   nilai: number;
+  grade: string;
   user_id: number | null;
 }
 
@@ -54,7 +55,7 @@ export async function GET(
       );
     }
 
-    // 2. Query ke database (setelah perbaikan skema)
+    // 2. Query ke database (dengan kolom grade)
     const db = await getDb();
     const query = `
       SELECT 
@@ -63,6 +64,7 @@ export async function GET(
         u.email as email,
         hk.tanggal_pengerjaan as tanggal,
         hk.nilai,
+        hk.grade,
         hk.user_id
       FROM 
         hasil_kuis hk
@@ -83,6 +85,7 @@ export async function GET(
       email: row.email,
       tanggal: row.tanggal,
       nilai: row.nilai,
+      grade: row.grade || "N/A", // Fallback untuk data lama tanpa grade
       isRegisteredUser: !!row.user_id,
     }));
 

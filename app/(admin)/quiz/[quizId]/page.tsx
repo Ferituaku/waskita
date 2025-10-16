@@ -9,13 +9,14 @@ import SkeletonTable from "@/components/SkeletonTable";
 import { ArrowLeft, User, Mail } from "lucide-react";
 import type { Judul } from "@/types/quiz";
 
-// Enhanced QuizResult interface to include user data
+// Enhanced QuizResult interface to include user data and grade
 interface QuizResultWithUser {
   id: number;
   nama: string;
   email?: string;
   tanggal: string;
   nilai: number;
+  grade: string;
   isRegisteredUser: boolean;
 }
 
@@ -67,7 +68,7 @@ const QuizDetailPage: React.FC = () => {
     fetchData();
   }, [quizId]);
 
-  // Calculate statistics
+  // Calculate statistics with grade distribution
   const calculateStats = () => {
     if (results.length === 0) return null;
 
@@ -77,6 +78,15 @@ const QuizDetailPage: React.FC = () => {
     const lowest = Math.min(...scores);
     const registeredUsers = results.filter((r) => r.isRegisteredUser).length;
 
+    // Calculate grade distribution
+    const gradeCount = {
+      A: results.filter((r) => r.grade === "A").length,
+      B: results.filter((r) => r.grade === "B").length,
+      C: results.filter((r) => r.grade === "C").length,
+      D: results.filter((r) => r.grade === "D").length,
+      E: results.filter((r) => r.grade === "E").length,
+    };
+
     return {
       totalParticipants: results.length,
       averageScore: average.toFixed(1),
@@ -84,6 +94,7 @@ const QuizDetailPage: React.FC = () => {
       lowestScore: lowest,
       registeredUsers,
       guestUsers: results.length - registeredUsers,
+      gradeDistribution: gradeCount,
     };
   };
 
@@ -105,6 +116,24 @@ const QuizDetailPage: React.FC = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // Get grade styling
+  const getGradeStyle = (grade: string) => {
+    switch (grade) {
+      case "A":
+        return "text-green-600 bg-green-100";
+      case "B":
+        return "text-blue-600 bg-blue-100";
+      case "C":
+        return "text-yellow-600 bg-yellow-100";
+      case "D":
+        return "text-orange-600 bg-orange-100";
+      case "E":
+        return "text-red-600 bg-red-100";
+      default:
+        return "text-gray-600 bg-gray-100";
+    }
   };
 
   return (
@@ -135,54 +164,97 @@ const QuizDetailPage: React.FC = () => {
 
           {/* Statistics Cards */}
           {!loading && stats && (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-blue-600 font-semibold">
-                  Total Peserta
-                </p>
-                <p className="text-2xl font-bold text-blue-800">
-                  {stats.totalParticipants}
-                </p>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-blue-600 font-semibold">
+                    Total Peserta
+                  </p>
+                  <p className="text-2xl font-bold text-blue-800">
+                    {stats.totalParticipants}
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-green-600 font-semibold">
+                    Rata-rata
+                  </p>
+                  <p className="text-2xl font-bold text-green-800">
+                    {stats.averageScore}
+                  </p>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <p className="text-sm text-purple-600 font-semibold">
+                    Nilai Tertinggi
+                  </p>
+                  <p className="text-2xl font-bold text-purple-800">
+                    {stats.highestScore}
+                  </p>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <p className="text-sm text-yellow-600 font-semibold">
+                    Nilai Terendah
+                  </p>
+                  <p className="text-2xl font-bold text-yellow-800">
+                    {stats.lowestScore}
+                  </p>
+                </div>
+                <div className="bg-indigo-50 p-4 rounded-lg">
+                  <p className="text-sm text-indigo-600 font-semibold">
+                    User Terdaftar
+                  </p>
+                  <p className="text-2xl font-bold text-indigo-800">
+                    {stats.registeredUsers}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 font-semibold">
+                    User Tamu
+                  </p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {stats.guestUsers}
+                  </p>
+                </div>
               </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm text-green-600 font-semibold">
-                  Rata-rata
-                </p>
-                <p className="text-2xl font-bold text-green-800">
-                  {stats.averageScore}
-                </p>
+
+              {/* Grade Distribution */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg mb-6">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Distribusi Grade
+                </h3>
+                <div className="grid grid-cols-5 gap-3">
+                  <div className="bg-white p-3 rounded-lg text-center border-2 border-green-200">
+                    <p className="text-xs text-gray-600 mb-1">Grade A</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {stats.gradeDistribution.A}
+                    </p>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg text-center border-2 border-blue-200">
+                    <p className="text-xs text-gray-600 mb-1">Grade B</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {stats.gradeDistribution.B}
+                    </p>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg text-center border-2 border-yellow-200">
+                    <p className="text-xs text-gray-600 mb-1">Grade C</p>
+                    <p className="text-2xl font-bold text-yellow-600">
+                      {stats.gradeDistribution.C}
+                    </p>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg text-center border-2 border-orange-200">
+                    <p className="text-xs text-gray-600 mb-1">Grade D</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {stats.gradeDistribution.D}
+                    </p>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg text-center border-2 border-red-200">
+                    <p className="text-xs text-gray-600 mb-1">Grade E</p>
+                    <p className="text-2xl font-bold text-red-600">
+                      {stats.gradeDistribution.E}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <p className="text-sm text-purple-600 font-semibold">
-                  Nilai Tertinggi
-                </p>
-                <p className="text-2xl font-bold text-purple-800">
-                  {stats.highestScore}
-                </p>
-              </div>
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <p className="text-sm text-yellow-600 font-semibold">
-                  Nilai Terendah
-                </p>
-                <p className="text-2xl font-bold text-yellow-800">
-                  {stats.lowestScore}
-                </p>
-              </div>
-              <div className="bg-indigo-50 p-4 rounded-lg">
-                <p className="text-sm text-indigo-600 font-semibold">
-                  User Terdaftar
-                </p>
-                <p className="text-2xl font-bold text-indigo-800">
-                  {stats.registeredUsers}
-                </p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600 font-semibold">User Tamu</p>
-                <p className="text-2xl font-bold text-gray-800">
-                  {stats.guestUsers}
-                </p>
-              </div>
-            </div>
+            </>
           )}
 
           {error && (
@@ -227,79 +299,52 @@ const QuizDetailPage: React.FC = () => {
               ) : (
                 <tbody>
                   {paginatedResults.length > 0 ? (
-                    paginatedResults.map((result, index) => {
-                      const percentage =
-                        (result.nilai / (quizInfo?.questionCount || 10)) * 100;
-                      const getGrade = () => {
-                        if (percentage >= 90)
-                          return {
-                            grade: "A",
-                            color: "text-green-600 bg-green-100",
-                          };
-                        if (percentage >= 80)
-                          return {
-                            grade: "B",
-                            color: "text-blue-600 bg-blue-100",
-                          };
-                        if (percentage >= 70)
-                          return {
-                            grade: "C",
-                            color: "text-yellow-600 bg-yellow-100",
-                          };
-                        if (percentage >= 60)
-                          return {
-                            grade: "D",
-                            color: "text-orange-600 bg-orange-100",
-                          };
-                        return { grade: "E", color: "text-red-600 bg-red-100" };
-                      };
-                      const gradeInfo = getGrade();
-
-                      return (
-                        <tr
-                          key={result.id}
-                          className="bg-white border-b last:border-b-0 hover:bg-gray-50 align-middle"
-                        >
-                          <td className="p-4 font-medium text-gray-900">
-                            {(currentPage - 1) * entriesPerPage + index + 1}
-                          </td>
-                          <td className="p-4 font-medium text-gray-800">
-                            {result.nama}
-                          </td>
-                          <td className="p-4 text-gray-600">
-                            {result.email || (
-                              <span className="text-gray-400 italic">
-                                Tidak tersedia
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <span
-                              className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                result.isRegisteredUser
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-gray-100 text-gray-600"
-                              }`}
-                            >
-                              {result.isRegisteredUser ? "Terdaftar" : "Tamu"}
+                    paginatedResults.map((result, index) => (
+                      <tr
+                        key={result.id}
+                        className="bg-white border-b last:border-b-0 hover:bg-gray-50 align-middle"
+                      >
+                        <td className="p-4 font-medium text-gray-900">
+                          {(currentPage - 1) * entriesPerPage + index + 1}
+                        </td>
+                        <td className="p-4 font-medium text-gray-800">
+                          {result.nama}
+                        </td>
+                        <td className="p-4 text-gray-600">
+                          {result.email || (
+                            <span className="text-gray-400 italic">
+                              Tidak tersedia
                             </span>
-                          </td>
-                          <td className="p-4 text-gray-600">
-                            {formatDate(result.tanggal)}
-                          </td>
-                          <td className="p-4 font-bold text-blue-600">
-                            {result.nilai}
-                          </td>
-                          <td className="p-4">
-                            <span
-                              className={`px-2 py-1 text-sm font-bold rounded-lg ${gradeInfo.color}`}
-                            >
-                              {gradeInfo.grade}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                              result.isRegisteredUser
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {result.isRegisteredUser ? "Terdaftar" : "Tamu"}
+                          </span>
+                        </td>
+                        <td className="p-4 text-gray-600">
+                          {formatDate(result.tanggal)}
+                        </td>
+                        <td className="p-4 font-bold text-blue-600">
+                          {result.nilai}
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`px-3 py-1 text-sm font-bold rounded-lg ${getGradeStyle(
+                              result.grade
+                            )}`}
+                          >
+                            {result.grade || "N/A"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
                       <td
