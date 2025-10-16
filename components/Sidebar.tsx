@@ -175,7 +175,7 @@ const Sidebar: React.FC = () => {
                   : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
               )}
             >
-              {userRole === "admin" ? "👑 ADMIN" : "👤 USER"}
+              {userRole === "admin" ? "ADMIN" : "USER"}
             </div>
           </div>
         )}
