@@ -23,7 +23,7 @@ export default function AuthLayout({
         <div className="grid grid-cols-1 md:grid-cols-2 h-screen"> */}
       {/* Left Column: Image */}
       <div className="relative hidden md:block">
-        <div className="absolute inset-0 bg-white bg-opacity-40" />
+        <div className="absolute inset-0 bg-white bg-opacity-30" />
         <Slideshow slides={slides} className="h-full w-full object-cover" />
       </div>
       {/* Right Column: Form */}
