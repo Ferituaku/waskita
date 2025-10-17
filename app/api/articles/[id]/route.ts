@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RowDataPacket, OkPacket } from "mysql2/promise";
 import { getDb } from "@/lib/db";
+import { OkPacket, RowDataPacket } from "mysql2";
+import { Next } from "mysql2/typings/mysql/lib/parsers/typeCast";
 
-// Interface untuk data artikel
 interface Article extends RowDataPacket {
   id: number;
   title: string;
@@ -13,20 +13,14 @@ interface Article extends RowDataPacket {
   image_url: string;
 }
 
-// Tipe untuk parameter dinamis dari URL
-// Ini adalah bagian kunci untuk membantu TypeScript
-type RouteParams = {
-  params: {
-    id: string;
-  };
-};
-
 // GET - Ambil artikel berdasarkan ID
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
     const db = await getDb();
-    // ... sisa kode GET ...
     const [rows] = await db.query<Article[]>(
       "SELECT * FROM articles WHERE id = ?",
       [id]
@@ -50,10 +44,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT - Update artikel berdasarkan ID
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
-    // ... sisa kode PUT ...
+    const { id } = await context.params;
     const { title, content, category, image_url, file_type, file_url } =
       await request.json();
 
@@ -64,6 +60,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // Validasi kategori
     if (category !== "HIV" && category !== "AIDS") {
       return NextResponse.json(
         { success: false, error: "Category must be HIV or AIDS" },
@@ -115,12 +112,23 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE - Hapus artikel berdasarkan ID
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
-    // ... sisa kode DELETE ...
+    const { id } = await context.params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Article ID is required" },
+        { status: 400 }
+      );
+    }
+
     const db = await getDb();
 
+    // Cek apakah artikel dengan ID tersebut ada
     const [existingArticle] = await db.query<Article[]>(
       "SELECT id, title FROM articles WHERE id = ?",
       [id]
@@ -133,7 +141,18 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    await db.query<OkPacket>("DELETE FROM articles WHERE id = ?", [id]);
+    // Hapus artikel
+    const [result] = await db.query<OkPacket>(
+      "DELETE FROM articles WHERE id = ?",
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return NextResponse.json(
+        { success: false, error: "Failed to delete article" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -149,13 +168,24 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// PATCH - Update sebagian field artikel
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+// PATCH - Update sebagian field artikel (partial update)
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = params;
-    // ... sisa kode PATCH ...
+    const { id } = await context.params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Article ID is required" },
+        { status: 400 }
+      );
+    }
+
     const updateData = await request.json();
 
+    // Cek apakah ada field yang akan diupdate
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
         { success: false, error: "No fields to update" },
@@ -163,9 +193,34 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // ... (sisanya sama, tidak perlu diubah) ...
     const db = await getDb();
 
+    // Cek apakah artikel dengan ID tersebut ada
+    const [existingArticle] = await db.query<Article[]>(
+      "SELECT * FROM articles WHERE id = ?",
+      [id]
+    );
+
+    if (existingArticle.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Article not found" },
+        { status: 404 }
+      );
+    }
+
+    // Validasi kategori jika ada
+    if (
+      updateData.category &&
+      updateData.category !== "HIV" &&
+      updateData.category !== "AIDS"
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Category must be HIV or AIDS" },
+        { status: 400 }
+      );
+    }
+
+    // Buat query update dinamis
     const allowedFields = [
       "title",
       "content",
@@ -174,32 +229,41 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       "file_type",
       "file_url",
     ];
-    const setClauses: string[] = [];
-    const queryValues: unknown[] = [];
+    const updateFields: string[] = [];
+    const updateValues: unknown[] = [];
 
-    for (const key of allowedFields) {
-      if (updateData[key] !== undefined) {
-        setClauses.push(`${key} = ?`);
-        queryValues.push(updateData[key]);
+    for (const [key, value] of Object.entries(updateData)) {
+      if (allowedFields.includes(key)) {
+        updateFields.push(`${key} = ?`);
+        updateValues.push(value);
       }
     }
 
-    if (setClauses.length === 0) {
+    if (updateFields.length === 0) {
       return NextResponse.json(
         { success: false, error: "No valid fields to update" },
         { status: 400 }
       );
     }
 
-    setClauses.push("updated_at = NOW()");
-    queryValues.push(id);
+    // Tambahkan updated_at dan id ke values
+    updateFields.push("updated_at = NOW()");
+    updateValues.push(id);
 
-    const updateQuery = `UPDATE articles SET ${setClauses.join(
+    const updateQuery = `UPDATE articles SET ${updateFields.join(
       ", "
     )} WHERE id = ?`;
 
-    await db.query<OkPacket>(updateQuery, queryValues);
+    const [result] = await db.query<OkPacket>(updateQuery, updateValues);
 
+    if (result.affectedRows === 0) {
+      return NextResponse.json(
+        { success: false, error: "Failed to update article" },
+        { status: 500 }
+      );
+    }
+
+    // Ambil data artikel yang sudah diupdate
     const [updatedArticle] = await db.query<Article[]>(
       "SELECT * FROM articles WHERE id = ?",
       [id]
