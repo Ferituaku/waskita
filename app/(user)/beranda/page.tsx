@@ -127,7 +127,7 @@ const BerandaPage: React.FC = () => {
         </section>
 
         <TabFilter 
-          tabs={["Semua", "Edukasi", "Artikel", "Video"]} 
+          tabs={["Semua", "Artikel", "Video Edukasi"]} 
           activeTab={activeTab}
           onTabChange={handleTabChange}
         />
