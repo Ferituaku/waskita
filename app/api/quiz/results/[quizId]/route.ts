@@ -24,11 +24,12 @@ interface QuizResultWithUser extends RowDataPacket {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { quizId: string } }
+  { params }: { params: Promise<{ quizId: string }> } // ✅ Ubah ke Promise
 ) {
-  const { quizId } = params;
-
   try {
+    // ✅ Await params terlebih dahulu
+    const { quizId } = await params;
+
     // 1. Verifikasi token dan role admin
     const token = req.cookies.get("token")?.value;
     if (!token) {
@@ -91,7 +92,7 @@ export async function GET(
 
     return NextResponse.json(resultsWithStatus);
   } catch (error) {
-    console.error(`Failed to fetch results for quiz ${quizId}:`, error);
+    console.error("Failed to fetch quiz results:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 }

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { OkPacket, RowDataPacket } from "mysql2";
-import { Next } from "mysql2/typings/mysql/lib/parsers/typeCast";
 
 interface Article extends RowDataPacket {
   id: number;

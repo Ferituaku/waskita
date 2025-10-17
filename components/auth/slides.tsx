@@ -1,6 +1,6 @@
 export const slides = [
   {
-    src: "/IMG_0715.JPG",
+    src: "@/IMG_0715.JPG",
     alt: "WASKITA by StopHIVa",
     title: "Training on Trainers (ToT) WASKITA by StopHIVa",
   },

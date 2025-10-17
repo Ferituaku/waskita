@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Video,
 } from "lucide-react";
+import Header from "@/components/Header";
 
 interface VideoEdukasi {
   id: number;
@@ -274,7 +275,10 @@ const VideoEdukasiPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 size={48} className="animate-spin text-red-600 mx-auto mb-4" />
+          <Loader2
+            size={48}
+            className="animate-spin text-red-600 mx-auto mb-4"
+          />
           <p className="text-gray-600 font-medium">Memuat data video...</p>
         </div>
       </div>
@@ -283,11 +287,7 @@ const VideoEdukasiPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
-      <div className="bg-white shadow-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Video Edukasi</h1>
-        </div>
-      </div>
+      <Header title="Kelola Video Edukasi" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
