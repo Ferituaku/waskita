@@ -14,55 +14,22 @@ import {
   ExternalLink,
   Video,
 } from "lucide-react";
-import Header from "@/components/Header";
-import { toast } from "react-toastify";
 
 interface VideoEdukasi {
   id: number;
   judul: string;
   link: string;
-  tanggalDitambahkan: string;
+  tanggal_ditambahkan: string;
 }
 
 type ModalType = "add" | "edit" | "delete";
 
 const VideoEdukasiPage: React.FC = () => {
-  const [videos, setVideos] = useState<VideoEdukasi[]>([
-    {
-      id: 1,
-      judul: "Memahami HIV & AIDS dalam 5 Menit",
-      link: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      tanggalDitambahkan: "2025-09-16",
-    },
-    {
-      id: 2,
-      judul: "Pencegahan adalah Kunci Utama Melawan AIDS",
-      link: "https://www.youtube.com/watch?v=tILGAq24Jqs",
-      tanggalDitambahkan: "2025-09-15",
-    },
-    {
-      id: 3,
-      judul: "Hidup Sehat dan Berkualitas dengan HIV",
-      link: "https://www.youtube.com/watch?v=ghijkl67890",
-      tanggalDitambahkan: "2025-09-14",
-    },
-    {
-      id: 4,
-      judul: "Stigma dan Diskriminasi Terhadap ODHA",
-      link: "https://www.youtube.com/watch?v=abcdef12345",
-      tanggalDitambahkan: "2025-09-13",
-    },
-    {
-      id: 5,
-      judul: "Terapi ARV: Harapan Baru untuk Penderita HIV",
-      link: "https://www.youtube.com/watch?v=xyz789mnop",
-      tanggalDitambahkan: "2025-09-12",
-    },
-  ]);
-
-  const [filteredVideos, setFilteredVideos] = useState<VideoEdukasi[]>(videos);
+  const [videos, setVideos] = useState<VideoEdukasi[]>([]);
+  const [filteredVideos, setFilteredVideos] = useState<VideoEdukasi[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -82,6 +49,30 @@ const VideoEdukasiPage: React.FC = () => {
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Fetch videos from API
+  const fetchVideos = async () => {
+    try {
+      setPageLoading(true);
+      const response = await fetch("/api/videos");
+      const result = await response.json();
+
+      if (result.success) {
+        setVideos(result.data);
+      } else {
+        showToast("error", "Gagal mengambil data video");
+      }
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      showToast("error", "Terjadi kesalahan saat mengambil data");
+    } finally {
+      setPageLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
   // Extract YouTube Video ID
   const getYouTubeVideoId = (url: string): string | null => {
@@ -122,6 +113,17 @@ const VideoEdukasiPage: React.FC = () => {
       year: "numeric",
     };
     return date.toLocaleDateString("id-ID", options);
+  };
+
+  const showToast = (type: "success" | "error", message: string) => {
+    // Simple toast notification
+    const toast = document.createElement("div");
+    toast.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-semibold ${
+      type === "success" ? "bg-green-600" : "bg-red-600"
+    }`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
   };
 
   const closeModal = () => {
@@ -169,48 +171,87 @@ const VideoEdukasiPage: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleAddVideo = () => {
+  const handleAddVideo = async () => {
     if (!validateForm()) return;
 
     setSubmitLoading(true);
-    setTimeout(() => {
-      const newVideo: VideoEdukasi = {
-        id: videos.length + 1,
-        judul: formData.judul,
-        link: formData.link,
-        tanggalDitambahkan: new Date().toISOString().split("T")[0],
-      };
-      setVideos([newVideo, ...videos]);
+    try {
+      const response = await fetch("/api/videos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("success", "Video berhasil ditambahkan");
+        await fetchVideos();
+        closeModal();
+      } else {
+        showToast("error", result.message || "Gagal menambahkan video");
+      }
+    } catch (error) {
+      console.error("Error adding video:", error);
+      showToast("error", "Terjadi kesalahan saat menambahkan video");
+    } finally {
       setSubmitLoading(false);
-      closeModal();
-    }, 1000);
+    }
   };
 
-  const handleEditVideo = () => {
+  const handleEditVideo = async () => {
     if (!validateForm()) return;
 
     setSubmitLoading(true);
-    setTimeout(() => {
-      const updatedVideos = videos.map((video) =>
-        video.id === modal.data?.id
-          ? { ...video, judul: formData.judul, link: formData.link }
-          : video
-      );
-      setVideos(updatedVideos);
+    try {
+      const response = await fetch("/api/videos", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: modal.data?.id,
+          ...formData,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("success", "Video berhasil diperbarui");
+        await fetchVideos();
+        closeModal();
+      } else {
+        showToast("error", result.message || "Gagal memperbarui video");
+      }
+    } catch (error) {
+      console.error("Error updating video:", error);
+      showToast("error", "Terjadi kesalahan saat memperbarui video");
+    } finally {
       setSubmitLoading(false);
-      closeModal();
-    }, 1000);
+    }
   };
 
-  const handleDeleteVideo = () => {
+  const handleDeleteVideo = async () => {
     setSubmitLoading(true);
-    setTimeout(() => {
-      setVideos(videos.filter((video) => video.id !== modal.data?.id));
-      setSubmitLoading(false);
-      closeModal();
-    }, 1000);
+    try {
+      const response = await fetch(`/api/videos?id=${modal.data?.id}`, {
+        method: "DELETE",
+      });
 
-    toast.success("Video berhasil dihapus", { position: "top-right" });
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("success", "Video berhasil dihapus");
+        await fetchVideos();
+        closeModal();
+      } else {
+        showToast("error", result.message || "Gagal menghapus video");
+      }
+    } catch (error) {
+      console.error("Error deleting video:", error);
+      showToast("error", "Terjadi kesalahan saat menghapus video");
+    } finally {
+      setSubmitLoading(false);
+    }
   };
 
   const handleFormSubmit = (e: React.KeyboardEvent) => {
@@ -229,14 +270,27 @@ const VideoEdukasiPage: React.FC = () => {
     return text.substring(0, maxLength) + "...";
   };
 
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 size={48} className="animate-spin text-red-600 mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Memuat data video...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
-      <Header title="Video Edukasi" />
+      <div className="bg-white shadow-md border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <h1 className="text-2xl font-bold text-gray-900">Video Edukasi</h1>
+        </div>
+      </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          {/* Toolbar */}
           <div className="p-6 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200">
             <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
               <button
@@ -287,7 +341,6 @@ const VideoEdukasiPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
@@ -370,7 +423,7 @@ const VideoEdukasiPage: React.FC = () => {
                         </a>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
-                        {formatDate(video.tanggalDitambahkan)}
+                        {formatDate(video.tanggal_ditambahkan)}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -397,7 +450,6 @@ const VideoEdukasiPage: React.FC = () => {
             </table>
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="px-6 py-4 bg-red-50 border-t border-red-100">
               <div className="flex items-center justify-between flex-wrap gap-4">
@@ -458,7 +510,6 @@ const VideoEdukasiPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal */}
       {modal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">

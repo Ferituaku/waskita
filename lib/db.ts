@@ -64,7 +64,6 @@ CREATE TABLE IF NOT EXISTS \`jawaban\` (
     ON DELETE CASCADE
 );`;
 
-// UPDATED: Added user_id column and foreign key to users table
 const CREATE_HASIL_KUIS_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS \`hasil_kuis\` (
   \`id_hasil\` INT NOT NULL AUTO_INCREMENT,
@@ -72,7 +71,7 @@ CREATE TABLE IF NOT EXISTS \`hasil_kuis\` (
   \`user_id\` INT NULL,
   \`nama_peserta\` VARCHAR(255) NOT NULL,
   \`nilai\` INT NOT NULL,
-  \`grade\` INT NOT NULL, -- ✅ tambahkan kolom grade
+  \`grade\` INT NOT NULL,
   \`tanggal_pengerjaan\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (\`id_hasil\`),
   INDEX \`fk_hasil_judul_idx\` (\`id_judul\` ASC),
@@ -87,7 +86,6 @@ CREATE TABLE IF NOT EXISTS \`hasil_kuis\` (
     ON DELETE SET NULL
 );`;
 
-
 const CREATE_ARTICLES_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS \`articles\` (
   \`id\` INT NOT NULL AUTO_INCREMENT,
@@ -99,6 +97,15 @@ CREATE TABLE IF NOT EXISTS \`articles\` (
   \`image_url\` VARCHAR(255) NULL DEFAULT '/default-image.jpg',
   \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   \`updated_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (\`id\`)
+);`;
+
+const CREATE_VIDEO_EDUKASI_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS \`video_edukasi\` (
+  \`id\` INT NOT NULL AUTO_INCREMENT,
+  \`judul\` VARCHAR(255) NOT NULL,
+  \`link\` VARCHAR(500) NOT NULL,
+  \`tanggal_ditambahkan\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (\`id\`)
 );`;
 
@@ -178,6 +185,9 @@ async function initializeDatabase(): Promise<mysql.Pool> {
 
     await pool.query(CREATE_ARTICLES_TABLE_SQL);
     console.log('✅ Table "articles" is ready');
+
+    await pool.query(CREATE_VIDEO_EDUKASI_TABLE_SQL);
+    console.log('✅ Table "video_edukasi" is ready');
 
     isInitialized = true;
     console.log("✅ Database and all tables are ready.");
