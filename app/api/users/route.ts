@@ -12,7 +12,7 @@ interface User extends RowDataPacket {
   status?: string;
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const db = await getDb();
     const [users] = await db.query<User[]>(

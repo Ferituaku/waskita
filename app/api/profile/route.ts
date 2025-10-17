@@ -40,7 +40,7 @@ async function getUserFromToken(): Promise<JWTPayload | null> {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const userFromToken = await getUserFromToken();
 

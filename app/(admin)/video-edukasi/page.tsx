@@ -480,7 +480,7 @@ const VideoEdukasiPage: React.FC = () => {
                     Apakah Anda yakin ingin menghapus video
                   </p>
                   <p className="text-lg font-bold text-gray-900 mb-2">
-                    "{modal.data?.judul}"?
+                    &quot;{modal.data?.judul}&quot;?
                   </p>
                   <p className="text-sm text-gray-500">
                     Tindakan ini tidak dapat dibatalkan.

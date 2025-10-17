@@ -1,11 +1,12 @@
 "use client";
 
 import React, { Fragment, useState, useEffect } from "react";
-import { Search, User, LogOut, Menu } from "lucide-react";
+import { User, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu as HeadlessMenu, Transition } from "@headlessui/react";
 import { useSidebar } from "@/hooks/SidebarContext";
+import Image from "next/image";
 
 interface HeaderProps {
   title: string;
@@ -80,20 +81,26 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   // Generate display image
   const getDisplayImage = () => {
-    if (!user) return `https://ui-avatars.com/api/?name=User&size=100&background=random`;
-    
+    if (!user)
+      return `https://ui-avatars.com/api/?name=User&size=100&background=random`;
+
     // Jika ada profile_picture dan bukan default
-    if (user.profile_picture && user.profile_picture !== '/default-profile.jpg') {
+    if (
+      user.profile_picture &&
+      user.profile_picture !== "/default-profile.jpg"
+    ) {
       // Jika URL eksternal (http/https), gunakan langsung
-      if (user.profile_picture.startsWith('http')) {
+      if (user.profile_picture.startsWith("http")) {
         return user.profile_picture;
       }
       // Jika path lokal (uploads), tambahkan base URL
       return `http://localhost:3000${user.profile_picture}`;
     }
-    
+
     // Fallback ke UI Avatars
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&size=100&background=random`;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      user.name
+    )}&size=100&background=random`;
   };
 
   const displayImage = getDisplayImage();
@@ -124,8 +131,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           {title}
         </h2>
 
-      
-
         <div className="flex items-center gap-3">
           <span className="hidden sm:block text-sm font-bold text-slate-700">
             {loading ? "Loading..." : displayName}
@@ -139,12 +144,16 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
               "
             >
               <span className="sr-only">Open user menu</span>
-              <img
+              <Image
                 className="h-10 w-10 rounded-full object-cover"
                 src={displayImage}
                 alt={displayName}
+                width="100"
+                height="100"
                 onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&size=100&background=random`;
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    displayName
+                  )}&size=100&background=random`;
                 }}
               />
             </HeadlessMenu.Button>
@@ -181,7 +190,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                     </Link>
                   )}
                 </HeadlessMenu.Item>
-                
+
                 <div className="my-1 h-px bg-slate-200" />
 
                 <HeadlessMenu.Item>

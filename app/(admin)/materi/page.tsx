@@ -167,7 +167,6 @@ const MateriPage: React.FC = () => {
       const result = await response.json();
 
       if (result.success) {
-        toast.loading("Menyimpan data...", { position: "top-right" });
         toast.success(
           `Materi berhasil ${
             modal.type === "edit" ? "diperbarui" : "ditambahkan"

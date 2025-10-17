@@ -36,7 +36,7 @@ export async function middleware(req: NextRequest) {
         } else {
           return NextResponse.redirect(new URL("/beranda", req.url));
         }
-      } catch (err) {
+      } catch {
         // Token invalid, hapus dan biarkan akses login
         const response = NextResponse.next();
         response.cookies.delete("token");
@@ -61,7 +61,12 @@ export async function middleware(req: NextRequest) {
     const userRole = payload.role as string;
 
     // 🔵 USER ROUTES
-    const userRoutes = ["/quiz-user", "/apa-itu-wpa", "/beranda"];
+    const userRoutes = [
+      "/quiz-user",
+      "/apa-itu-wpa",
+      "/beranda",
+      "/user/profile",
+    ];
     const isUserRoute = userRoutes.some((route) => pathname.startsWith(route));
 
     if (isUserRoute) {
@@ -72,8 +77,16 @@ export async function middleware(req: NextRequest) {
     }
 
     // 🔴 ADMIN ROUTES
-    const adminRoutes = ["/materi", "/profile", "/quiz", "/users", "/video-edukasi"];
-    const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route));
+    const adminRoutes = [
+      "/materi",
+      "/admin/profile",
+      "/quiz",
+      "/users-management",
+      "/video-edukasi",
+    ];
+    const isAdminRoute = adminRoutes.some((route) =>
+      pathname.startsWith(route)
+    );
 
     if (isAdminRoute) {
       if (userRole !== "admin") {
@@ -92,7 +105,6 @@ export async function middleware(req: NextRequest) {
     }
 
     return NextResponse.next();
-
   } catch (err) {
     console.error("❌ Invalid token:", err);
     const response = NextResponse.redirect(new URL("/login", req.url));

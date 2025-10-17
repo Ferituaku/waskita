@@ -34,11 +34,12 @@ const icons = [
 
 type GameState = "start" | "playing" | "finished";
 
-export default function UserQuizPage({
-  params,
-}: {
-  params: { quizId: string };
-}) {
+// Updated props interface to handle Promise params
+interface UserQuizPageProps {
+  params: Promise<{ quizId: string }>;
+}
+
+export default function UserQuizPage({ params }: UserQuizPageProps) {
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,9 +56,18 @@ export default function UserQuizPage({
     grade: string;
   } | null>(null);
 
-  const quizId = parseInt(params.quizId, 10);
+  const [quizId, setQuizId] = useState<number | null>(null);
+
+  // Unwrap params Promise
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setQuizId(parseInt(resolvedParams.quizId, 10));
+    });
+  }, [params]);
 
   const fetchAndStructureQuizData = useCallback(async () => {
+    if (quizId === null) return;
+
     setLoading(true);
     setError(null);
     try {
@@ -131,7 +141,12 @@ export default function UserQuizPage({
   // Updated effect to handle score submission with totalQuestions and correctAnswers
   useEffect(() => {
     const submitScore = async () => {
-      if (gameState === "finished" && !isSubmitting && !hasSubmitted && quizData) {
+      if (
+        gameState === "finished" &&
+        !isSubmitting &&
+        !hasSubmitted &&
+        quizData
+      ) {
         setIsSubmitting(true);
         try {
           const res = await fetch("/api/quiz/results", {
@@ -152,7 +167,7 @@ export default function UserQuizPage({
 
           const data = await res.json();
           setHasSubmitted(true);
-          
+
           // Store the calculated score and grade from backend
           if (data.data) {
             setFinalScore({
@@ -160,7 +175,7 @@ export default function UserQuizPage({
               grade: data.data.grade,
             });
           }
-          
+
           if (data.data?.isRetake) {
             toast.success("Skor berhasil disimpan! (Percobaan ulang)");
           } else {
@@ -233,7 +248,7 @@ export default function UserQuizPage({
     return "bg-gray-500 opacity-50";
   };
 
-  if (loading) {
+  if (loading || quizId === null) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-100">
         <span className="loading loading-spinner loading-lg text-red-800"></span>
@@ -291,23 +306,32 @@ export default function UserQuizPage({
   // UI for Finish Screen
   if (gameState === "finished") {
     // Use backend calculated score if available, otherwise calculate locally as fallback
-    const displayNilai = finalScore?.nilai ?? Math.round((correctAnswers / totalQuestions) * 100);
-    const displayGrade = finalScore?.grade ?? (() => {
-      if (displayNilai >= 80) return "A";
-      if (displayNilai >= 65) return "B";
-      if (displayNilai >= 50) return "C";
-      if (displayNilai >= 35) return "D";
-      return "E";
-    })();
+    const displayNilai =
+      finalScore?.nilai ?? Math.round((correctAnswers / totalQuestions) * 100);
+    const displayGrade =
+      finalScore?.grade ??
+      (() => {
+        if (displayNilai >= 80) return "A";
+        if (displayNilai >= 65) return "B";
+        if (displayNilai >= 50) return "C";
+        if (displayNilai >= 35) return "D";
+        return "E";
+      })();
 
     const getGradeColor = (grade: string) => {
       switch (grade) {
-        case "A": return "text-green-600";
-        case "B": return "text-blue-600";
-        case "C": return "text-yellow-600";
-        case "D": return "text-orange-600";
-        case "E": return "text-red-600";
-        default: return "text-gray-600";
+        case "A":
+          return "text-green-600";
+        case "B":
+          return "text-blue-600";
+        case "C":
+          return "text-yellow-600";
+        case "D":
+          return "text-orange-600";
+        case "E":
+          return "text-red-600";
+        default:
+          return "text-gray-600";
       }
     };
 
@@ -320,31 +344,33 @@ export default function UserQuizPage({
           <p className="text-lg text-gray-600 mb-6">
             Kerja bagus telah menyelesaikan kuis.
           </p>
-          
+
           <div className="bg-red-50 p-6 rounded-lg mb-4">
             <p className="text-xl text-gray-700 mb-2">Hasil Anda</p>
-            
+
             {/* Correct Answers Display */}
             <div className="mb-4 p-4 bg-white rounded-lg">
               <p className="text-lg text-gray-600">Jawaban Benar</p>
               <p className="text-4xl font-bold text-gray-800">
                 {correctAnswers}{" "}
-                <span className="text-2xl text-gray-500">/ {totalQuestions}</span>
+                <span className="text-2xl text-gray-500">
+                  / {totalQuestions}
+                </span>
               </p>
             </div>
 
             {/* Score Display */}
             <div className="mb-4 p-4 bg-white rounded-lg">
               <p className="text-lg text-gray-600">Nilai</p>
-              <p className="text-5xl font-bold text-red-800">
-                {displayNilai}
-              </p>
+              <p className="text-5xl font-bold text-red-800">{displayNilai}</p>
             </div>
 
             {/* Grade Display */}
             <div className="p-4 bg-white rounded-lg">
               <p className="text-lg text-gray-600">Grade</p>
-              <p className={`text-6xl font-bold ${getGradeColor(displayGrade)}`}>
+              <p
+                className={`text-6xl font-bold ${getGradeColor(displayGrade)}`}
+              >
                 {displayGrade}
               </p>
             </div>
