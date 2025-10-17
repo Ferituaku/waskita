@@ -28,6 +28,7 @@ const BerandaPage: React.FC = () => {
   const router = useRouter();
   const [articles, setArticles] = useState<Article[]>([]);
   const [videos, setVideos] = useState<VideoEdukasi[]>([]);
+  const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
   const [currentArticlePage, setCurrentArticlePage] = useState(1);
   const [currentVideoPage, setCurrentVideoPage] = useState(1);
   const [activeTab, setActiveTab] = useState("Semua");
@@ -46,24 +47,19 @@ const BerandaPage: React.FC = () => {
         const articlesResponse = await fetch('/api/articles');
         const articlesResult = await articlesResponse.json();
         
-        // Fetch videos
-        const videosResponse = await fetch('/api/videos');
-        const videosResult = await videosResponse.json();
-        
         if (articlesResult.success) {
-          // Filter only articles (category: "Artikel")
-          const filteredArticles = articlesResult.data.filter(
-            (article: Article) => article.category === "Artikel"
-          );
-          setArticles(filteredArticles);
-          console.log('Articles loaded:', filteredArticles);
+          setArticles(articlesResult.data);
+          setFilteredArticles(articlesResult.data);
         } else {
           setError("Gagal memuat artikel");
         }
 
+        // Fetch videos
+        const videosResponse = await fetch('/api/videos');
+        const videosResult = await videosResponse.json();
+        
         if (videosResult.success) {
           setVideos(videosResult.data);
-          console.log('Videos loaded:', videosResult.data);
         }
       } catch (err) {
         setError("Terjadi kesalahan saat memuat data");
@@ -76,11 +72,22 @@ const BerandaPage: React.FC = () => {
     fetchData();
   }, []);
 
+  // Filter articles by category
+  useEffect(() => {
+    if (activeTab === "Semua") {
+      setFilteredArticles(articles);
+    } else if (activeTab === "Artikel") {
+      setFilteredArticles(articles.filter(article => article.category === "Artikel"));
+    } else if (activeTab === "Video Edukasi") {
+      setFilteredArticles(articles.filter(article => article.category === "Video Edukasi"));
+    }
+    setCurrentArticlePage(1);
+    setCurrentVideoPage(1);
+  }, [activeTab, articles]);
+
   // Handle tab change
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    setCurrentArticlePage(1);
-    setCurrentVideoPage(1);
   };
 
   // Handle article click - navigate to article detail
@@ -94,8 +101,8 @@ const BerandaPage: React.FC = () => {
   };
 
   // Calculate pagination for articles
-  const totalArticlePages = Math.ceil(articles.length / itemsPerPage);
-  const paginatedArticles = articles.slice(
+  const totalArticlePages = Math.ceil(filteredArticles.length / itemsPerPage);
+  const paginatedArticles = filteredArticles.slice(
     (currentArticlePage - 1) * itemsPerPage,
     currentArticlePage * itemsPerPage
   );
@@ -178,13 +185,18 @@ const BerandaPage: React.FC = () => {
         {/* Section Artikel */}
         {showArticles && (
           <section className="mb-12">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 mt-6">
               <h3 className="text-xl font-bold text-gray-800">Artikel</h3>
             </div>
-
-            {articles.length === 0 ? (
+            
+            {filteredArticles.length === 0 ? (
               <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">Belum ada artikel tersedia</p>
+                <p className="text-gray-500">
+                  {activeTab === "Artikel" 
+                    ? "Belum ada artikel dalam kategori Artikel" 
+                    : "Belum ada artikel tersedia"
+                  }
+                </p>
               </div>
             ) : (
               <>
@@ -212,13 +224,15 @@ const BerandaPage: React.FC = () => {
         {/* Section Video Edukasi */}
         {showVideos && (
           <section>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 mt-6">
               <h3 className="text-xl font-bold text-gray-800">Video Edukasi</h3>
             </div>
 
             {videos.length === 0 ? (
               <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">Belum ada video tersedia</p>
+                <p className="text-gray-500">
+                  Belum ada video dalam kategori Video Edukasi
+                </p>
               </div>
             ) : (
               <>
@@ -262,6 +276,15 @@ const BerandaPage: React.FC = () => {
               </>
             )}
           </section>
+        )}
+
+        {/* Empty state when "Semua" is selected and no data at all */}
+        {activeTab === "Semua" && filteredArticles.length === 0 && videos.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-500">
+              Belum ada artikel atau video tersedia
+            </p>
+          </div>
         )}
       </div>
     </>
