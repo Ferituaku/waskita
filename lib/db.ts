@@ -4,7 +4,7 @@ const dbConfig = {
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "waskita_db",
+database: process.env.DB_NAME || "railway", // ← Ubah dari "waskita_db" ke "railway"
 };
 
 const CREATE_DATABASE_SQL = `CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`;
