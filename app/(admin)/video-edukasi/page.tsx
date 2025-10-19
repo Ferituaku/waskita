@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image"; // <-- PERUBAHAN: Ditambahkan
 import {
   Plus,
   Search,
@@ -15,6 +16,7 @@ import {
   Video,
 } from "lucide-react";
 import Header from "@/components/Header";
+import SkeletonTable from "@/components/SkeletonTable";
 
 interface VideoEdukasi {
   id: number;
@@ -30,6 +32,7 @@ const VideoEdukasiPage: React.FC = () => {
   const [filteredVideos, setFilteredVideos] = useState<VideoEdukasi[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
+  // PERUBAHAN 1: Set state loading awal ke true
   const [pageLoading, setPageLoading] = useState(true);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,7 +57,7 @@ const VideoEdukasiPage: React.FC = () => {
   // Fetch videos from API
   const fetchVideos = async () => {
     try {
-      setPageLoading(true);
+      // Tidak perlu setPageLoading(true) di sini lagi jika default-nya true
       const response = await fetch("/api/videos");
       const result = await response.json();
 
@@ -73,6 +76,7 @@ const VideoEdukasiPage: React.FC = () => {
 
   useEffect(() => {
     fetchVideos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Extract YouTube Video ID
@@ -97,6 +101,8 @@ const VideoEdukasiPage: React.FC = () => {
     }
     setCurrentPage(1);
   }, [searchTerm, videos]);
+
+  const entriesOptions = [5, 10, 20, 50];
 
   // Pagination
   const totalPages = Math.ceil(filteredVideos.length / entriesPerPage);
@@ -187,7 +193,7 @@ const VideoEdukasiPage: React.FC = () => {
 
       if (result.success) {
         showToast("success", "Video berhasil ditambahkan");
-        await fetchVideos();
+        await fetchVideos(); // Re-fetch data
         closeModal();
       } else {
         showToast("error", result.message || "Gagal menambahkan video");
@@ -218,7 +224,7 @@ const VideoEdukasiPage: React.FC = () => {
 
       if (result.success) {
         showToast("success", "Video berhasil diperbarui");
-        await fetchVideos();
+        await fetchVideos(); // Re-fetch data
         closeModal();
       } else {
         showToast("error", result.message || "Gagal memperbarui video");
@@ -242,7 +248,7 @@ const VideoEdukasiPage: React.FC = () => {
 
       if (result.success) {
         showToast("success", "Video berhasil dihapus");
-        await fetchVideos();
+        await fetchVideos(); // Re-fetch data
         closeModal();
       } else {
         showToast("error", result.message || "Gagal menghapus video");
@@ -271,19 +277,8 @@ const VideoEdukasiPage: React.FC = () => {
     return text.substring(0, maxLength) + "...";
   };
 
-  if (pageLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2
-            size={48}
-            className="animate-spin text-red-600 mx-auto mb-4"
-          />
-          <p className="text-gray-600 font-medium">Memuat data video...</p>
-        </div>
-      </div>
-    );
-  }
+  // Kode loading screen di tengah halaman (yang Anda komentari)
+  // bisa dihapus jika Anda sudah puas dengan skeleton table.
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
@@ -315,11 +310,11 @@ const VideoEdukasiPage: React.FC = () => {
                     placeholder="Cari judul video..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border border-red-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white text-gray-700 placeholder-gray-400 shadow-sm transition-all"
+                    className="w-full pl-12 pr-4 py-3 border border-red-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white text-gray-700 placeholder-gray-400 shadow-sm transition-all"
                   />
                 </div>
 
-                <div className="flex items-center gap-2 bg-white px-4 py-3 rounded-xl border border-red-200 shadow-sm">
+                <div className="flex items-center gap-2 bg-white px-4 py-3 rounded-xl border border-red-300 shadow-sm">
                   <span className="text-sm text-gray-600 whitespace-nowrap">
                     Per Halaman:
                   </span>
@@ -329,12 +324,17 @@ const VideoEdukasiPage: React.FC = () => {
                       setEntriesPerPage(Number(e.target.value));
                       setCurrentPage(1);
                     }}
-                    className="text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className="text-sm font-medium text-red-600 bg-red-100 border border-red-300 rounded-lg px-3 py-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={50}>50</option>
+                    {entriesOptions.map((opt) => (
+                      <option
+                        key={opt}
+                        value={opt}
+                        className="bg-white text-black"
+                      >
+                        {opt}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -371,82 +371,122 @@ const VideoEdukasiPage: React.FC = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {paginatedVideos.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-16 text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                          <Video size={32} className="text-red-400" />
-                        </div>
-                        <p className="text-gray-600 font-medium">
-                          Tidak ada video ditemukan
-                        </p>
-                        <p className="text-gray-400 text-sm">
-                          {searchTerm
-                            ? "Coba ubah kata kunci pencarian"
-                            : "Mulai dengan menambahkan video edukasi"}
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedVideos.map((video, index) => (
-                    <tr
-                      key={video.id}
-                      className="hover:bg-red-50 transition-colors duration-150 group"
-                    >
-                      <td className="px-6 py-4 text-sm text-gray-600 font-medium">
-                        {(currentPage - 1) * entriesPerPage + index + 1}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="relative w-32 h-20 rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-shadow">
-                          <div className="w-full h-full bg-gradient-to-br from-red-400 via-red-400 to-red-500 flex flex-col items-center justify-center">
-                            <Youtube size={32} className="text-white mb-1" />
+
+              {/* PERUBAHAN 2: Skeleton dinamis */}
+              {pageLoading ? (
+                <SkeletonTable rows={entriesPerPage} cols={6} />
+              ) : (
+                <tbody className="divide-y divide-gray-200">
+                  {paginatedVideos.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-16 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                            <Video size={32} className="text-red-400" />
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-semibold text-gray-800">
-                          {truncateText(video.judul, 60)}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <a
-                          href={video.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-                        >
-                          <span>Lihat Video</span>
-                          <ExternalLink size={14} />
-                        </a>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {formatDate(video.tanggal_ditambahkan)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => openModal("edit", video)}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95"
-                            title="Edit"
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            onClick={() => openModal("delete", video)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95"
-                            title="Hapus"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <p className="text-gray-600 font-medium">
+                            Tidak ada video ditemukan
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            {searchTerm
+                              ? "Coba ubah kata kunci pencarian"
+                              : "Mulai dengan menambahkan video edukasi"}
+                          </p>
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
+                  ) : (
+                    paginatedVideos.map((video, index) => (
+                      <tr
+                        key={video.id}
+                        className="hover:bg-red-50 transition-colors duration-150 group"
+                      >
+                        <td className="px-6 py-4 text-sm text-gray-600 font-medium">
+                          {(currentPage - 1) * entriesPerPage + index + 1}
+                        </td>
+                        
+                        {/* PERUBAHAN 3: Thumbnail asli YouTube */}
+                        <td className="px-6 py-4">
+                          {(() => {
+                            const videoId = getYouTubeVideoId(video.link);
+                            return (
+                              <a
+                                href={video.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="relative block w-32 h-20 rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-200"
+                              >
+                                {videoId ? (
+                                  <Image
+                                    src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
+                                    alt={`Thumbnail ${video.judul}`}
+                                    fill
+                                    sizes="128px"
+                                    className="object-cover group-hover:scale-110 transition-transform duration-200"
+                                  />
+                                ) : (
+                                  // Fallback jika ID tidak ditemukan
+                                  <div className="w-full h-full bg-gradient-to-br from-red-400 via-red-400 to-red-500 flex flex-col items-center justify-center">
+                                    <Youtube
+                                      size={32}
+                                      className="text-white mb-1"
+                                    />
+                                  </div>
+                                )}
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                  <Play
+                                    size={24}
+                                    className="text-white"
+                                    fill="white"
+                                  />
+                                </div>
+                              </a>
+                            );
+                          })()}
+                        </td>
+                        
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-semibold text-gray-800">
+                            {truncateText(video.judul, 60)}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <a
+                            href={video.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                          >
+                            <span>Lihat Video</span>
+                            <ExternalLink size={14} />
+                          </a>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {formatDate(video.tanggal_ditambahkan)}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => openModal("edit", video)}
+                              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95"
+                              title="Edit"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              onClick={() => openModal("delete", video)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95"
+                              title="Hapus"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              )}
             </table>
           </div>
 
@@ -594,9 +634,21 @@ const VideoEdukasiPage: React.FC = () => {
                         Preview
                       </label>
                       <div className="relative w-full h-48 rounded-xl overflow-hidden shadow-md">
-                        <div className="w-full h-full bg-gradient-to-br from-red-400 via-orange-400 to-red-500 flex flex-col items-center justify-center">
-                          <Youtube size={64} className="text-white mb-3" />
-                          <Play size={32} className="text-white" fill="white" />
+                        {/* Preview juga bisa pakai thumbnail asli */}
+                        <Image
+                          src={`https://img.youtube.com/vi/${getYouTubeVideoId(
+                            formData.link
+                          )}/mqdefault.jpg`}
+                          alt="Video preview"
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+                          <Play
+                            size={32}
+                            className="text-white"
+                            fill="white"
+                          />
                           <p className="text-white text-sm mt-3 font-medium">
                             Video Valid
                           </p>

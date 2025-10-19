@@ -252,29 +252,31 @@ const QuizPage: React.FC = () => {
               />
               <span>Tambah Data</span>
             </button>
-            <div className="flex items-center gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <div className="relative flex-1 lg:w-80">
                 <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-red-400"
                   size={20}
                 />
                 <input
                   type="text"
-                  placeholder="Cari judul kuis..."
+                  placeholder="Cari judul video..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 py-2 border text-gray-700 border-gray-300 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full pl-12 pr-4 py-3 border border-red-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white text-gray-700 placeholder-gray-400 shadow-sm transition-all"
                 />
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>Entries per Page:</span>
+              <div className="flex items-center gap-2 bg-white px-4 py-3 rounded-xl border border-red-300 shadow-sm">
+                <span className="text-sm text-gray-600 whitespace-nowrap">
+                  Per Halaman:
+                </span>
                 <select
-                  className="bg-red-600 hover:bg-red-800 text-white font-semibold py-1 px-3 rounded-md focus:outline-none"
                   value={entriesPerPage}
                   onChange={(e) => {
                     setEntriesPerPage(Number(e.target.value));
                     setCurrentPage(1);
                   }}
+                  className="text-sm font-medium text-red-600 bg-red-100 border border-red-300 rounded-lg px-3 py-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                   {entriesOptions.map((opt) => (
                     <option

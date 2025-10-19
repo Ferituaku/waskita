@@ -502,18 +502,18 @@ const MateriPage: React.FC = () => {
               />
               <span>Tambah Data</span>
             </button>
-            <div className="flex items-center gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <div className="relative flex-1 lg:w-80">
                 <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-red-400"
                   size={20}
                 />
                 <input
                   type="text"
-                  placeholder="Cari materi..."
+                  placeholder="Cari judul video..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 py-2 border text-gray-500 border-gray-300 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full pl-12 pr-4 py-3 border border-red-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white text-gray-700 placeholder-gray-400 shadow-sm transition-all"
                 />
               </div>
             </div>

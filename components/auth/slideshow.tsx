@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play, ImageOff } from "lucide-react";
 
 type Slide = {
   src: string;
@@ -29,6 +29,7 @@ export function Slideshow({
   const [index, setIndex] = React.useState(0);
   const [paused, setPaused] = React.useState(!autoPlay);
   const [isImageLoading, setIsImageLoading] = React.useState(true);
+  const [isImageError, setIsImageError] = React.useState(false);
   const [progress, setProgress] = React.useState(0);
 
   // Auto-pause when tab is not visible
@@ -83,12 +84,14 @@ export function Slideshow({
     setIndex((i) => (i + 1) % slides.length);
     setProgress(0);
     setIsImageLoading(true);
+    setIsImageError(false);
   }, [slides.length]);
 
   const goToPrevious = React.useCallback(() => {
     setIndex((i) => (i - 1 + slides.length) % slides.length);
     setProgress(0);
     setIsImageLoading(true);
+    setIsImageError(false);
   }, [slides.length]);
 
   const togglePause = React.useCallback(() => {
@@ -113,6 +116,7 @@ export function Slideshow({
     setIndex(i);
     setProgress(0);
     setIsImageLoading(true);
+    setIsImageError(false);
   }, []);
 
   const handleDragEnd = React.useCallback(
@@ -182,17 +186,42 @@ export function Slideshow({
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             priority={index === 0}
-            quality={90}
+            // quality={90} // Opsional: Hapus untuk menghilangkan warning
             className={cn(
               "object-cover transition-opacity duration-300",
-              isImageLoading ? "opacity-0" : "opacity-100"
+              // Sembunyikan gambar jika sedang loading ATAU jika ada error
+              isImageLoading || isImageError ? "opacity-0" : "opacity-100"
             )}
-            onLoadingComplete={() => setIsImageLoading(false)}
+            onLoad={() => {
+              setIsImageLoading(false);
+              setIsImageError(false);
+            }}
+            onError={() => {
+              // Jika gambar gagal dimuat (404, dll)
+              setIsImageLoading(false);
+              setIsImageError(true);
+            }}
           />
 
           {/* Loading skeleton */}
           {isImageLoading && (
             <div className="absolute inset-0 bg-red-900/50 animate-pulse" />
+          )}
+          {!isImageLoading && isImageError && (
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center bg-red-900/50" // Latar belakang placeholder
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }} // Efek "fade tipis"
+              aria-label="Gambar tidak dapat dimuat"
+            >
+              <div className="text-center text-white/70">
+                <ImageOff className="w-12 h-12 mx-auto" />
+                <p className="mt-2 text-sm font-medium">
+                  Gambar tidak tersedia
+                </p>
+              </div>
+            </motion.div>
           )}
         </motion.div>
       </AnimatePresence>
