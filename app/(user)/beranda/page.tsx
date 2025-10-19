@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Youtube, ExternalLink } from "lucide-react";
+import ChatBot from "@/components/chatbot";
 
 interface Article {
   id: number;
@@ -36,17 +37,17 @@ const BerandaPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const itemsPerPage = 3;
-  
+
   // Fetch articles and videos from API
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch articles
-        const articlesResponse = await fetch('/api/articles');
+        const articlesResponse = await fetch("/api/articles");
         const articlesResult = await articlesResponse.json();
-        
+
         if (articlesResult.success) {
           setArticles(articlesResult.data);
           setFilteredArticles(articlesResult.data);
@@ -55,15 +56,15 @@ const BerandaPage: React.FC = () => {
         }
 
         // Fetch videos
-        const videosResponse = await fetch('/api/videos');
+        const videosResponse = await fetch("/api/videos");
         const videosResult = await videosResponse.json();
-        
+
         if (videosResult.success) {
           setVideos(videosResult.data);
         }
       } catch (err) {
         setError("Terjadi kesalahan saat memuat data");
-        console.error('Error fetching data:', err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
@@ -77,9 +78,13 @@ const BerandaPage: React.FC = () => {
     if (activeTab === "Semua") {
       setFilteredArticles(articles);
     } else if (activeTab === "Artikel") {
-      setFilteredArticles(articles.filter(article => article.category === "Artikel"));
+      setFilteredArticles(
+        articles.filter((article) => article.category === "Artikel")
+      );
     } else if (activeTab === "Video Edukasi") {
-      setFilteredArticles(articles.filter(article => article.category === "Video Edukasi"));
+      setFilteredArticles(
+        articles.filter((article) => article.category === "Video Edukasi")
+      );
     }
     setCurrentArticlePage(1);
     setCurrentVideoPage(1);
@@ -97,7 +102,7 @@ const BerandaPage: React.FC = () => {
 
   // Handle video click - open in new tab
   const handleVideoClick = (videoLink: string) => {
-    window.open(videoLink, '_blank', 'noopener,noreferrer');
+    window.open(videoLink, "_blank", "noopener,noreferrer");
   };
 
   // Calculate pagination for articles
@@ -119,7 +124,7 @@ const BerandaPage: React.FC = () => {
     category: article.category,
     title: article.title,
     imageUrl: article.image_url || "/default-image.jpg",
-    onClick: () => handleArticleClick(article.id)
+    onClick: () => handleArticleClick(article.id),
   });
 
   // Format date
@@ -166,6 +171,7 @@ const BerandaPage: React.FC = () => {
   return (
     <>
       <Header title="Beranda" />
+      <ChatBot />
       <div className="p-4 md:p-8">
         <section className="mb-5">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
@@ -176,8 +182,8 @@ const BerandaPage: React.FC = () => {
           </p>
         </section>
 
-        <TabFilter 
-          tabs={["Semua", "Artikel", "Video Edukasi"]} 
+        <TabFilter
+          tabs={["Semua", "Artikel", "Video Edukasi"]}
           activeTab={activeTab}
           onTabChange={handleTabChange}
         />
@@ -188,23 +194,22 @@ const BerandaPage: React.FC = () => {
             <div className="flex items-center justify-between mb-6 mt-6">
               <h3 className="text-xl font-bold text-gray-800">Artikel</h3>
             </div>
-            
+
             {filteredArticles.length === 0 ? (
               <div className="text-center py-8 bg-gray-50 rounded-lg">
                 <p className="text-gray-500">
-                  {activeTab === "Artikel" 
-                    ? "Belum ada artikel dalam kategori Artikel" 
-                    : "Belum ada artikel tersedia"
-                  }
+                  {activeTab === "Artikel"
+                    ? "Belum ada artikel dalam kategori Artikel"
+                    : "Belum ada artikel tersedia"}
                 </p>
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
                   {paginatedArticles.map((article) => (
-                    <MaterialCard 
-                      key={article.id} 
-                      {...convertToMaterialProps(article)} 
+                    <MaterialCard
+                      key={article.id}
+                      {...convertToMaterialProps(article)}
                     />
                   ))}
                 </div>
@@ -238,15 +243,21 @@ const BerandaPage: React.FC = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
                   {paginatedVideos.map((video) => (
-                    <div 
+                    <div
                       key={video.id}
                       onClick={() => handleVideoClick(video.link)}
                       className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
                     >
                       <div className="relative h-48 bg-gradient-to-br from-red-400 via-red-500 to-red-600 flex items-center justify-center">
-                        <Youtube size={64} className="text-white opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <Youtube
+                          size={64}
+                          className="text-white opacity-80 group-hover:opacity-100 transition-opacity"
+                        />
                         <div className="absolute top-3 right-3">
-                          <ExternalLink size={20} className="text-white opacity-70" />
+                          <ExternalLink
+                            size={20}
+                            className="text-white opacity-70"
+                          />
                         </div>
                       </div>
                       <div className="p-5">
@@ -279,13 +290,15 @@ const BerandaPage: React.FC = () => {
         )}
 
         {/* Empty state when "Semua" is selected and no data at all */}
-        {activeTab === "Semua" && filteredArticles.length === 0 && videos.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">
-              Belum ada artikel atau video tersedia
-            </p>
-          </div>
-        )}
+        {activeTab === "Semua" &&
+          filteredArticles.length === 0 &&
+          videos.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">
+                Belum ada artikel atau video tersedia
+              </p>
+            </div>
+          )}
       </div>
     </>
   );

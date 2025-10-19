@@ -31,7 +31,7 @@ const adminNavLinks: NavLink[] = [
   { href: "/materi", label: "Materi", icon: BookOpenText },
   { href: "/quiz", label: "Kelola Quiz", icon: ClipboardCheck },
   { href: "/video-edukasi", label: "Video Edukasi", icon: Youtube },
-  { href: "/users", label: "Kelola User", icon: Users },
+  { href: "/users-management", label: "Kelola User", icon: Users },
 ];
 
 // Menu untuk USER BIASA

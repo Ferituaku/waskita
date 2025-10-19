@@ -65,7 +65,7 @@ export async function middleware(req: NextRequest) {
       "/quiz-user",
       "/apa-itu-wpa",
       "/beranda",
-      "/user/profile",
+      "/user/profile/edit",
     ];
     const isUserRoute = userRoutes.some((route) => pathname.startsWith(route));
 
@@ -79,7 +79,7 @@ export async function middleware(req: NextRequest) {
     // 🔴 ADMIN ROUTES
     const adminRoutes = [
       "/materi",
-      "/admin/profile",
+      "/admin/profile/edit",
       "/quiz",
       "/users-management",
       "/video-edukasi",

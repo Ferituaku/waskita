@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Toaster position="top-right" reverseOrder={false} />
           {children}
         </main>
-        <ChatBot />
+        
       </SidebarProvider>
     </div>
   );

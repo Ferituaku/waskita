@@ -3,17 +3,46 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
-import Header from "@/components/Header";
+import Header from "@/components/Header"; // Asumsi komponen ini ada
 
+// --- Import untuk UI/UX Baru ---
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button"; // dari Shadcn
+import { Badge } from "@/components/ui/badge"; // dari Shadcn
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // dari Shadcn
+import { Skeleton } from "@/components/ui/skeleton"; // dari Shadcn
+import {
+  ArrowLeft,
+  CalendarDays,
+  Printer,
+  Newspaper,
+  AlertTriangle,
+  RefreshCw,
+} from "lucide-react";
+
+// --- Tipe data tetap sama ---
 interface Article {
   id: number;
   title: string;
-  content: string;
+  content: string; // Asumsi ini adalah HTML, bukan plain text
   category: string;
   image_url?: string;
   created_at: string;
   updated_at: string;
 }
+
+// --- Varian Animasi untuk Framer Motion ---
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  in: { opacity: 1, y: 0 },
+  out: { opacity: 0, y: -20 },
+};
+
+const transition = {
+  type: "spring",
+  stiffness: 260,
+  damping: 20,
+};
 
 export default function ArticleDetailPage() {
   const router = useRouter();
@@ -22,46 +51,66 @@ export default function ArticleDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchArticle = async () => {
-      if (!params.id) return;
-      
-      try {
-        setLoading(true);
-        const response = await fetch(`/api/articles/${params.id}`);
-        const result = await response.json();
-        
-        if (result.success) {
-          setArticle(result.data);
-        } else {
-          setError("Artikel tidak ditemukan");
-        }
-      } catch (err) {
-        setError("Terjadi kesalahan saat memuat artikel");
-        console.error('Error fetching article:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchArticle = async () => {
+    if (!params.id) return;
 
+    try {
+      setLoading(true);
+      setError(null); // Reset error state
+      const response = await fetch(`/api/articles/${params.id}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setArticle(result.data);
+      } else {
+        setError(result.message || "Artikel tidak ditemukan");
+      }
+    } catch (err) {
+      setError("Terjadi kesalahan saat memuat artikel. Silakan coba lagi.");
+      console.error("Error fetching article:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchArticle();
   }, [params.id]);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   if (loading) {
     return (
       <>
-        <Header title="Detail Artikel" />
-        <div className="p-4 md:p-8">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+        <Header title="Memuat Artikel..." />
+        <div className="p-4 md:p-6 max-w-5xl mx-auto">
+          {/* Skeleton untuk Tombol Kembali */}
+          <Skeleton className="h-9 w-28 mb-6" />
+
+          {/* Skeleton untuk Header Artikel */}
+          <div className="mb-4 space-y-4">
+            <Skeleton className="h-6 w-16" /> {/* Badge Kategori */}
+            <Skeleton className="h-10 w-full" /> {/* Judul */}
+            <Skeleton className="h-8 w-3/4" /> {/* Judul baris 2 (jika ada) */}
+            <Skeleton className="h-5 w-64" /> {/* Metadata Tanggal */}
+          </div>
+
+          {/* Skeleton untuk Gambar */}
+          <Skeleton className="relative w-full h-64 md:h-96 mb-8 rounded-lg" />
+
+          {/* Skeleton untuk Konten */}
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-11/12" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
           </div>
         </div>
       </>
@@ -71,18 +120,28 @@ export default function ArticleDetailPage() {
   if (error || !article) {
     return (
       <>
-        <Header title="Detail Artikel" />
-        <div className="p-4 md:p-8">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error || "Artikel tidak ditemukan"}
+        <Header title="Error" />
+        <motion.div
+          className="p-4 md:p-8 max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[60vh]"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Alert variant="destructive" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Gagal Memuat Artikel</AlertTitle>
+            <AlertDescription>
+              {error || "Artikel yang Anda cari tidak dapat ditemukan."}
+            </AlertDescription>
+          </Alert>
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={() => router.back()}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Kembali
+            </Button>
+            <Button onClick={fetchArticle}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Coba Lagi
+            </Button>
           </div>
-          <button
-            onClick={() => router.back()}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
-          >
-            Kembali
-          </button>
-        </div>
+        </motion.div>
       </>
     );
   }
@@ -90,78 +149,107 @@ export default function ArticleDetailPage() {
   return (
     <>
       <Header title="Detail Artikel" />
-      <div className="p-4 md:p-8 max-w-4xl mx-auto">
-        {/* Back Button */}
-        <button
-          onClick={() => router.back()}
-          className="flex items-center text-red-600 hover:text-red-700 mb-6 transition-colors"
-        >
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Kembali
-        </button>
 
-        {/* Article Header */}
-        <div className="mb-6">
-          <span className="inline-block bg-red-100 text-red-600 text-sm font-semibold px-3 py-1 rounded-full mb-4">
+      {/* Container utama dengan animasi Framer Motion */}
+      <motion.div
+        className="p-4 md:p-6 max-w-5xl mx-auto"
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      >
+        {/* Tombol Kembali (Shadcn + Framer Motion) */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0, transition: { delay: 0.1 } }}
+        >
+          <Button
+            variant="secondary"
+            onClick={() => router.back()}
+            className="mb-4 group bg-slate-400/10 hover:bg-red-400/20"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
+            Kembali
+          </Button>
+        </motion.div>
+        {/* Header Artikel */}
+        <motion.div
+          className="mb-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
+        >
+          <Badge variant="destructive" className="text-sm mb-2 text-white">
             {article.category}
-          </span>
-          
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4 leading-tight">
+          </Badge>
+          <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
             {article.title}
           </h1>
-          
           <div className="flex items-center text-gray-600 text-sm">
+            <CalendarDays className="w-4 h-4 mr-2" />
             <span>Dipublikasikan pada {formatDate(article.created_at)}</span>
             {article.updated_at !== article.created_at && (
-              <span className="ml-4">
-                • Diperbarui pada {formatDate(article.updated_at)}
+              <span className="ml-4 pl-4 border-l border-gray-300">
+                Diperbarui {formatDate(article.updated_at)}
               </span>
             )}
           </div>
-        </div>
-
-        {/* Featured Image */}
+        </motion.div>
+        {/* Gambar Artikel (dengan animasi) */}
         {article.image_url && (
-          <div className="relative w-full h-64 md:h-96 mb-8 rounded-lg overflow-hidden">
+          <motion.div
+            className="relative w-full h-64 md:h-[450px] mb-8 rounded-lg overflow-hidden shadow-lg"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1, transition: { delay: 0.3 } }}
+          >
             <Image
               src={article.image_url}
               alt={article.title}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
+              sizes="(max-width: 768px) 100vw, 896px"
+              priority // Penting untuk LCP (Largest Contentful Paint)
             />
-          </div>
+          </motion.div>
         )}
-
-        {/* Article Content */}
-        <article className="prose prose-lg max-w-none">
-          <div 
-            className="text-gray-700 leading-relaxed whitespace-pre-line"
-            dangerouslySetInnerHTML={{ __html: article.content.replace(/\n/g, '<br>') }}
-          />
-        </article>
-
-        {/* Article Actions */}
-        <div className="mt-12 pt-8 border-t border-gray-200">
+        {/* Konten Artikel (Menggunakan Tailwind Typography / @tailwindcss/prose) */}
+        <motion.article
+          className="prose prose-lg md:prose-xl max-w-none
+                   prose-red dark:prose-invert
+                   prose-headings:font-bold prose-headings:text-gray-900
+                   prose-p:text-gray-700
+                   prose-a:text-red-600
+                   prose-strong:text-gray-800 "
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: 0.4 } }}
+          // dangerouslySetInnerHTML={{ __html: article.content }}
+          // PENTING: Kode di atas berasumsi `article.content` adalah HTML yang aman (sanitized).
+          // Jika ini adalah plain text, gunakan:
+        />
+        <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-line">
+          {article.content}
+        </p>
+        {/* Aksi Artikel */}
+        <motion.div
+          className="mt-12 pt-8 border-t border-gray-200 "
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: 0.5 } }}
+        >
           <div className="flex flex-wrap gap-4">
-            <button
-              onClick={() => router.push('/beranda')}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded transition-colors"
+            <Button
+              onClick={() => router.push("/beranda")} // Ganti dengan path artikel Anda
+              className="bg-red-600 hover:bg-red-700 "
             >
+              <Newspaper className="mr-2 h-4 w-4" />
               Lihat Artikel Lainnya
-            </button>
-            
-            <button
-              onClick={() => window.print()}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded transition-colors"
-            >
+            </Button>
+            <Button variant="outline" onClick={() => window.print()}>
+              <Printer className="mr-2 h-4 w-4" />
               Cetak Artikel
-            </button>
+            </Button>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </>
   );
 }

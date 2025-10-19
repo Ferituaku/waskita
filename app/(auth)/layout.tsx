@@ -24,7 +24,7 @@ export default function AuthLayout({
       {/* Left Column: Image */}
       <div className="relative hidden md:block">
         <div className="absolute inset-0 bg-white bg-opacity-30" />
-        <Slideshow slides={slides} className="h-full w-full object-cover" />
+        <Slideshow slides={slides} className="h-full w-full " />
       </div>
       {/* Right Column: Form */}
       <div className="relative isolate flex items-center justify-center">

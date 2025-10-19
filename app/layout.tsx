@@ -9,8 +9,7 @@ import { ToastContainer } from "react-toastify";
 
 export const metadata: Metadata = {
   title: "WASKITA - Edukasi HIV/AIDS",
-  description:
-    "Wadah Sinau Kita - Platform edukasi mengenai HIV/AIDS.",
+  description: "Wadah Sinau Kita - Platform edukasi mengenai HIV/AIDS.",
 };
 
 export default function RootLayout({
