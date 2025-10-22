@@ -1,3 +1,4 @@
+//app/api/articles/%5Bid%5D/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { OkPacket, RowDataPacket } from "mysql2";
@@ -11,7 +12,18 @@ interface Article extends RowDataPacket {
   file_url?: string;
   image_url: string;
 }
-
+function normalizeImageUrl(imageUrl: string | null | undefined): string {
+  if (!imageUrl) {
+    return "/images/default-article.jpg";
+  }
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl;
+  }
+  if (imageUrl.startsWith("/")) {
+    return imageUrl;
+  }
+  return `/uploads/images/${imageUrl}`;
+}
 // GET - Ambil artikel berdasarkan ID
 export async function GET(
   request: NextRequest,
@@ -32,7 +44,10 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ success: true, data: rows[0] });
+    const article = rows[0];
+    article.image_url = normalizeImageUrl(article.image_url);
+
+    return NextResponse.json({ success: true, data: article });
   } catch (error) {
     console.error("Error fetching article:", error);
     return NextResponse.json(

@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["i.pravatar.cc", "img.youtube.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+    domains: ["waskita-elearning.com", "i.pravatar.cc", "img.youtube.com"],
   },
   eslint: {
     //WARNING: Ini mengabaikan error ESLint saat production build, turn off jika sudah selesai development

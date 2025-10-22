@@ -49,6 +49,7 @@ export default function ArticleDetailPage() {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   const fetchArticle = async () => {
     if (!params.id) return;
@@ -74,6 +75,7 @@ export default function ArticleDetailPage() {
 
   useEffect(() => {
     fetchArticle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const formatDate = (dateString: string) => {
@@ -82,6 +84,18 @@ export default function ArticleDetailPage() {
       month: "long",
       day: "numeric",
     });
+  };
+
+  const handleImageError = () => {
+    console.error("Image failed to load:", article?.image_url);
+    setImageError(true);
+  };
+
+  const getImageUrl = () => {
+    if (imageError || !article?.image_url) {
+      return "/images/default-article.jpg";
+    }
+    return article.image_url;
   };
 
   if (loading) {
@@ -201,13 +215,23 @@ export default function ArticleDetailPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1, transition: { delay: 0.3 } }}
           >
-            <Image
+            {/* <Image
               src={article.image_url}
               alt={article.title}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 896px"
               priority // Penting untuk LCP (Largest Contentful Paint)
+            /> */}
+            <Image
+              src={getImageUrl()}
+              alt={article.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 896px"
+              priority
+              onError={handleImageError}
+              unoptimized
             />
           </motion.div>
         )}

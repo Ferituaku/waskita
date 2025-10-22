@@ -1,3 +1,4 @@
+// app/api/articles/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { OkPacket, RowDataPacket } from "mysql2";
@@ -12,6 +13,19 @@ interface Article extends RowDataPacket {
   image_url: string;
 }
 
+function normalizeImageUrl(imageUrl: string | null | undefined): string {
+  if (!imageUrl) {
+    return "/images/default-article.jpg";
+  }
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl;
+  }
+  if (imageUrl.startsWith("/")) {
+    return imageUrl;
+  }
+  return `/uploads/images/${imageUrl}`;
+}
+
 // GET - Ambil semua artikel dari database
 export async function GET() {
   try {
@@ -19,7 +33,11 @@ export async function GET() {
     const [rows] = await db.query<Article[]>(
       "SELECT * FROM articles ORDER BY created_at DESC"
     );
-    return NextResponse.json({ success: true, data: rows });
+    const articles = rows.map((article) => ({
+      ...article,
+      image_url: normalizeImageUrl(article.image_url),
+    }));
+    return NextResponse.json({ success: true, data: articles });
   } catch (error) {
     console.error("Error fetching articles:", error);
     return NextResponse.json(
