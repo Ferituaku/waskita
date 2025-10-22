@@ -1,23 +1,41 @@
-export const slides = [
+// components/auth/slides.tsx
+
+export type NewsSlide = {
+  src: string;
+  alt: string;
+  title: string;
+  category: string;
+  date: string;
+  author?: string;
+  tags?: string[];
+  source?: string;
+  description?: string;
+};
+
+export const slides: NewsSlide[] = [
   {
-    src: "/slides/foto_tot_waskita.jpg",
-    alt: "WASKITA by StopHIVa",
-    title: "Training on Trainers (ToT) WASKITA by StopHIVa",
+    src: "/news/tot_1_waskita.jpg",
+    alt: "WASKITA by StopHIVa Training on Trainers",
+    title: "Training on Trainers (ToT) Warga Peduli AIDS #1",
+    category: "Pelatihan",
+    date: "2025-10-08",
+    author: "Tim StopHIVa",
+    tags: ["ToT", "Edukasi", "Peer Counselor"],
+    source: "Stophiva Universitas Diponegoro",
+    description:
+      "Program pelatihan intensif untuk meningkatkan kapasitas peer educator dalam edukasi HIV/AIDS di komunitas.",
   },
   {
-    src: "/ilustrasi-kesehatan-komunitas-modern.jpg",
-    alt: "Ilustrasi kesehatan komunitas modern",
-    title: "Kolaborasi komunitas untuk hidup sehat.",
-  },
-  {
-    src: "/rumah-sakit-dan-teknologi-digital.jpg",
-    alt: "Rumah sakit dan teknologi digital",
-    title: "Teknologi digital untuk pelayanan yang lebih baik.",
-  },
-  {
-    src: "/edukasi-kesehatan-dan-pencegahan.jpg",
-    alt: "Edukasi kesehatan dan pencegahan",
-    title: "Edukasi, pencegahan, dan kesadaran kesehatan.",
+    src: "/news/tot_2_oktober_11.JPG",
+    alt: "WASKITA by StopHIVa Training on Trainers",
+    title: "Training on Trainers (ToT) Warga Peduli AIDS #2",
+    category: "Pelatihan",
+    date: "2025-10-11",
+    author: "Tim StopHIVa",
+    tags: ["Komunitas", "Kesehatan", "Kolaborasi"],
+    source: "Stophiva Universitas Diponegoro",
+    description:
+      "Kolaborasi dengan berbagai komunitas untuk memperluas jangkauan edukasi HIV/AIDS melalui pelatihan peer educator.",
   },
 ];
 
