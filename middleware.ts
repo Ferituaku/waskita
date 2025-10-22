@@ -34,7 +34,7 @@ export async function middleware(req: NextRequest) {
         if (userRole === "admin") {
           return NextResponse.redirect(new URL("/dashboard", req.url));
         } else {
-          return NextResponse.redirect(new URL("/beranda", req.url));
+          return NextResponse.redirect(new URL("/apa-itu-wpa", req.url));
         }
       } catch {
         // Token invalid, hapus dan biarkan akses login

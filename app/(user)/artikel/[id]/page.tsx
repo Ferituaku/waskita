@@ -6,7 +6,7 @@ import Image from "next/image";
 import Header from "@/components/Header"; // Asumsi komponen ini ada
 
 // --- Import untuk UI/UX Baru ---
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button"; // dari Shadcn
 import { Badge } from "@/components/ui/badge"; // dari Shadcn
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // dari Shadcn
@@ -14,7 +14,6 @@ import { Skeleton } from "@/components/ui/skeleton"; // dari Shadcn
 import {
   ArrowLeft,
   CalendarDays,
-  Printer,
   Newspaper,
   AlertTriangle,
   RefreshCw,
@@ -38,11 +37,11 @@ const pageVariants = {
   out: { opacity: 0, y: -20 },
 };
 
-const transition = {
-  type: "spring",
-  stiffness: 260,
-  damping: 20,
-};
+// const transition = {
+//   type: "spring",
+//   stiffness: 260,
+//   damping: 20,
+// };
 
 export default function ArticleDetailPage() {
   const router = useRouter();
@@ -179,9 +178,9 @@ export default function ArticleDetailPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
         >
-          {/* <Badge variant="destructive" className="text-sm mb-2 text-white">
+          <Badge variant="destructive" className="text-sm mb-2 text-white">
             {article.category}
-          </Badge> */}
+          </Badge>
           <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
             {article.title}
           </h1>

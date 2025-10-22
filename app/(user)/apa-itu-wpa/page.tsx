@@ -4,9 +4,6 @@ import Header from "@/components/Header";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import {
-  Youtube,
-  ExternalLink,
-  Loader2,
   Users,
   Heart,
   Target,
@@ -54,49 +51,49 @@ const getColorClasses = (color: string) => {
 };
 
 const ApaItuWPAPage: React.FC = () => {
-  const [videos, setVideos] = useState<VideoEdukasi[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [videos, setVideos] = useState<VideoEdukasi[]>([]);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState<string | null>(null);
 
   // Fetch videos from API
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/videos");
-        const result = await response.json();
+  // useEffect(() => {
+  //   const fetchVideos = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const response = await fetch("/api/videos");
+  //       const result = await response.json();
 
-        if (result.success) {
-          setVideos(result.data);
-        } else {
-          setError("Gagal memuat video");
-        }
-      } catch (err) {
-        setError("Terjadi kesalahan saat memuat video");
-        console.error("Error fetching videos:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       if (result.success) {
+  //         setVideos(result.data);
+  //       } else {
+  //         setError("Gagal memuat video");
+  //       }
+  //     } catch (err) {
+  //       setError("Terjadi kesalahan saat memuat video");
+  //       console.error("Error fetching videos:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchVideos();
-  }, []);
+  //   fetchVideos();
+  // }, []);
 
   // Handle video click - open in new tab
-  const handleVideoClick = (videoLink: string) => {
-    window.open(videoLink, "_blank", "noopener,noreferrer");
-  };
+  // const handleVideoClick = (videoLink: string) => {
+  //   window.open(videoLink, "_blank", "noopener,noreferrer");
+  // };
 
   // Format date
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    };
-    return date.toLocaleDateString("id-ID", options);
-  };
+  // const formatDate = (dateString: string): string => {
+  //   const date = new Date(dateString);
+  //   const options: Intl.DateTimeFormatOptions = {
+  //     day: "2-digit",
+  //     month: "long",
+  //     year: "numeric",
+  //   };
+  //   return date.toLocaleDateString("id-ID", options);
+  // };
 
   // Peran WPA data
   const peranWPA = [
@@ -303,9 +300,9 @@ const ApaItuWPAPage: React.FC = () => {
                     (Wadah Sinau Kita).
                   </p>
                   <p className="text-slate-600 leading-relaxed italic">
-                    "Tembalang Responsif dan Antisipatif HIV AIDS Berbasis
+                    &quot;Tembalang Responsif dan Antisipatif HIV AIDS Berbasis
                     Literasi Digital Website Wadah Sinau Kita oleh Warga Peduli
-                    AIDS"
+                    AIDS&quot;
                   </p>
                 </div>
               </div>

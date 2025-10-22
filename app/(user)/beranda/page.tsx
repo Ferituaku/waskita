@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  Youtube,
   ExternalLink,
   BookOpen,
   Video,
@@ -61,17 +60,17 @@ const ArticleCardSkeleton: React.FC = () => (
 );
 
 // 2. Skeleton Card untuk Video
-const VideoCardSkeleton: React.FC = () => (
-  <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden animate-pulse">
-    <div className="relative h-48 w-full bg-slate-200"></div>
-    <div className="p-5">
-      <div className="h-4 bg-slate-200 rounded-full w-1/3 mb-3"></div>
-      <div className="h-6 bg-slate-300 rounded-md w-full mb-3"></div>
-      <div className="h-6 bg-slate-300 rounded-md w-3/4 mb-4"></div>
-      <div className="h-4 bg-slate-200 rounded-full w-1/4"></div>
-    </div>
-  </div>
-);
+// const VideoCardSkeleton: React.FC = () => (
+//   <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden animate-pulse">
+//     <div className="relative h-48 w-full bg-slate-200"></div>
+//     <div className="p-5">
+//       <div className="h-4 bg-slate-200 rounded-full w-1/3 mb-3"></div>
+//       <div className="h-6 bg-slate-300 rounded-md w-full mb-3"></div>
+//       <div className="h-6 bg-slate-300 rounded-md w-3/4 mb-4"></div>
+//       <div className="h-4 bg-slate-200 rounded-full w-1/4"></div>
+//     </div>
+//   </div>
+// );
 
 // 3. Komponen Loading Screen (Grid Skeleton)
 const LoadingScreen: React.FC<{ itemsPerPage: number }> = ({
@@ -350,7 +349,6 @@ const BerandaPage: React.FC = () => {
     window.open(videoLink, "_blank", "noopener,noreferrer");
   };
 
-  // MEMPERBAIKI LOGIKA: Paginasi terpusat
   const { paginatedItems, totalPages } = useMemo(() => {
     let dataToPaginate: FeedItem[] | Article[] | VideoEdukasi[] = [];
 
@@ -368,9 +366,7 @@ const BerandaPage: React.FC = () => {
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     );
-
-    // Pastikan item yang dipaginasi memiliki tipe yang benar
-    // Ini penting jika 'articles' atau 'videos' tidak dalam format FeedItem
+    
     if (activeTab === "Artikel") {
       return {
         paginatedItems: (paginated as Article[]).map((article) => ({
