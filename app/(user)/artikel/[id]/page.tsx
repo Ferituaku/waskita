@@ -179,9 +179,9 @@ export default function ArticleDetailPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
         >
-          <Badge variant="destructive" className="text-sm mb-2 text-white">
+          {/* <Badge variant="destructive" className="text-sm mb-2 text-white">
             {article.category}
-          </Badge>
+          </Badge> */}
           <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
             {article.title}
           </h1>
@@ -198,7 +198,7 @@ export default function ArticleDetailPage() {
         {/* Gambar Artikel (dengan animasi) */}
         {article.image_url && (
           <motion.div
-            className="relative w-full h-64 md:h-[450px] mb-8 rounded-lg overflow-hidden shadow-lg"
+            className="relative w-full h-60 md:h-[350px] mb-8 rounded-lg overflow-hidden shadow-lg"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1, transition: { delay: 0.3 } }}
           >
@@ -242,10 +242,6 @@ export default function ArticleDetailPage() {
             >
               <Newspaper className="mr-2 h-4 w-4" />
               Lihat Artikel Lainnya
-            </Button>
-            <Button variant="outline" onClick={() => window.print()}>
-              <Printer className="mr-2 h-4 w-4" />
-              Cetak Artikel
             </Button>
           </div>
         </motion.div>

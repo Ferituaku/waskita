@@ -70,7 +70,7 @@ export default function ChatBot() {
           animate={{ opacity: 1, scale: 1 }}
           whileHover={{ scale: 1.15 }}
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 bg-gradient-to-r from-red-600 to-red-400 text-white p-4 rounded-full shadow-[0_0_12px_rgba(220,38,38,0.5)] transition-all"
+          className="fixed bottom-8 right-8 z-[100] transition-all bg-gradient-to-r from-red-600 to-red-400 text-white p-4 rounded-full shadow-[0_0_12px_rgba(220,38,38,0.5)]"
         >
           <MessageCircle size={26} />
         </motion.button>
@@ -84,7 +84,7 @@ export default function ChatBot() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: "spring", stiffness: 130, damping: 12 }}
-            className="fixed bottom-6 right-6 w-[22rem] h-[28rem] bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-red-200 flex flex-col overflow-hidden"
+            className="fixed bottom-8 right-8 z-[100] w-[22rem] h-[28rem] bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-red-200 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-red-700 to-red-500 text-white flex justify-between items-center px-4 py-2">
