@@ -12,18 +12,37 @@ interface Article extends RowDataPacket {
   file_url?: string;
   image_url: string;
 }
+
 function normalizeImageUrl(imageUrl: string | null | undefined): string {
   if (!imageUrl) {
     return "/images/default-article.jpg";
   }
+
+  // Already full URL - return as is
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
     return imageUrl;
   }
-  if (imageUrl.startsWith("/")) {
+
+  // For Railway: map uploads to committed images
+  if (imageUrl.includes("/uploads/images/")) {
+    const filename = imageUrl.split("/").pop();
+    return `/images/articles/${filename}`;
+  }
+
+  // Already correct path
+  if (imageUrl.startsWith("/images/")) {
     return imageUrl;
   }
-  return `/uploads/images/${imageUrl}`;
+
+  // Just filename - assume article image
+  if (!imageUrl.includes("/")) {
+    return `/images/articles/${imageUrl}`;
+  }
+
+  // Default
+  return imageUrl;
 }
+
 // GET - Ambil artikel berdasarkan ID
 export async function GET(
   request: NextRequest,

@@ -32,10 +32,10 @@ export const slides: NewsSlide[] = [
     category: "Pelatihan",
     date: "2025-10-11",
     author: "Tim StopHIVa",
-    tags: ["Komunitas", "Kesehatan", "Kolaborasi"],
+    tags: ["Komunitas", "Media", "ToT"],
     source: "Stophiva Universitas Diponegoro",
     description:
-      "Kolaborasi dengan berbagai komunitas untuk memperluas jangkauan edukasi HIV/AIDS melalui pelatihan peer educator.",
+      "Kolaborasi dengan berbagai komunitas dalam pembelajaran media intervensi.",
   },
 ];
 

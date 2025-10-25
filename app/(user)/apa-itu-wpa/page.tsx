@@ -139,7 +139,7 @@ const ApaItuWPAPage: React.FC = () => {
     <>
       <Header title="Apa Itu WPA?" />
       <ChatBot />
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white scroll-smooth ">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
         {/* Hero Section */}
         <section className="relative bg-gradient-to-br from-red-800 via-red-900 to-red-700 text-white overflow-hidden">
           <div className="absolute inset-0 bg-black/10"></div>
@@ -253,12 +253,12 @@ const ApaItuWPAPage: React.FC = () => {
         </section>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-5 py-14 md:px-8 md:py-16 space-y-10">
+        <div
+          className="max-w-7xl mx-auto px-5 py-14 md:px-8 md:py-16 space-y-10"
+          id="tentang-wpa"
+        >
           {/* Tentang WPA Section */}
-          <section
-            id="tentang-wpa"
-            className="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 overflow-hidden mb-16"
-          >
+          <section className="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 overflow-hidden mb-16">
             <div className="p-8 md:p-12">
               <div className="flex items-center gap-3 mb-6">
                 <div className="bg-red-100 rounded-xl p-3">
@@ -613,6 +613,14 @@ const ApaItuWPAPage: React.FC = () => {
                     <span>Dinkes Kota Semarang</span>
                     <span>•</span>
                     <span>UNAIDS</span>
+                    <span>•</span>
+                    <span>LSM Yayasan Peduli Kasih</span>
+                    <span>•</span>
+                    <span>Rumah AIRA</span>
+                    <span>•</span>
+                    <span>PKBI</span>
+                    <span>•</span>
+                    <span>KDS Arjuna</span>
                   </div>
                 </div>
               </div>
