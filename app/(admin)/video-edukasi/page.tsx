@@ -404,7 +404,7 @@ const VideoEdukasiPage: React.FC = () => {
                         <td className="px-6 py-4 text-sm text-gray-600 font-medium">
                           {(currentPage - 1) * entriesPerPage + index + 1}
                         </td>
-                        
+
                         {/* PERUBAHAN 3: Thumbnail asli YouTube */}
                         <td className="px-6 py-4">
                           {(() => {
@@ -444,7 +444,7 @@ const VideoEdukasiPage: React.FC = () => {
                             );
                           })()}
                         </td>
-                        
+
                         <td className="px-6 py-4">
                           <p className="text-sm font-semibold text-gray-800">
                             {truncateText(video.judul, 60)}
@@ -465,17 +465,17 @@ const VideoEdukasiPage: React.FC = () => {
                           {formatDate(video.tanggal_ditambahkan)}
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-2 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => openModal("edit", video)}
-                              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95"
+                              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95 active:bg-green-400"
                               title="Edit"
                             >
                               <Pencil size={16} />
                             </button>
                             <button
                               onClick={() => openModal("delete", video)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95"
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95 active:bg-red-400"
                               title="Hapus"
                             >
                               <Trash2 size={16} />
@@ -644,11 +644,7 @@ const VideoEdukasiPage: React.FC = () => {
                           className="object-cover"
                         />
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
-                          <Play
-                            size={32}
-                            className="text-white"
-                            fill="white"
-                          />
+                          <Play size={32} className="text-white" fill="white" />
                           <p className="text-white text-sm mt-3 font-medium">
                             Video Valid
                           </p>

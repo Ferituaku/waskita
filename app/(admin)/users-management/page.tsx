@@ -419,17 +419,17 @@ const UsersPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-2 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => openModal("edit", user)}
-                            className="p-2 text-blue-600 hover:bg-red-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95"
+                            className="p-2 text-blue-600 hover:bg-red-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95 active:bg-blue-400"
                             title="Edit"
                           >
                             <Pencil size={16} />
                           </button>
                           <button
                             onClick={() => openModal("delete", user)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 hover:scale-110 active:scale-95 active:bg-red-400"
                             title="Hapus"
                           >
                             <Trash2 size={16} />
