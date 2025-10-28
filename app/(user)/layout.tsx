@@ -1,4 +1,4 @@
-import ChatBot from "@/components/chatbot";
+// import ChatBot from "@/components/chatbot";
 import Sidebar from "@/components/Sidebar";
 import { SidebarProvider } from "@/hooks/SidebarContext";
 import { Toaster } from "react-hot-toast";

@@ -2,7 +2,7 @@
 
 import Header from "@/components/Header";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, from "react";
 import {
   Users,
   Heart,
@@ -18,12 +18,12 @@ import {
 } from "lucide-react";
 import ChatBot from "@/components/chatbot";
 
-interface VideoEdukasi {
-  id: number;
-  judul: string;
-  link: string;
-  tanggal_ditambahkan: string;
-}
+// interface VideoEdukasi {
+//   id: number;
+//   judul: string;
+//   link: string;
+//   tanggal_ditambahkan: string;
+// }
 
 // Helper function to get color classes - prevents Tailwind purging issues
 const getColorClasses = (color: string) => {
