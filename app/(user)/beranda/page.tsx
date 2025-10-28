@@ -21,7 +21,7 @@ import ChatBot from "@/components/chatbot";
 interface Article {
   id: number;
   title: string;
-  content: string; // Anda mungkin perlu mengambil 'excerpt' atau ringkasan
+  content: string;
   category: string;
   image_url?: string;
   created_at: string;
@@ -34,16 +34,14 @@ interface VideoEdukasi {
   tanggal_ditambahkan: string;
 }
 
-// Tipe data untuk feed gabungan
 type FeedItem = {
   type: "article" | "video";
   date: Date;
   data: Article | VideoEdukasi;
 };
 
-// --- KOMPONEN BANTU (HELPER COMPONENTS) ---
+// --- KOMPONEN BANTU ---
 
-// 1. Skeleton Card untuk Artikel
 const ArticleCardSkeleton: React.FC = () => (
   <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden animate-pulse">
     <div className="relative h-48 w-full bg-slate-200"></div>
@@ -59,36 +57,19 @@ const ArticleCardSkeleton: React.FC = () => (
   </div>
 );
 
-// 2. Skeleton Card untuk Video
-// const VideoCardSkeleton: React.FC = () => (
-//   <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden animate-pulse">
-//     <div className="relative h-48 w-full bg-slate-200"></div>
-//     <div className="p-5">
-//       <div className="h-4 bg-slate-200 rounded-full w-1/3 mb-3"></div>
-//       <div className="h-6 bg-slate-300 rounded-md w-full mb-3"></div>
-//       <div className="h-6 bg-slate-300 rounded-md w-3/4 mb-4"></div>
-//       <div className="h-4 bg-slate-200 rounded-full w-1/4"></div>
-//     </div>
-//   </div>
-// );
-
-// 3. Komponen Loading Screen (Grid Skeleton)
 const LoadingScreen: React.FC<{ itemsPerPage: number }> = ({
   itemsPerPage,
 }) => (
   <div className="p-4 md:p-8">
-    {/* Intro Skeleton */}
     <div className="mb-5 animate-pulse">
       <div className="h-8 bg-slate-300 rounded-md w-1/3 mb-3"></div>
       <div className="h-5 bg-slate-200 rounded-md w-1/2"></div>
     </div>
-    {/* Tab Skeleton */}
     <div className="flex space-x-2 mb-8">
       <div className="h-10 bg-slate-200 rounded-lg w-24"></div>
       <div className="h-10 bg-slate-200 rounded-lg w-24"></div>
       <div className="h-10 bg-slate-200 rounded-lg w-24"></div>
     </div>
-    {/* Grid Skeleton */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
       {Array(itemsPerPage)
         .fill(0)
@@ -99,7 +80,6 @@ const LoadingScreen: React.FC<{ itemsPerPage: number }> = ({
   </div>
 );
 
-// 4. Komponen Error
 const ErrorDisplay: React.FC<{ message: string }> = ({ message }) => (
   <div className="p-4 md:p-8">
     <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 flex items-center gap-3">
@@ -109,7 +89,6 @@ const ErrorDisplay: React.FC<{ message: string }> = ({ message }) => (
   </div>
 );
 
-// 5. Komponen Empty State
 const EmptyState: React.FC<{ tab: string }> = ({ tab }) => {
   const messages: Record<string, string> = {
     Semua: "Belum ada artikel atau video yang tersedia.",
@@ -133,78 +112,89 @@ const EmptyState: React.FC<{ tab: string }> = ({ tab }) => {
 
 // --- KOMPONEN KARTU KONTEN ---
 
-// 1. Kartu Artikel (Pengganti MaterialCard)
+// ⭐ FIXED: ArticleCard dengan proper image handling
 const ArticleCardComponent: React.FC<{
   article: Article;
   onClick: () => void;
-}> = ({ article, onClick }) => (
-  <div
-    onClick={onClick}
-    className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer group"
-  >
-    <div className="relative h-48 w-full">
-      <Image
-        src={article.image_url || "/placeholder-article.jpg"} // Pastikan Anda punya placeholder
-        alt={article.title}
-        fill
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        className="object-cover group-hover:scale-105 transition-transform duration-300"
-        onError={(e) => {
-          e.currentTarget.src = "/placeholder-article.jpg"; // Fallback jika gambar 404
-        }}
-      />
-      <div className="absolute top-3 left-3">
-        <span className="inline-flex items-center gap-1.5 bg-red-100 text-red-600 text-xs font-semibold px-3 py-1 rounded-full">
-          <BookOpen size={14} />
-          {article.category}
-        </span>
-      </div>
-    </div>
-    <div className="p-5">
-      <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 h-[3.5rem] group-hover:text-red-600 transition-colors">
-        {article.title}
-      </h3>
-      {/* Ganti ini dengan 'excerpt' jika ada dari API */}
-      <p className="text-sm text-gray-600 line-clamp-2 h-[2.5rem] mb-4">
-        {article.content.replace(/<[^>]+>/g, "").substring(0, 100)}...
-      </p>
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-500 flex items-center gap-1.5">
-          <Clock size={14} />
-          {formatDate(article.created_at)}
-        </p>
-        <span className="text-sm font-semibold text-red-600 group-hover:underline">
-          Baca Selengkapnya
-        </span>
-      </div>
-    </div>
-  </div>
-);
-
-// 2. Kartu Video (Dengan Thumbnail Asli)
-const VideoCardComponent: React.FC<{
-  video: VideoEdukasi;
-  onClick: () => void;
-}> = ({ video, onClick }) => {
-  const videoId = getYouTubeVideoId(video.link);
-  const thumbnailUrl = videoId
-    ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
-    : "/placeholder-video.jpg"; // Pastikan Anda punya placeholder
+}> = ({ article, onClick }) => {
+  // ⭐ Use R2 URL or fallback to default
+  const imageUrl = article.image_url || "/images/default-article.jpg";
 
   return (
     <div
       onClick={onClick}
       className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer group"
     >
-      <div className="relative h-48 w-full">
+      <div className="relative h-48 w-full bg-gray-100">
+        <Image
+          src={imageUrl} // ⭐ FIXED: Use actual image_url
+          alt={article.title}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          unoptimized // ⭐ IMPORTANT: Allow R2 external URLs
+          onError={(e) => {
+            // ⭐ FIXED: Proper fallback path
+            const target = e.currentTarget as HTMLImageElement;
+            target.src = "/images/default-article.jpg";
+          }}
+        />
+        <div className="absolute top-3 left-3">
+          <span className="inline-flex items-center gap-1.5 bg-red-100 text-red-600 text-xs font-semibold px-3 py-1 rounded-full">
+            <BookOpen size={14} />
+            {article.category}
+          </span>
+        </div>
+      </div>
+      <div className="p-5">
+        <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 h-[3.5rem] group-hover:text-red-600 transition-colors">
+          {article.title}
+        </h3>
+        <p className="text-sm text-gray-600 line-clamp-2 h-[2.5rem] mb-4">
+          {article.content.replace(/<[^>]+>/g, "").substring(0, 100)}...
+        </p>
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-gray-500 flex items-center gap-1.5">
+            <Clock size={14} />
+            {formatDate(article.created_at)}
+          </p>
+          <span className="text-sm font-semibold text-red-600 group-hover:underline">
+            Baca Selengkapnya
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ⭐ FIXED: VideoCard dengan proper thumbnail handling
+const VideoCardComponent: React.FC<{
+  video: VideoEdukasi;
+  onClick: () => void;
+}> = ({ video, onClick }) => {
+  const videoId = getYouTubeVideoId(video.link);
+  // ⭐ YouTube thumbnail atau fallback
+  const thumbnailUrl = videoId
+    ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+    : "/images/default-video.jpg"; // ⭐ FIXED: Proper path
+
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer group"
+    >
+      <div className="relative h-48 w-full bg-gray-100">
         <Image
           src={thumbnailUrl}
           alt={video.judul}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover group-hover:scale-105 transition-transform duration-300"
+          unoptimized // ⭐ Allow YouTube thumbnails
           onError={(e) => {
-            e.currentTarget.src = "/placeholder-video.jpg"; // Fallback jika thumbnail 404
+            // ⭐ FIXED: Proper fallback path
+            const target = e.currentTarget as HTMLImageElement;
+            target.src = "/images/default-video.jpg";
           }}
         />
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -221,7 +211,7 @@ const VideoCardComponent: React.FC<{
         </div>
       </div>
       <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 h-[3.5rem] group-hover:text-red-600 transition-colors">
+        <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 h-14 group-hover:text-red-600 transition-colors">
           {video.judul}
         </h3>
         <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-4">
@@ -233,20 +223,18 @@ const VideoCardComponent: React.FC<{
   );
 };
 
-// --- FUNGSI HELPER UTAMA ---
+// --- FUNGSI HELPER ---
 
-// Format tanggal
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
-    day: "2-digit",
-    month: "long",
     year: "numeric",
+    month: "long",
+    day: "numeric",
   };
   return date.toLocaleDateString("id-ID", options);
 };
 
-// Get YouTube ID (dari file admin video)
 const getYouTubeVideoId = (url: string): string | null => {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regExp);
@@ -266,9 +254,9 @@ const BerandaPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const itemsPerPage = 6; // Menambah item per halaman
+  const itemsPerPage = 6;
 
-  // Fetch articles and videos from API
+  // Fetch articles and videos
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -280,6 +268,14 @@ const BerandaPage: React.FC = () => {
         const articlesResult = await articlesResponse.json();
 
         if (articlesResult.success) {
+          console.log("📋 Articles loaded:", articlesResult.data.length);
+          // ⭐ Debug first article image
+          if (articlesResult.data[0]) {
+            console.log(
+              "🖼️ First article image:",
+              articlesResult.data[0].image_url
+            );
+          }
           setArticles(articlesResult.data);
         } else {
           throw new Error("Gagal memuat artikel");
@@ -290,6 +286,7 @@ const BerandaPage: React.FC = () => {
         const videosResult = await videosResponse.json();
 
         if (videosResult.success) {
+          console.log("🎥 Videos loaded:", videosResult.data.length);
           setVideos(videosResult.data);
         } else {
           throw new Error("Gagal memuat video");
@@ -309,23 +306,20 @@ const BerandaPage: React.FC = () => {
     fetchData();
   }, []);
 
-  // MEMPERBAIKI LOGIKA: Menggabungkan feed saat data berubah
+  // Combine feeds
   useEffect(() => {
-    // 1. Ubah artikel ke format feed
     const articleFeed: FeedItem[] = articles.map((article) => ({
       type: "article",
       date: new Date(article.created_at),
       data: article,
     }));
 
-    // 2. Ubah video ke format feed
     const videoFeed: FeedItem[] = videos.map((video) => ({
       type: "video",
       date: new Date(video.tanggal_ditambahkan),
       data: video,
     }));
 
-    // 3. Gabungkan dan urutkan berdasarkan tanggal (terbaru dulu)
     const combined = [...articleFeed, ...videoFeed].sort(
       (a, b) => b.date.getTime() - a.date.getTime()
     );
@@ -333,18 +327,15 @@ const BerandaPage: React.FC = () => {
     setCombinedFeed(combined);
   }, [articles, videos]);
 
-  // Handle tab change
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    setCurrentPage(1); // Reset paginasi setiap ganti tab
+    setCurrentPage(1);
   };
 
-  // Handle article click
   const handleArticleClick = (articleId: number) => {
     router.push(`/artikel/${articleId}`);
   };
 
-  // Handle video click
   const handleVideoClick = (videoLink: string) => {
     window.open(videoLink, "_blank", "noopener,noreferrer");
   };
@@ -352,7 +343,6 @@ const BerandaPage: React.FC = () => {
   const { paginatedItems, totalPages } = useMemo(() => {
     let dataToPaginate: FeedItem[] | Article[] | VideoEdukasi[] = [];
 
-    // Tentukan data mana yang akan dipaginasi berdasarkan tab
     if (activeTab === "Artikel") {
       dataToPaginate = articles;
     } else if (activeTab === "Video Edukasi") {
@@ -366,7 +356,7 @@ const BerandaPage: React.FC = () => {
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     );
-    
+
     if (activeTab === "Artikel") {
       return {
         paginatedItems: (paginated as Article[]).map((article) => ({
@@ -389,14 +379,13 @@ const BerandaPage: React.FC = () => {
       };
     }
 
-    // Untuk "Semua"
     return {
       paginatedItems: paginated as FeedItem[],
       totalPages: total,
     };
   }, [activeTab, articles, videos, combinedFeed, currentPage, itemsPerPage]);
 
-  // --- RENDER UTAMA ---
+  // --- RENDER ---
 
   if (loading) {
     return (
@@ -441,7 +430,6 @@ const BerandaPage: React.FC = () => {
           />
         </div>
 
-        {/* --- Area Konten --- */}
         <section>
           {paginatedItems.length === 0 ? (
             <EmptyState tab={activeTab} />
