@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "pub-*.r2.dev",
       },
+      {
+        protocol: "https",
+        hostname: "*.cloudflare.com",
+      },
     ],
     domains: ["waskita-elearning.com", "i.pravatar.cc", "img.youtube.com"],
   },

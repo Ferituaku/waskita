@@ -106,17 +106,10 @@ export async function PUT(
 
     const [result] = await db.query<OkPacket>(
       `UPDATE articles 
-       SET title = ?, content = ?, category = ?, image_url = ?, file_type = ?, file_url = ?, updated_at = NOW()
+       SET title = ?, content = ?, category = ?, image_url = ?, 
+           file_type = ?, file_url = ?, updated_at = NOW()
        WHERE id = ?`,
-      [
-        title,
-        content,
-        category,
-        image_url || "/default-image.jpg",
-        file_type || "text",
-        file_url || null,
-        id,
-      ]
+      [title, content, category, image_url, file_type, file_url, id]
     );
 
     if (result.affectedRows === 0) {

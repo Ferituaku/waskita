@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         title,
         content,
         category,
-        image_url || "/default-image.jpg",
+        image_url || null,
         file_type || "text",
         file_url || null,
       ]

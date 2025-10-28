@@ -24,6 +24,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "pub-*.r2.dev",
       },
+      {
+        protocol: "https",
+        hostname: "*.cloudflare.com",
+      },
     ],
     unoptimized: true, // Untuk development, bisa dihapus di production
   },
