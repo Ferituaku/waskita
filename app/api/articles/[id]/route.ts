@@ -14,33 +14,33 @@ interface Article extends RowDataPacket {
 }
 
 function normalizeImageUrl(imageUrl: string | null | undefined): string {
+  console.log("🔍 Input:", imageUrl);
+
   if (!imageUrl) {
     return "/images/default-article.jpg";
   }
 
-  // Already full URL - return as is
+  if (imageUrl.startsWith("https://pub-") && imageUrl.includes(".r2.dev")) {
+    console.log("✅ R2 URL detected");
+    return imageUrl; // Return as-is
+  }
+
+  // Full URLs
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
     return imageUrl;
   }
 
-  // For Railway: map uploads to committed images
+  // Legacy paths
   if (imageUrl.includes("/uploads/images/")) {
     const filename = imageUrl.split("/").pop();
     return `/images/articles/${filename}`;
   }
 
-  // Already correct path
   if (imageUrl.startsWith("/images/")) {
     return imageUrl;
   }
 
-  // Just filename - assume article image
-  if (!imageUrl.includes("/")) {
-    return `/images/articles/${imageUrl}`;
-  }
-
-  // Default
-  return imageUrl;
+  return "/images/default-article.jpg";
 }
 
 // GET - Ambil artikel berdasarkan ID
@@ -58,12 +58,13 @@ export async function GET(
 
     if (rows.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Article not found" },
+        { success: false, message: "Article not found" },
         { status: 404 }
       );
     }
 
     const article = rows[0];
+    // ⭐ Normalize image URL
     article.image_url = normalizeImageUrl(article.image_url);
 
     return NextResponse.json({ success: true, data: article });

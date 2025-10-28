@@ -6,6 +6,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "**",
       },
+      {
+        protocol: "https",
+        hostname: "pub-*.r2.dev",
+      },
     ],
     domains: ["waskita-elearning.com", "i.pravatar.cc", "img.youtube.com"],
   },

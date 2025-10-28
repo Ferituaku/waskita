@@ -14,33 +14,33 @@ interface Article extends RowDataPacket {
 }
 
 function normalizeImageUrl(imageUrl: string | null | undefined): string {
+  console.log("🔍 Input:", imageUrl);
+
   if (!imageUrl) {
     return "/images/default-article.jpg";
   }
 
-  // Already full URL - return as is
+  if (imageUrl.startsWith("https://pub-") && imageUrl.includes(".r2.dev")) {
+    console.log("✅ R2 URL detected");
+    return imageUrl; // Return as-is
+  }
+
+  // Full URLs
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
     return imageUrl;
   }
 
-  // For Railway: map uploads to committed images
+  // Legacy paths
   if (imageUrl.includes("/uploads/images/")) {
     const filename = imageUrl.split("/").pop();
     return `/images/articles/${filename}`;
   }
 
-  // Already correct path
   if (imageUrl.startsWith("/images/")) {
     return imageUrl;
   }
 
-  // Just filename - assume article image
-  if (!imageUrl.includes("/")) {
-    return `/images/articles/${imageUrl}`;
-  }
-
-  // Default
-  return imageUrl;
+  return "/images/default-article.jpg";
 }
 
 // GET - Ambil semua artikel dari database
@@ -50,10 +50,12 @@ export async function GET() {
     const [rows] = await db.query<Article[]>(
       "SELECT * FROM articles ORDER BY created_at DESC"
     );
+
     const articles = rows.map((article) => ({
       ...article,
       image_url: normalizeImageUrl(article.image_url),
     }));
+
     return NextResponse.json({ success: true, data: articles });
   } catch (error) {
     console.error("Error fetching articles:", error);
