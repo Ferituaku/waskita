@@ -2,7 +2,7 @@
 
 import Header from "@/components/Header";
 import Image from "next/image";
-import React, from "react";
+import React from "react";
 import {
   Users,
   Heart,
