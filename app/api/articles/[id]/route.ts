@@ -1,4 +1,4 @@
-//app/api/articles/%5Bid%5D/route.ts
+//app/api/articles/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { OkPacket, RowDataPacket } from "mysql2";
