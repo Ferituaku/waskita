@@ -9,8 +9,7 @@ import { ToastContainer } from "react-toastify";
 
 export const metadata: Metadata = {
   title: "WASKITA - Edukasi HIV/AIDS",
-  description:
-    "Wadah Sinau Kita - Platform edukasi mengenai HIV/AIDS.",
+  description: "Wadah Sinau Kita - Platform edukasi mengenai HIV/AIDS.",
 };
 
 export default function RootLayout({
@@ -19,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <body
         className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased bg-slate-50 text-slate-800`}
       >

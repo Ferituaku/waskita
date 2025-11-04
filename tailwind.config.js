@@ -60,5 +60,6 @@ module.exports = {
   plugins: [
     // Plugin HeroUI sudah cukup untuk mengaktifkan semua komponennya
     heroUI(),
+    require('@tailwindcss/typography'),
   ],
 };

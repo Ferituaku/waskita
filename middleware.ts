@@ -34,7 +34,7 @@ export async function middleware(req: NextRequest) {
         if (userRole === "admin") {
           return NextResponse.redirect(new URL("/dashboard", req.url));
         } else {
-          return NextResponse.redirect(new URL("/beranda", req.url));
+          return NextResponse.redirect(new URL("/apa-itu-wpa", req.url));
         }
       } catch {
         // Token invalid, hapus dan biarkan akses login
@@ -65,7 +65,7 @@ export async function middleware(req: NextRequest) {
       "/quiz-user",
       "/apa-itu-wpa",
       "/beranda",
-      "/user/profile",
+      "/user/profile/edit",
     ];
     const isUserRoute = userRoutes.some((route) => pathname.startsWith(route));
 
@@ -79,7 +79,7 @@ export async function middleware(req: NextRequest) {
     // 🔴 ADMIN ROUTES
     const adminRoutes = [
       "/materi",
-      "/admin/profile",
+      "/admin/profile/edit",
       "/quiz",
       "/users-management",
       "/video-edukasi",
@@ -122,6 +122,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
   ],
 };

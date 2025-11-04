@@ -31,13 +31,13 @@ const adminNavLinks: NavLink[] = [
   { href: "/materi", label: "Materi", icon: BookOpenText },
   { href: "/quiz", label: "Kelola Quiz", icon: ClipboardCheck },
   { href: "/video-edukasi", label: "Video Edukasi", icon: Youtube },
-  { href: "/users", label: "Kelola User", icon: Users },
+  { href: "/users-management", label: "Kelola User", icon: Users },
 ];
 
 // Menu untuk USER BIASA
 const userNavLinks: NavLink[] = [
-  { href: "/beranda", label: "Beranda", icon: Home },
   { href: "/apa-itu-wpa", label: "Apa itu WPA", icon: CircleQuestionMark },
+  { href: "/beranda", label: "Beranda", icon: Home },
   // { href: "/materi", label: "Materi", icon: BookOpenText },
   { href: "/quiz-user", label: "Quiz", icon: ClipboardCheck },
   // { href: "/video-edukasi", label: "Video Edukasi", icon: Youtube },

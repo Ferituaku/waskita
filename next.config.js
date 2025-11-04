@@ -20,6 +20,14 @@ const nextConfig = {
         port: '3000',
         pathname: '/uploads/**',
       },
+      {
+        protocol: "https",
+        hostname: "pub-*.r2.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "*.cloudflare.com",
+      },
     ],
     unoptimized: true, // Untuk development, bisa dihapus di production
   },

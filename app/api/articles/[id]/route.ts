@@ -1,3 +1,4 @@
+//app/api/articles/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { OkPacket, RowDataPacket } from "mysql2";
@@ -10,6 +11,36 @@ interface Article extends RowDataPacket {
   file_type: "text" | "pdf";
   file_url?: string;
   image_url: string;
+}
+
+function normalizeImageUrl(imageUrl: string | null | undefined): string {
+  console.log("🔍 Input:", imageUrl);
+
+  if (!imageUrl) {
+    return "/images/default-article.jpg";
+  }
+
+  if (imageUrl.startsWith("https://pub-") && imageUrl.includes(".r2.dev")) {
+    console.log("✅ R2 URL detected");
+    return imageUrl; // Return as-is
+  }
+
+  // Full URLs
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl;
+  }
+
+  // Legacy paths
+  if (imageUrl.includes("/uploads/images/")) {
+    const filename = imageUrl.split("/").pop();
+    return `/images/articles/${filename}`;
+  }
+
+  if (imageUrl.startsWith("/images/")) {
+    return imageUrl;
+  }
+
+  return "/images/default-article.jpg";
 }
 
 // GET - Ambil artikel berdasarkan ID
@@ -27,12 +58,16 @@ export async function GET(
 
     if (rows.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Article not found" },
+        { success: false, message: "Article not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: rows[0] });
+    const article = rows[0];
+    // ⭐ Normalize image URL
+    article.image_url = normalizeImageUrl(article.image_url);
+
+    return NextResponse.json({ success: true, data: article });
   } catch (error) {
     console.error("Error fetching article:", error);
     return NextResponse.json(
@@ -71,17 +106,10 @@ export async function PUT(
 
     const [result] = await db.query<OkPacket>(
       `UPDATE articles 
-       SET title = ?, content = ?, category = ?, image_url = ?, file_type = ?, file_url = ?, updated_at = NOW()
+       SET title = ?, content = ?, category = ?, image_url = ?, 
+           file_type = ?, file_url = ?, updated_at = NOW()
        WHERE id = ?`,
-      [
-        title,
-        content,
-        category,
-        image_url || "/default-image.jpg",
-        file_type || "text",
-        file_url || null,
-        id,
-      ]
+      [title, content, category, image_url, file_type, file_url, id]
     );
 
     if (result.affectedRows === 0) {

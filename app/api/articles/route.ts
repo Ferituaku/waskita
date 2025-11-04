@@ -1,3 +1,4 @@
+// app/api/articles/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { OkPacket, RowDataPacket } from "mysql2";
@@ -12,6 +13,36 @@ interface Article extends RowDataPacket {
   image_url: string;
 }
 
+function normalizeImageUrl(imageUrl: string | null | undefined): string {
+  console.log("🔍 Input:", imageUrl);
+
+  if (!imageUrl) {
+    return "/images/default-article.jpg";
+  }
+
+  if (imageUrl.startsWith("https://pub-") && imageUrl.includes(".r2.dev")) {
+    console.log("✅ R2 URL detected");
+    return imageUrl; // Return as-is
+  }
+
+  // Full URLs
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl;
+  }
+
+  // Legacy paths
+  if (imageUrl.includes("/uploads/images/")) {
+    const filename = imageUrl.split("/").pop();
+    return `/images/articles/${filename}`;
+  }
+
+  if (imageUrl.startsWith("/images/")) {
+    return imageUrl;
+  }
+
+  return "/images/default-article.jpg";
+}
+
 // GET - Ambil semua artikel dari database
 export async function GET() {
   try {
@@ -19,7 +50,13 @@ export async function GET() {
     const [rows] = await db.query<Article[]>(
       "SELECT * FROM articles ORDER BY created_at DESC"
     );
-    return NextResponse.json({ success: true, data: rows });
+
+    const articles = rows.map((article) => ({
+      ...article,
+      image_url: normalizeImageUrl(article.image_url),
+    }));
+
+    return NextResponse.json({ success: true, data: articles });
   } catch (error) {
     console.error("Error fetching articles:", error);
     return NextResponse.json(
@@ -58,7 +95,7 @@ export async function POST(request: NextRequest) {
         title,
         content,
         category,
-        image_url || "/default-image.jpg",
+        image_url || null,
         file_type || "text",
         file_url || null,
       ]

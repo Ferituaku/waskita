@@ -30,7 +30,8 @@ export async function POST(req: Request) {
   try {
     const { id_soal, teks_jawaban, is_correct } = await req.json();
 
-    if (!id_soal || !teks_jawaban || teks_jawaban.trim() === "") {
+    // Perbaikan: cek null/undefined secara spesifik, bukan falsy values
+    if (id_soal === null || id_soal === undefined || !teks_jawaban || teks_jawaban.trim() === "") {
       return NextResponse.json(
         { message: "id_soal and teks_jawaban are required" },
         { status: 400 }

@@ -1,3 +1,4 @@
+//app/(admin)/materi/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -94,7 +95,7 @@ const MateriPage: React.FC = () => {
     setLoading(true);
 
     try {
-      let imageUrl = modal.data?.image_url || "/default-image.jpg";
+      let imageUrl: string | null = modal.data?.image_url || null;
       let pdfContent = formData.content;
       let pdfUrl = null;
 
@@ -102,9 +103,8 @@ const MateriPage: React.FC = () => {
       if (formData.coverFile) {
         const imageFormData = new FormData();
         imageFormData.append("file", formData.coverFile);
-        imageFormData.append("type", "image");
 
-        const uploadResponse = await fetch("/api/upload", {
+        const uploadResponse = await fetch("/api/upload/image", {
           method: "POST",
           body: imageFormData,
         });
@@ -112,7 +112,8 @@ const MateriPage: React.FC = () => {
         const uploadResult = await uploadResponse.json();
 
         if (uploadResult.success) {
-          imageUrl = uploadResult.url;
+          imageUrl = uploadResult.data.imageUrl;
+          console.log("✅ Image uploaded to R2:", imageUrl);
         } else {
           alert("Gagal upload gambar: " + uploadResult.error);
           setLoading(false);
@@ -122,11 +123,12 @@ const MateriPage: React.FC = () => {
 
       // Upload PDF jika tipe file adalah PDF
       if (formData.file_type === "pdf" && formData.file) {
+        console.log("📤 Uploading PDF:", formData.file.name);
+
         const pdfFormData = new FormData();
         pdfFormData.append("file", formData.file);
-        pdfFormData.append("type", "pdf");
 
-        const uploadResponse = await fetch("/api/upload", {
+        const uploadResponse = await fetch("/api/upload/image", {
           method: "POST",
           body: pdfFormData,
         });
@@ -134,10 +136,13 @@ const MateriPage: React.FC = () => {
         const uploadResult = await uploadResponse.json();
 
         if (uploadResult.success) {
-          pdfUrl = uploadResult.url;
+          pdfUrl = uploadResult.data.imageUrl;
           pdfContent = `PDF: ${formData.file.name}`;
+          console.log("✅ PDF uploaded:", pdfUrl);
         } else {
-          alert("Gagal upload PDF: " + uploadResult.error);
+          toast.error(
+            "Gagal upload PDF: " + (uploadResult.message || "Unknown error")
+          );
           setLoading(false);
           return;
         }
@@ -151,6 +156,7 @@ const MateriPage: React.FC = () => {
         image_url: imageUrl,
         file_url: pdfUrl,
       };
+      console.log("📝 Submitting article:", payload);
 
       const url =
         modal.type === "edit"
@@ -494,7 +500,7 @@ const MateriPage: React.FC = () => {
               onClick={() =>
                 setModal({ isOpen: true, type: "add", data: null })
               }
-              className="group bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2 transition-all duration-200 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 active:scale-95"
+              className="group bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-xl flex items-center gap-2 transition-all duration-200 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:scale-105 active:scale-95"
             >
               <Plus
                 size={20}
@@ -502,18 +508,18 @@ const MateriPage: React.FC = () => {
               />
               <span>Tambah Data</span>
             </button>
-            <div className="flex items-center gap-4">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <div className="relative flex-1 lg:w-80">
                 <Search
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-red-600"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-red-400"
                   size={20}
                 />
                 <input
                   type="text"
-                  placeholder="Cari materi..."
+                  placeholder="Cari judul artikel..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 py-2 border text-gray-500 border-gray-300 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full pl-12 pr-4 py-3 border border-red-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white text-gray-700 placeholder-gray-400 shadow-sm transition-all"
                 />
               </div>
             </div>
