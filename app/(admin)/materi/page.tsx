@@ -103,7 +103,6 @@ const MateriPage: React.FC = () => {
       if (formData.coverFile) {
         const imageFormData = new FormData();
         imageFormData.append("file", formData.coverFile);
-        s;
 
         const uploadResponse = await fetch("/api/upload/image", {
           method: "POST",
