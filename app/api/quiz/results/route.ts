@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
 
     // Insert the quiz result with grade
     const [result] = await db.query<OkPacket>(
-      "INSERT INTO hasil_kuis (id_judul, user_id, nama_peserta, nilai, grade) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO hasil_kuis (id_judul, user_id, nama_peserta, nilai) VALUES (?, ?, ?, ?)",
       [quizId, user.id, user.name || "Unknown User", nilai, grade]
     );
 
@@ -181,7 +181,6 @@ export async function GET(req: NextRequest) {
         hk.user_id,
         hk.nama_peserta,
         hk.nilai,
-        hk.grade,
         hk.tanggal_pengerjaan,
         j.judul as quiz_title,
         u.email as user_email

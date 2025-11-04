@@ -3,7 +3,18 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { Check, X, Triangle, Square, Circle, Star } from "lucide-react";
+import {
+  Check,
+  X,
+  Triangle,
+  Square,
+  Circle,
+  Star,
+  Trophy,
+  Target,
+  Zap,
+  Heart,
+} from "lucide-react";
 import type { Judul, Soal, Jawaban } from "@/types/quiz";
 
 // Define the structure for the quiz data used by the component
@@ -20,21 +31,20 @@ interface QuizData {
 
 const colors = [
   "bg-red-500 hover:bg-red-600",
-  "bg-blue-500 hover:bg-blue-600",
-  "bg-yellow-500 hover:bg-yellow-600",
-  "bg-green-500 hover:bg-green-600",
+  "bg-teal-500 hover:bg-teal-600",
+  "bg-rose-500 hover:bg-rose-600",
+  "bg-cyan-500 hover:bg-cyan-600",
 ];
 
 const icons = [
-  <Triangle key="triangle" className="w-8 h-8" />,
-  <Square key="square" className="w-8 h-8" />,
-  <Circle key="circle" className="w-8 h-8" />,
-  <Star key="star" className="w-8 h-8" />,
+  <Triangle key="triangle" className="w-7 h-7" />,
+  <Square key="square" className="w-7 h-7" />,
+  <Circle key="circle" className="w-7 h-7" />,
+  <Star key="star" className="w-7 h-7" />,
 ];
 
 type GameState = "start" | "playing" | "finished";
 
-// Updated props interface to handle Promise params
 interface UserQuizPageProps {
   params: Promise<{ quizId: string }>;
 }
@@ -51,10 +61,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
   const [isAnswered, setIsAnswered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [finalScore, setFinalScore] = useState<{
-    nilai: number;
-    grade: string;
-  } | null>(null);
+  const [finalScore, setFinalScore] = useState<number | null>(null);
 
   const [quizId, setQuizId] = useState<number | null>(null);
 
@@ -138,7 +145,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
     fetchAndStructureQuizData();
   }, [fetchAndStructureQuizData]);
 
-  // Updated effect to handle score submission with totalQuestions and correctAnswers
+  // Submit score effect - NO GRADE
   useEffect(() => {
     const submitScore = async () => {
       if (
@@ -168,12 +175,9 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
           const data = await res.json();
           setHasSubmitted(true);
 
-          // Store the calculated score and grade from backend
+          // Store only the nilai (score)
           if (data.data) {
-            setFinalScore({
-              nilai: data.data.nilai,
-              grade: data.data.grade,
-            });
+            setFinalScore(data.data.nilai);
           }
 
           if (data.data?.isRetake) {
@@ -239,7 +243,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
     if (!isAnswered || !currentQuestion) {
       return colors[optionId % 4];
     }
-    if (optionId === currentQuestion.correctAnswerId) return "bg-green-600";
+    if (optionId === currentQuestion.correctAnswerId) return "bg-teal-600";
     if (
       optionId === selectedAnswer &&
       optionId !== currentQuestion.correctAnswerId
@@ -248,25 +252,71 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
     return "bg-gray-500 opacity-50";
   };
 
+  // Get score category and styling - HIV/Health Theme
+  const getScoreDetails = (score: number) => {
+    if (score >= 90)
+      return {
+        label: "Luar Biasa!",
+        color: "text-teal-700",
+        bgColor: "bg-teal-50",
+        borderColor: "border-teal-300",
+        icon: <Heart className="w-16 h-16 text-teal-600" />,
+      };
+    if (score >= 75)
+      return {
+        label: "Sangat Baik!",
+        color: "text-cyan-700",
+        bgColor: "bg-cyan-50",
+        borderColor: "border-cyan-300",
+        icon: <Trophy className="w-16 h-16 text-cyan-600" />,
+      };
+    if (score >= 60)
+      return {
+        label: "Baik!",
+        color: "text-rose-700",
+        bgColor: "bg-rose-50",
+        borderColor: "border-rose-300",
+        icon: <Target className="w-16 h-16 text-rose-600" />,
+      };
+    return {
+      label: "Terus Berlatih!",
+      color: "text-red-700",
+      bgColor: "bg-red-50",
+      borderColor: "border-red-300",
+      icon: <Zap className="w-16 h-16 text-red-600" />,
+    };
+  };
+
   if (loading || quizId === null) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-100">
-        <span className="loading loading-spinner loading-lg text-red-800"></span>
+      <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 overflow-hidden">
+        <div className="relative">
+          <div className="w-20 h-20 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Heart className="w-8 h-8 text-red-600 animate-pulse" />
+          </div>
+        </div>
+        <p className="mt-6 text-lg font-semibold text-gray-700 animate-pulse">
+          Memuat kuis...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 text-center">
-        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">
-            Terjadi Kesalahan
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-red-50 to-rose-100 p-4 text-center overflow-hidden">
+        <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg border-2 border-red-200">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <X className="w-10 h-10 text-red-600" />
+          </div>
+          <h1 className="text-3xl font-bold text-red-600 mb-4">
+            Oops! Ada Masalah
           </h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-gray-600 mb-8 text-lg">{error}</p>
           <Link
             href="/quiz-user"
-            className="btn btn-primary bg-red-800 text-white hover:bg-red-900"
+            className="inline-block bg-gradient-to-r from-red-500 to-rose-500 text-white font-bold py-4 px-8 rounded-full hover:shadow-xl transform hover:scale-105 transition-all duration-300"
           >
             Kembali ke Daftar Kuis
           </Link>
@@ -277,130 +327,131 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
 
   if (!quizData) return null;
 
-  // UI for Start Screen
+  // START SCREEN - HIV Health Theme
   if (gameState === "start") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 text-center">
-        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 p-4 text-center overflow-hidden">
+        <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-2xl border-2 border-red-200 transform hover:scale-105 transition-all duration-300">
+          {/* Red Ribbon / Heart Icon */}
+          <div className="w-24 h-24 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-pulse">
+            <Heart className="w-14 h-14 text-white fill-white" />
+          </div>
+
+          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-4">
             {quizData.title}
           </h1>
-          <p className="text-gray-600 mb-8">{totalQuestions} Soal</p>
+
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <div className="bg-red-100 px-6 py-3 rounded-full border-2 border-red-300">
+              <p className="text-red-700 font-bold text-lg">
+                {totalQuestions} Soal
+              </p>
+            </div>
+          </div>
+
           <button
             onClick={handleStartQuiz}
-            className="w-full bg-red-800 text-white font-bold py-4 px-8 rounded-full text-xl transition-transform duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold py-5 px-8 rounded-full text-2xl transition-all duration-300 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-rose-300 mb-6"
           >
-            Mulai Kuis
+            💪 Mulai Kuis Sekarang!
           </button>
+
           <Link
             href="/quiz-user"
-            className="inline-block mt-6 text-gray-500 hover:text-primary"
+            className="inline-block text-gray-500 hover:text-red-600 font-semibold transition-colors duration-300"
           >
-            Kembali ke Daftar Kuis
+            ← Kembali ke Daftar Kuis
           </Link>
         </div>
       </div>
     );
   }
 
-  // UI for Finish Screen
+  // FINISH SCREEN - HIV Health Theme (NO GRADE)
   if (gameState === "finished") {
-    // Use backend calculated score if available, otherwise calculate locally as fallback
     const displayNilai =
-      finalScore?.nilai ?? Math.round((correctAnswers / totalQuestions) * 100);
-    const displayGrade =
-      finalScore?.grade ??
-      (() => {
-        if (displayNilai >= 80) return "A";
-        if (displayNilai >= 65) return "B";
-        if (displayNilai >= 50) return "C";
-        if (displayNilai >= 35) return "D";
-        return "E";
-      })();
-
-    const getGradeColor = (grade: string) => {
-      switch (grade) {
-        case "A":
-          return "text-green-600";
-        case "B":
-          return "text-blue-600";
-        case "C":
-          return "text-yellow-600";
-        case "D":
-          return "text-orange-600";
-        case "E":
-          return "text-red-600";
-        default:
-          return "text-gray-600";
-      }
-    };
+      finalScore ?? Math.round((correctAnswers / totalQuestions) * 100);
+    const scoreDetails = getScoreDetails(displayNilai);
+    const percentage = (correctAnswers / totalQuestions) * 100;
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 text-center">
-        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-lg">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Kuis Selesai!
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 p-4 text-center overflow-hidden">
+        <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-3xl border-2 border-red-200 max-h-[95vh] overflow-y-auto">
+          {/* Icon */}
+          <div className="mb-4 animate-bounce">{scoreDetails.icon}</div>
+
+          <h1 className={`text-4xl font-extrabold mb-2 ${scoreDetails.color}`}>
+            {scoreDetails.label}
           </h1>
           <p className="text-lg text-gray-600 mb-6">
-            Kerja bagus telah menyelesaikan kuis.
+            Kamu telah menyelesaikan kuis dengan baik!
           </p>
 
-          <div className="bg-red-50 p-6 rounded-lg mb-4">
-            <p className="text-xl text-gray-700 mb-2">Hasil Anda</p>
-
-            {/* Correct Answers Display */}
-            <div className="mb-4 p-4 bg-white rounded-lg">
-              <p className="text-lg text-gray-600">Jawaban Benar</p>
-              <p className="text-4xl font-bold text-gray-800">
-                {correctAnswers}{" "}
-                <span className="text-2xl text-gray-500">
-                  / {totalQuestions}
-                </span>
+          {/* Score Display - Large and Prominent */}
+          <div
+            className={`${scoreDetails.bgColor} border-4 ${scoreDetails.borderColor} p-6 rounded-3xl mb-5 transform hover:scale-105 transition-all duration-300`}
+          >
+            <p className="text-base font-semibold text-gray-600 mb-2">
+              Nilai Akhir
+            </p>
+            <div className="relative">
+              <p className={`text-7xl font-extrabold ${scoreDetails.color} mb-3`}>
+                {displayNilai}
               </p>
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                <div
+                  className="bg-gradient-to-r from-red-500 to-rose-500 h-3 rounded-full transition-all duration-1000 ease-out"
+                  style={{ width: `${percentage}%` }}
+                ></div>
+              </div>
             </div>
 
-            {/* Score Display */}
-            <div className="mb-4 p-4 bg-white rounded-lg">
-              <p className="text-lg text-gray-600">Nilai</p>
-              <p className="text-5xl font-bold text-red-800">{displayNilai}</p>
-            </div>
-
-            {/* Grade Display */}
-            <div className="p-4 bg-white rounded-lg">
-              <p className="text-lg text-gray-600">Grade</p>
-              <p
-                className={`text-6xl font-bold ${getGradeColor(displayGrade)}`}
-              >
-                {displayGrade}
-              </p>
+            {/* Correct Answers */}
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <div className="bg-white p-3 rounded-xl shadow-md">
+                <p className="text-xs text-gray-600 mb-1">Jawaban Benar</p>
+                <p className="text-2xl font-bold text-teal-600">
+                  {correctAnswers}
+                </p>
+              </div>
+              <div className="bg-white p-3 rounded-xl shadow-md">
+                <p className="text-xs text-gray-600 mb-1">Total Soal</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {totalQuestions}
+                </p>
+              </div>
             </div>
           </div>
 
+          {/* Status Messages */}
           {isSubmitting && (
-            <div className="mb-4 text-gray-600">
-              <span className="loading loading-spinner loading-sm mr-2"></span>
-              Menyimpan skor...
+            <div className="mb-4 flex items-center justify-center gap-3 text-gray-600 bg-gray-100 py-2 px-4 rounded-full">
+              <div className="w-4 h-4 border-2 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
+              <span className="font-semibold text-sm">Menyimpan skor...</span>
             </div>
           )}
 
           {hasSubmitted && (
-            <div className="mb-4 text-green-600 font-semibold">
-              ✓ Skor berhasil disimpan
+            <div className="mb-4 flex items-center justify-center gap-2 text-teal-600 bg-teal-50 py-2 px-4 rounded-full border-2 border-teal-200">
+              <Check className="w-4 h-4" />
+              <span className="font-bold text-sm">Skor berhasil disimpan!</span>
             </div>
           )}
 
-          <div className="flex flex-col md:flex-row gap-4">
+          {/* Action Buttons */}
+          <div className="flex flex-col md:flex-row gap-3">
             <button
               onClick={handleRestartQuiz}
-              className="w-full bg-red-800 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 hover:bg-red-900"
+              className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
             >
+              <Zap className="w-5 h-5" />
               Coba Lagi
             </button>
             <Link
               href="/quiz-user"
-              className="w-full flex items-center justify-center bg-white border border-red-800 text-red-800 font-bold py-3 px-6 rounded-full transition-colors duration-300 hover:bg-red-50"
+              className="flex-1 flex items-center justify-center bg-white border-2 border-red-600 text-red-600 font-bold py-3 px-6 rounded-full transition-all duration-300 hover:bg-red-50 hover:scale-105 gap-2"
             >
-              Kembali ke Daftar Kuis
+              ← Kembali ke Daftar
             </Link>
           </div>
         </div>
@@ -410,58 +461,78 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 text-center">
-        <p className="text-gray-600">Soal tidak dapat dimuat.</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-red-50 to-rose-50 p-4 text-center overflow-hidden">
+        <p className="text-gray-600 text-lg">Soal tidak dapat dimuat.</p>
       </div>
     );
   }
 
-  // UI for Playing Screen
+  // PLAYING SCREEN - HIV Health Theme
   return (
-    <div className="min-h-screen bg-red-100 text-white flex flex-col p-4 md:p-8">
+    <div className="h-screen bg-gradient-to-br from-red-500 via-rose-500 to-pink-500 text-white flex flex-col p-4 md:p-6 overflow-hidden">
       {/* Header */}
-      <header className="flex justify-between items-center mb-6">
-        <p className="font-bold text-lg text-gray-600">
-          Soal {currentQuestionIndex + 1}{" "}
-          <span className="text-gray-400">dari {totalQuestions}</span>
-        </p>
+      <header className="flex justify-between items-center mb-4">
+        <div className="bg-white/20 backdrop-blur-lg px-4 py-2 rounded-full border-2 border-white/30">
+          <p className="font-bold text-base">
+            Soal {currentQuestionIndex + 1}{" "}
+            <span className="text-white/70">dari {totalQuestions}</span>
+          </p>
+        </div>
         <Link
           href="/quiz-user"
-          className="flex items-center text-red-700 gap-2 py-2 px-3 rounded-lg hover:bg-white/40 transition-colors"
+          className="flex items-center gap-2 bg-white/20 backdrop-blur-lg px-3 py-2 rounded-full hover:bg-white/30 transition-all duration-300 border-2 border-white/30"
         >
-          <X size={20} />{" "}
-          <span className="hidden sm:inline text-red-700">Keluar</span>
+          <X size={18} />
+          <span className="hidden sm:inline font-semibold text-sm">
+            Keluar
+          </span>
         </Link>
       </header>
 
+      {/* Progress Bar */}
+      <div className="w-full max-w-4xl mx-auto mb-4">
+        <div className="w-full bg-white/20 rounded-full h-2.5 backdrop-blur-lg">
+          <div
+            className="bg-gradient-to-r from-white to-teal-200 h-2.5 rounded-full transition-all duration-500 ease-out shadow-lg"
+            style={{
+              width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`,
+            }}
+          ></div>
+        </div>
+      </div>
+
       {/* Main Content */}
-      <main className="flex-1 flex flex-col justify-center items-center">
-        <div className="w-full max-w-3xl text-center mb-8 bg-white text-gray-800 p-6 rounded-lg shadow-lg">
-          <h2 className="text-2xl md:text-4xl font-bold">
+      <main className="flex-1 flex flex-col justify-center items-center overflow-hidden">
+        <div className="w-full max-w-4xl text-center mb-6 bg-white text-gray-800 p-6 rounded-3xl shadow-2xl border-4 border-white/50 transform hover:scale-105 transition-all duration-300">
+          <h2 className="text-2xl md:text-4xl font-bold leading-tight">
             {currentQuestion.questionText}
           </h2>
         </div>
 
-        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto max-h-[45vh] px-2">
           {currentQuestion.options.map((option, index) => (
             <button
               key={option.id}
               onClick={() => handleSelectAnswer(option.id)}
               disabled={isAnswered}
-              className={`p-4 rounded-lg text-white font-semibold text-lg flex items-center justify-between transition-all duration-300 disabled:cursor-not-allowed ${getButtonClass(
+              className={`p-4 rounded-2xl text-white font-bold text-lg flex items-center justify-between transition-all duration-300 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:scale-105 ${getButtonClass(
                 option.id
               )}`}
             >
-              <div className="flex items-center gap-4">
-                {icons[index % 4]}
-                <span>{option.text}</span>
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 p-2 rounded-xl backdrop-blur-lg">
+                  {icons[index % 4]}
+                </div>
+                <span className="text-left">{option.text}</span>
               </div>
               {isAnswered && (
-                <div className="w-8 h-8 rounded-full bg-black/20 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-full bg-black/30 flex items-center justify-center backdrop-blur-lg">
                   {option.id === currentQuestion.correctAnswerId ? (
-                    <Check size={20} />
+                    <Check size={20} className="animate-bounce" />
                   ) : (
-                    option.id === selectedAnswer && <X size={20} />
+                    option.id === selectedAnswer && (
+                      <X size={20} className="animate-pulse" />
+                    )
                   )}
                 </div>
               )}
@@ -471,15 +542,15 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
       </main>
 
       {/* Footer */}
-      <footer className="h-24 mt-8 flex items-center justify-end">
+      <footer className="h-20 flex items-center justify-end">
         {isAnswered && (
           <button
             onClick={handleNextQuestion}
-            className="bg-white text-gray-800 font-bold py-3 px-12 rounded-lg text-xl transition-transform hover:scale-105 shadow-2xl"
+            className="bg-white text-gray-800 font-bold py-3 px-12 rounded-full text-xl transition-all duration-300 hover:scale-110 shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
           >
             {currentQuestionIndex < totalQuestions - 1
-              ? "Lanjut"
-              : "Lihat Hasil"}
+              ? "Lanjut →"
+              : "Selesai 💪"}
           </button>
         )}
       </footer>
