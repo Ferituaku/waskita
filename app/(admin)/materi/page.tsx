@@ -112,7 +112,7 @@ const MateriPage: React.FC = () => {
         const uploadResult = await uploadResponse.json();
 
         if (uploadResult.success) {
-          imageUrl = uploadResult.dataUrl;
+          imageUrl = uploadResult.data.imageUrl;
           console.log("✅ Image uploaded to R2:", imageUrl);
         } else {
           alert("Gagal upload gambar: " + uploadResult.error);
