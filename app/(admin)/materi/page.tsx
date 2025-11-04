@@ -1,3 +1,4 @@
+//app/(admin)/materi/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -94,7 +95,7 @@ const MateriPage: React.FC = () => {
     setLoading(true);
 
     try {
-      let imageUrl = modal.data?.image_url || "/default-image.jpg";
+      let imageUrl: string | null = modal.data?.image_url || null;
       let pdfContent = formData.content;
       let pdfUrl = null;
 
@@ -102,9 +103,9 @@ const MateriPage: React.FC = () => {
       if (formData.coverFile) {
         const imageFormData = new FormData();
         imageFormData.append("file", formData.coverFile);
-        imageFormData.append("type", "image");
+        s;
 
-        const uploadResponse = await fetch("/api/upload", {
+        const uploadResponse = await fetch("/api/upload/image", {
           method: "POST",
           body: imageFormData,
         });
@@ -112,7 +113,8 @@ const MateriPage: React.FC = () => {
         const uploadResult = await uploadResponse.json();
 
         if (uploadResult.success) {
-          imageUrl = uploadResult.url;
+          imageUrl = uploadResult.dataUrl;
+          console.log("✅ Image uploaded to R2:", imageUrl);
         } else {
           alert("Gagal upload gambar: " + uploadResult.error);
           setLoading(false);
@@ -122,11 +124,12 @@ const MateriPage: React.FC = () => {
 
       // Upload PDF jika tipe file adalah PDF
       if (formData.file_type === "pdf" && formData.file) {
+        console.log("📤 Uploading PDF:", formData.file.name);
+
         const pdfFormData = new FormData();
         pdfFormData.append("file", formData.file);
-        pdfFormData.append("type", "pdf");
 
-        const uploadResponse = await fetch("/api/upload", {
+        const uploadResponse = await fetch("/api/upload/image", {
           method: "POST",
           body: pdfFormData,
         });
@@ -134,10 +137,13 @@ const MateriPage: React.FC = () => {
         const uploadResult = await uploadResponse.json();
 
         if (uploadResult.success) {
-          pdfUrl = uploadResult.url;
+          pdfUrl = uploadResult.data.imageUrl;
           pdfContent = `PDF: ${formData.file.name}`;
+          console.log("✅ PDF uploaded:", pdfUrl);
         } else {
-          alert("Gagal upload PDF: " + uploadResult.error);
+          toast.error(
+            "Gagal upload PDF: " + (uploadResult.message || "Unknown error")
+          );
           setLoading(false);
           return;
         }
@@ -151,6 +157,7 @@ const MateriPage: React.FC = () => {
         image_url: imageUrl,
         file_url: pdfUrl,
       };
+      console.log("📝 Submitting article:", payload);
 
       const url =
         modal.type === "edit"
