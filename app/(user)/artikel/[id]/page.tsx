@@ -48,6 +48,7 @@ export default function ArticleDetailPage() {
   const params = useParams();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
@@ -215,6 +216,11 @@ export default function ArticleDetailPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1, transition: { delay: 0.3 } }}
           >
+            {imageLoading && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                <span className="text-gray-400">Loading image...</span>
+              </div>
+            )}
             {/* <Image
               src={article.image_url}
               alt={article.title}
@@ -227,9 +233,12 @@ export default function ArticleDetailPage() {
               src={getImageUrl()}
               alt={article.title}
               fill
-              className="object-cover"
+              className={`object-cover transition-opacity duration-300 ${
+                imageLoading ? "opacity-0" : "opacity-100"
+              }`}
               sizes="(max-width: 768px) 100vw, 896px"
               priority
+              onLoad={() => setImageLoading(false)}
               onError={handleImageError}
               unoptimized
             />

@@ -111,32 +111,41 @@ const EmptyState: React.FC<{ tab: string }> = ({ tab }) => {
 };
 
 // --- KOMPONEN KARTU KONTEN ---
-
-// ⭐ FIXED: ArticleCard dengan proper image handling
 const ArticleCardComponent: React.FC<{
   article: Article;
   onClick: () => void;
 }> = ({ article, onClick }) => {
-  // ⭐ Use R2 URL or fallback to default
-  const imageUrl = article.image_url || "/images/default-article.jpg";
+  const [imgError, setImgError] = useState(false);
+  const [imgLoading, setImgLoading] = useState(true);
 
+  const imageUrl = imgError
+    ? "/images/default-article.jpg"
+    : article.image_url || "/images/default-article.jpg";
   return (
     <div
       onClick={onClick}
       className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer group"
     >
       <div className="relative h-48 w-full bg-gray-100">
+        {/* Loading skeleton */}
+        {imgLoading && (
+          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+        )}
+
         <Image
-          src={imageUrl} // ⭐ FIXED: Use actual image_url
+          src={imageUrl}
           alt={article.title}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-          unoptimized // ⭐ IMPORTANT: Allow R2 external URLs
+          className={`object-cover group-hover:scale-105 transition-transform duration-300 ${
+            imgLoading ? "opacity-0" : "opacity-100"
+          }`}
+          unoptimized
+          onLoad={() => setImgLoading(false)}
           onError={(e) => {
-            // ⭐ FIXED: Proper fallback path
-            const target = e.currentTarget as HTMLImageElement;
-            target.src = "/images/default-article.jpg";
+            console.error("Image error:", article.id, imageUrl);
+            setImgError(true);
+            setImgLoading(false);
           }}
         />
         <div className="absolute top-3 left-3">
@@ -147,10 +156,10 @@ const ArticleCardComponent: React.FC<{
         </div>
       </div>
       <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 h-[3.5rem] group-hover:text-red-600 transition-colors">
+        <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 h-10 group-hover:text-red-600 transition-colors">
           {article.title}
         </h3>
-        <p className="text-sm text-gray-600 line-clamp-2 h-[2.5rem] mb-4">
+        <p className="text-sm text-gray-600 line-clamp-2 h-10 mb-4">
           {article.content.replace(/<[^>]+>/g, "").substring(0, 100)}...
         </p>
         <div className="flex justify-between items-center">
