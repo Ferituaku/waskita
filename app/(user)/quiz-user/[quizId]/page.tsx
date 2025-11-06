@@ -6,14 +6,11 @@ import toast from "react-hot-toast";
 import {
   Check,
   X,
-  Triangle,
-  Square,
-  Circle,
-  Star,
-  Trophy,
-  Target,
-  Zap,
-  Heart,
+  ChevronRight,
+  Home,
+  RotateCcw,
+  Award,
+  BookOpen,
 } from "lucide-react";
 import type { Judul, Soal, Jawaban } from "@/types/quiz";
 
@@ -28,20 +25,6 @@ interface QuizData {
     correctAnswerId: number;
   }[];
 }
-
-const colors = [
-  "bg-red-500 hover:bg-red-600",
-  "bg-teal-500 hover:bg-teal-600",
-  "bg-rose-500 hover:bg-rose-600",
-  "bg-cyan-500 hover:bg-cyan-600",
-];
-
-const icons = [
-  <Triangle key="triangle" className="w-7 h-7" />,
-  <Square key="square" className="w-7 h-7" />,
-  <Circle key="circle" className="w-7 h-7" />,
-  <Star key="star" className="w-7 h-7" />,
-];
 
 type GameState = "start" | "playing" | "finished";
 
@@ -78,12 +61,10 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
     setLoading(true);
     setError(null);
     try {
-      // 1. Fetch quiz title
       const judulRes = await fetch(`/api/quiz/judul/${quizId}`);
       if (!judulRes.ok) throw new Error("Kuis tidak ditemukan.");
       const judulData: Judul = await judulRes.json();
 
-      // 2. Fetch questions for the quiz
       const soalRes = await fetch(`/api/quiz/soal?id_judul=${quizId}`);
       if (!soalRes.ok) throw new Error("Gagal memuat soal kuis.");
       const soalData: Soal[] = await soalRes.json();
@@ -92,7 +73,6 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
         throw new Error("Kuis ini belum memiliki soal.");
       }
 
-      // 3. Fetch answers for all questions in parallel
       const jawabanPromises = soalData.map((soal) =>
         fetch(`/api/quiz/jawaban?id_soal=${soal.id_soal}`).then((res) => {
           if (!res.ok)
@@ -104,7 +84,6 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
       );
       const jawabanArrays: Jawaban[][] = await Promise.all(jawabanPromises);
 
-      // 4. Structure the data
       const structuredQuestions = soalData.map((soal, index) => {
         const options = jawabanArrays[index];
         const correctOption = options.find((opt) => opt.is_correct);
@@ -145,7 +124,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
     fetchAndStructureQuizData();
   }, [fetchAndStructureQuizData]);
 
-  // Submit score effect - NO GRADE
+  // Submit score effect
   useEffect(() => {
     const submitScore = async () => {
       if (
@@ -175,7 +154,6 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
           const data = await res.json();
           setHasSubmitted(true);
 
-          // Store only the nilai (score)
           if (data.data) {
             setFinalScore(data.data.nilai);
           }
@@ -239,86 +217,52 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
     }
   };
 
-  const getButtonClass = (optionId: number) => {
+  const getOptionClass = (optionId: number) => {
     if (!isAnswered || !currentQuestion) {
-      return colors[optionId % 4];
+      return "border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 bg-white";
     }
-    if (optionId === currentQuestion.correctAnswerId) return "bg-teal-600";
-    if (
-      optionId === selectedAnswer &&
-      optionId !== currentQuestion.correctAnswerId
-    )
-      return "bg-red-700 opacity-70";
-    return "bg-gray-500 opacity-50";
+    if (optionId === currentQuestion.correctAnswerId) {
+      return "border-green-500 bg-green-50";
+    }
+    if (optionId === selectedAnswer && optionId !== currentQuestion.correctAnswerId) {
+      return "border-red-500 bg-red-50";
+    }
+    return "border-gray-200 bg-gray-50 opacity-60";
   };
 
-  // Get score category and styling - HIV/Health Theme
-  const getScoreDetails = (score: number) => {
-    if (score >= 90)
-      return {
-        label: "Luar Biasa!",
-        color: "text-teal-700",
-        bgColor: "bg-teal-50",
-        borderColor: "border-teal-300",
-        icon: <Heart className="w-16 h-16 text-teal-600" />,
-      };
-    if (score >= 75)
-      return {
-        label: "Sangat Baik!",
-        color: "text-cyan-700",
-        bgColor: "bg-cyan-50",
-        borderColor: "border-cyan-300",
-        icon: <Trophy className="w-16 h-16 text-cyan-600" />,
-      };
-    if (score >= 60)
-      return {
-        label: "Baik!",
-        color: "text-rose-700",
-        bgColor: "bg-rose-50",
-        borderColor: "border-rose-300",
-        icon: <Target className="w-16 h-16 text-rose-600" />,
-      };
-    return {
-      label: "Terus Berlatih!",
-      color: "text-red-700",
-      bgColor: "bg-red-50",
-      borderColor: "border-red-300",
-      icon: <Zap className="w-16 h-16 text-red-600" />,
-    };
+  const getScoreLevel = (score: number) => {
+    if (score >= 90) return { label: "Excellent", color: "text-green-600" };
+    if (score >= 75) return { label: "Very Good", color: "text-blue-600" };
+    if (score >= 60) return { label: "Good", color: "text-indigo-600" };
+    return { label: "Keep Practicing", color: "text-gray-600" };
   };
 
   if (loading || quizId === null) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-linear-to-br from-red-50 via-rose-50 to-pink-50 overflow-hidden">
-        <div className="relative">
-          <div className="w-20 h-20 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Heart className="w-8 h-8 text-red-600 animate-pulse" />
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-3 border-gray-300 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Memuat kuis...</p>
         </div>
-        <p className="mt-6 text-lg font-semibold text-gray-700 animate-pulse">
-          Memuat kuis...
-        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-linear-to-br from-red-50 to-rose-100 p-4 text-center overflow-hidden">
-        <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg border-2 border-red-200">
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <X className="w-10 h-10 text-red-600" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <X className="w-8 h-8 text-red-600" />
           </div>
-          <h1 className="text-3xl font-bold text-red-600 mb-4">
-            Oops! Ada Masalah
-          </h1>
-          <p className="text-gray-600 mb-8 text-lg">{error}</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
           <Link
             href="/quiz-user"
-            className="inline-block bg-linear-to-r from-red-500 to-rose-500 text-white font-bold py-4 px-8 rounded-full hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            className="inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium"
           >
-            Kembali ke Daftar Kuis
+            <Home className="w-4 h-4" />
+            Kembali
           </Link>
         </div>
       </div>
@@ -327,131 +271,140 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
 
   if (!quizData) return null;
 
-  // START SCREEN - HIV Health Theme
+  // START SCREEN - Professional White
   if (gameState === "start") {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-linear-to-br from-red-50 via-rose-50 to-pink-50 p-4 text-center overflow-hidden">
-        <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-2xl border-2 border-red-200 transform hover:scale-105 transition-all duration-300">
-          {/* Red Ribbon / Heart Icon */}
-          <div className="w-24 h-24 bg-linear-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-pulse">
-            <Heart className="w-14 h-14 text-white fill-white" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-10 max-w-2xl w-full">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+              <BookOpen className="w-8 h-8 text-indigo-600" />
+            </div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">
+              {quizData.title}
+            </h1>
+            <p className="text-gray-600">
+              Uji pengetahuan Anda dengan {totalQuestions} pertanyaan
+            </p>
           </div>
 
-          <h1 className="text-2xl font-extrabold bg-linear-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-4">
-            {quizData.title}
-          </h1>
-
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="bg-red-100 px-6 py-3 rounded-full border-2 border-red-300">
-              <p className="text-red-700 font-bold text-lg">
-                {totalQuestions} Soal
-              </p>
+          <div className="bg-gray-50 rounded-xl p-6 mb-8">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{totalQuestions}</p>
+                <p className="text-sm text-gray-600 mt-1">Pertanyaan</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">~{totalQuestions * 0.5}</p>
+                <p className="text-sm text-gray-600 mt-1">Menit</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">100</p>
+                <p className="text-sm text-gray-600 mt-1">Poin Max</p>
+              </div>
             </div>
           </div>
 
           <button
             onClick={handleStartQuiz}
-            className="w-full bg-linear-to-r from-red-600 to-rose-600 text-white font-bold py-5 px-8 rounded-full text-2xl transition-all duration-300 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-rose-300 mb-6"
+            className="w-full bg-gray-900 text-white font-semibold py-4 rounded-xl hover:bg-gray-800 transition-all duration-200 mb-4 flex items-center justify-center gap-2"
           >
-            💪 Mulai Kuis Sekarang!
+            Mulai Kuis
+            <ChevronRight className="w-5 h-5" />
           </button>
 
           <Link
             href="/quiz-user"
-            className="inline-block text-gray-500 hover:text-red-600 font-semibold transition-colors duration-300"
+            className="block text-center text-gray-600 hover:text-gray-900 font-medium transition-colors"
           >
-            ← Kembali ke Daftar Kuis
+            ← Kembali
           </Link>
         </div>
       </div>
     );
   }
 
-  // FINISH SCREEN - HIV Health Theme (NO GRADE)
+  // FINISH SCREEN - Professional Results
   if (gameState === "finished") {
     const displayNilai =
       finalScore ?? Math.round((correctAnswers / totalQuestions) * 100);
-    const scoreDetails = getScoreDetails(displayNilai);
+    const scoreLevel = getScoreLevel(displayNilai);
     const percentage = (correctAnswers / totalQuestions) * 100;
 
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-linear-to-br from-red-50 via-rose-50 to-pink-50 p-4 text-center overflow-hidden">
-        <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-3xl border-2 border-red-200 max-h-[95vh] overflow-y-auto">
-          {/* Icon */}
-          <div className="mb-4 animate-bounce">{scoreDetails.icon}</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-10 max-w-2xl w-full">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 rounded-full mb-4">
+              <Award className="w-10 h-10 text-indigo-600" />
+            </div>
+            <h2 className={`text-2xl font-bold mb-2 ${scoreLevel.color}`}>
+              {scoreLevel.label}
+            </h2>
+            <p className="text-gray-600">Quiz telah selesai</p>
+          </div>
 
-          <h1 className={`text-4xl font-extrabold mb-2 ${scoreDetails.color}`}>
-            {scoreDetails.label}
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            Kamu telah menyelesaikan kuis dengan baik!
-          </p>
-
-          {/* Score Display - Large and Prominent */}
-          <div
-            className={`${scoreDetails.bgColor} border-4 ${scoreDetails.borderColor} p-6 rounded-3xl mb-5 transform hover:scale-105 transition-all duration-300`}
-          >
-            <p className="text-base font-semibold text-gray-600 mb-2">
-              Nilai Akhir
-            </p>
-            <div className="relative">
-              <p className={`text-7xl font-extrabold ${scoreDetails.color} mb-3`}>
-                {displayNilai}
-              </p>
-              <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                <div
-                  className="bg-linear-to-r from-red-500 to-rose-500 h-3 rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: `${percentage}%` }}
-                ></div>
-              </div>
+          {/* Score Display */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 mb-6">
+            <div className="text-center mb-6">
+              <p className="text-sm font-medium text-gray-600 mb-2">Nilai Anda</p>
+              <p className="text-7xl font-bold text-gray-900">{displayNilai}</p>
+              <p className="text-gray-600 mt-2">dari 100</p>
             </div>
 
-            {/* Correct Answers */}
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              <div className="bg-white p-3 rounded-xl shadow-md">
-                <p className="text-xs text-gray-600 mb-1">Jawaban Benar</p>
-                <p className="text-2xl font-bold text-teal-600">
-                  {correctAnswers}
-                </p>
+            {/* Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
+              <div
+                className="bg-indigo-600 h-2 rounded-full transition-all duration-1000"
+                style={{ width: `${percentage}%` }}
+              ></div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white rounded-xl p-4 text-center">
+                <p className="text-sm text-gray-600 mb-1">Benar</p>
+                <p className="text-3xl font-bold text-green-600">{correctAnswers}</p>
               </div>
-              <div className="bg-white p-3 rounded-xl shadow-md">
-                <p className="text-xs text-gray-600 mb-1">Total Soal</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {totalQuestions}
+              <div className="bg-white rounded-xl p-4 text-center">
+                <p className="text-sm text-gray-600 mb-1">Salah</p>
+                <p className="text-3xl font-bold text-red-600">
+                  {totalQuestions - correctAnswers}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Status Messages */}
+          {/* Status */}
           {isSubmitting && (
-            <div className="mb-4 flex items-center justify-center gap-3 text-gray-600 bg-gray-100 py-2 px-4 rounded-full">
-              <div className="w-4 h-4 border-2 border-gray-300 border-t-red-600 rounded-full animate-spin"></div>
-              <span className="font-semibold text-sm">Menyimpan skor...</span>
+            <div className="flex items-center justify-center gap-2 text-gray-600 bg-gray-50 py-3 px-4 rounded-lg mb-4">
+              <div className="w-4 h-4 border-2 border-gray-300 border-t-indigo-600 rounded-full animate-spin"></div>
+              <span className="font-medium text-sm">Menyimpan hasil...</span>
             </div>
           )}
 
           {hasSubmitted && (
-            <div className="mb-4 flex items-center justify-center gap-2 text-teal-600 bg-teal-50 py-2 px-4 rounded-full border-2 border-teal-200">
+            <div className="flex items-center justify-center gap-2 text-green-600 bg-green-50 py-3 px-4 rounded-lg mb-4 border border-green-200">
               <Check className="w-4 h-4" />
-              <span className="font-bold text-sm">Skor berhasil disimpan!</span>
+              <span className="font-medium text-sm">Hasil tersimpan</span>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex flex-col md:flex-row gap-3">
+          {/* Actions */}
+          <div className="flex gap-3">
             <button
               onClick={handleRestartQuiz}
-              className="flex-1 bg-linear-to-r from-red-600 to-rose-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
+              className="flex-1 bg-gray-900 text-white font-semibold py-3 rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
             >
-              <Zap className="w-5 h-5" />
+              <RotateCcw className="w-4 h-4" />
               Coba Lagi
             </button>
             <Link
               href="/quiz-user"
-              className="flex-1 flex items-center justify-center bg-white border-2 border-red-600 text-red-600 font-bold py-3 px-6 rounded-full transition-all duration-300 hover:bg-red-50 hover:scale-105 gap-2"
+              className="flex-1 bg-gray-100 text-gray-900 font-semibold py-3 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
             >
-              ← Kembali ke Daftar
+              <Home className="w-4 h-4" />
+              Beranda
             </Link>
           </div>
         </div>
@@ -461,99 +414,98 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-linear-to-br from-red-50 to-rose-50 p-4 text-center overflow-hidden">
-        <p className="text-gray-600 text-lg">Soal tidak dapat dimuat.</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Soal tidak dapat dimuat.</p>
       </div>
     );
   }
 
-  // PLAYING SCREEN - HIV Health Theme
-  return (
-    <div className="h-screen bg-linear-to-br from-red-500 via-rose-500 to-pink-500 text-white flex flex-col p-4 md:p-6 overflow-hidden">
-      {/* Header */}
-      <header className="flex justify-between items-center mb-4">
-        <div className="bg-white/20 backdrop-blur-lg px-4 py-2 rounded-full border-2 border-white/30">
-          <p className="font-bold text-base">
-            Soal {currentQuestionIndex + 1}{" "}
-            <span className="text-white/70">dari {totalQuestions}</span>
-          </p>
-        </div>
-        <Link
-          href="/quiz-user"
-          className="flex items-center gap-2 bg-white/20 backdrop-blur-lg px-3 py-2 rounded-full hover:bg-white/30 transition-all duration-300 border-2 border-white/30"
-        >
-          <X size={18} />
-          <span className="hidden sm:inline font-semibold text-sm">
-            Keluar
-          </span>
-        </Link>
-      </header>
+  // PLAYING SCREEN - Clean & Professional
+  const optionLabels = ["A", "B", "C", "D"];
 
-      {/* Progress Bar */}
-      <div className="w-full max-w-4xl mx-auto mb-4">
-        <div className="w-full bg-white/20 rounded-full h-2.5 backdrop-blur-lg">
+  return (
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Header */}
+      <header className="border-b border-gray-200 bg-white sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-gray-600">
+              Pertanyaan {currentQuestionIndex + 1} dari {totalQuestions}
+            </span>
+          </div>
+          <Link
+            href="/quiz-user"
+            className="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2"
+          >
+            <X className="w-5 h-5" />
+            <span className="hidden sm:inline font-medium">Keluar</span>
+          </Link>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="h-1 bg-gray-100">
           <div
-            className="bg-linear-to-r from-white to-teal-200 h-2.5 rounded-full transition-all duration-500 ease-out shadow-lg"
+            className="h-full bg-indigo-600 transition-all duration-300"
             style={{
               width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`,
             }}
           ></div>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col justify-center items-center overflow-hidden">
-        <div className="w-full max-w-4xl text-center mb-6 bg-white text-gray-800 p-6 rounded-3xl shadow-2xl border-4 border-white/50 transform hover:scale-105 transition-all duration-300">
-          <h2 className="text-2xl md:text-4xl font-bold leading-tight">
+      <main className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-8">
+        {/* Question */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 leading-tight">
             {currentQuestion.questionText}
           </h2>
         </div>
 
-        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto max-h-[45vh] px-2">
+        {/* Options */}
+        <div className="space-y-3 mb-8">
           {currentQuestion.options.map((option, index) => (
             <button
               key={option.id}
               onClick={() => handleSelectAnswer(option.id)}
               disabled={isAnswered}
-              className={`p-4 rounded-2xl text-white font-bold text-lg flex items-center justify-between transition-all duration-300 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:scale-105 ${getButtonClass(
+              className={`w-full p-5 rounded-xl border-2 text-left transition-all duration-200 disabled:cursor-not-allowed ${getOptionClass(
                 option.id
               )}`}
             >
-              <div className="flex items-center gap-3">
-                <div className="bg-white/20 p-2 rounded-xl backdrop-blur-lg">
-                  {icons[index % 4]}
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center font-bold text-gray-900">
+                  {optionLabels[index]}
                 </div>
-                <span className="text-left">{option.text}</span>
-              </div>
-              {isAnswered && (
-                <div className="w-9 h-9 rounded-full bg-black/30 flex items-center justify-center backdrop-blur-lg">
-                  {option.id === currentQuestion.correctAnswerId ? (
-                    <Check size={20} className="animate-bounce" />
-                  ) : (
-                    option.id === selectedAnswer && (
-                      <X size={20} className="animate-pulse" />
-                    )
+                <span className="flex-1 text-gray-900 font-medium">
+                  {option.text}
+                </span>
+                {isAnswered && option.id === currentQuestion.correctAnswerId && (
+                  <Check className="w-6 h-6 text-green-600 flex-shrink-0" />
+                )}
+                {isAnswered &&
+                  option.id === selectedAnswer &&
+                  option.id !== currentQuestion.correctAnswerId && (
+                    <X className="w-6 h-6 text-red-600 flex-shrink-0" />
                   )}
-                </div>
-              )}
+              </div>
             </button>
           ))}
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="h-20 flex items-center justify-end">
+        {/* Next Button */}
         {isAnswered && (
-          <button
-            onClick={handleNextQuestion}
-            className="bg-white text-gray-800 font-bold py-3 px-12 rounded-full text-xl transition-all duration-300 hover:scale-110 shadow-2xl hover:shadow-3xl transform hover:-translate-y-1"
-          >
-            {currentQuestionIndex < totalQuestions - 1
-              ? "Lanjut →"
-              : "Selesai 💪"}
-          </button>
+          <div className="flex justify-end mt-auto">
+            <button
+              onClick={handleNextQuestion}
+              className="bg-gray-900 text-white font-semibold px-8 py-3 rounded-xl hover:bg-gray-800 transition-colors flex items-center gap-2"
+            >
+              {currentQuestionIndex < totalQuestions - 1 ? "Selanjutnya" : "Selesai"}
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         )}
-      </footer>
+      </main>
     </div>
   );
-}
+} 

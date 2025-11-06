@@ -7,7 +7,7 @@ import { ArrowLeft, Plus, Trash2, Save, CheckCircle2 } from "lucide-react";
 import type { Judul, Soal, Jawaban, BatchUpdatePayload } from "@/types/quiz";
 
 // Helper to check if an ID is temporary (for new items)
-const isTempId = (id: number) => id > 1_000_000_000;
+const isTempId = (id: number) => id >= 1_000_000_000;
 
 export default function QuizEditPage({
   params,
@@ -159,70 +159,103 @@ export default function QuizEditPage({
   };
 
   const handleSaveChanges = async () => {
-    setSaving(true);
-    const questions_to_add = questions.filter((q) => isTempId(q.id_soal));
-    const questions_to_update = questions.filter(
-      (q) =>
-        !isTempId(q.id_soal) &&
-        JSON.stringify(q) !==
-          JSON.stringify(
-            initialQuestions.find((iq) => iq.id_soal === q.id_soal)
-          )
+  setSaving(true);
+  
+  // 🔍 DEBUG: Cek data sebelum dikirim
+  console.log("📊 All questions:", questions);
+  console.log("📊 Initial questions:", initialQuestions);
+  
+  // ✅ PERBAIKAN: Filter dengan BENAR
+  const questions_to_add = questions.filter((q) => {
+    const isTemp = isTempId(q.id_soal);
+    console.log(`Question ${q.id_soal}: isTemp = ${isTemp}`);
+    return isTemp;
+  });
+  
+  const questions_to_update = questions.filter((q) => {
+    // Harus bukan temp ID DAN ada di initial questions
+    if (isTempId(q.id_soal)) return false;
+    
+    const initial = initialQuestions.find((iq) => iq.id_soal === q.id_soal);
+    if (!initial) return false; // Kalau tidak ada di initial, berarti baru
+    
+    // Cek apakah ada perubahan
+    const hasChanged = q.pertanyaan !== initial.pertanyaan;
+    console.log(`Question ${q.id_soal}: hasChanged = ${hasChanged}`);
+    return hasChanged;
+  });
+  
+  const questions_to_delete = initialQuestions
+    .filter((iq) => !questions.some((q) => q.id_soal === iq.id_soal))
+    .map((q) => q.id_soal);
+
+  // ✅ PERBAIKAN: Filter answers dengan benar
+  const answers_to_add = answers.filter((a) => {
+    // Jawaban baru = punya temp ID ATAU id_soal-nya adalah soal baru
+    const isTempAnswer = isTempId(a.id_jawaban);
+    const isForNewQuestion = isTempId(a.id_soal);
+    return isTempAnswer || isForNewQuestion;
+  });
+  
+  const answers_to_update = answers.filter((a) => {
+    // Harus bukan temp ID DAN id_soal bukan temp ID
+    if (isTempId(a.id_jawaban)) return false;
+    if (isTempId(a.id_soal)) return false;
+    
+    const initial = initialAnswers.find((ia) => ia.id_jawaban === a.id_jawaban);
+    if (!initial) return false;
+    
+    // Cek perubahan
+    return (
+      a.teks_jawaban !== initial.teks_jawaban ||
+      a.is_correct !== initial.is_correct
     );
-    const questions_to_delete = initialQuestions
-      .filter((iq) => !questions.some((q) => q.id_soal === iq.id_soal))
-      .map((q) => q.id_soal);
+  });
+  
+  const answers_to_delete = initialAnswers
+    .filter((ia) => 
+      !answers.some((a) => a.id_jawaban === ia.id_jawaban) &&
+      !isTempId(ia.id_jawaban) // Jangan delete temp ID (belum ada di DB)
+    )
+    .map((a) => a.id_jawaban);
 
-    // 2. Identify new, updated, and deleted answers
-    const answers_to_add = answers
-      .filter((a) => isTempId(a.id_jawaban))
-      .map(({ ...rest }) => rest);
-    const answers_to_update = answers.filter(
-      (a) =>
-        !isTempId(a.id_jawaban) &&
-        JSON.stringify(a) !==
-          JSON.stringify(
-            initialAnswers.find((ia) => ia.id_jawaban === a.id_jawaban)
-          )
-    );
-    const answers_to_delete = initialAnswers
-      .filter((ia) => !answers.some((a) => a.id_jawaban === ia.id_jawaban))
-      .map((a) => a.id_jawaban);
-
-    const payload: BatchUpdatePayload = {
-      questions_to_add,
-      questions_to_update,
-      questions_to_delete,
-      answers_to_add,
-      answers_to_update,
-      answers_to_delete,
-    };
-
-    try {
-      const res = await fetch(`/api/quiz/manage/${quizId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Gagal menyimpan perubahan.");
-      }
-
-      toast.success("Perubahan berhasil disimpan!");
-      // Refresh data from server to get new IDs and confirm changes
-      await fetchData();
-    } catch (error) {
-      let message = "Gagal menyimpan perubahan.";
-      if (error instanceof Error) {
-        message = error.message;
-      }
-      toast.error(message);
-    } finally {
-      setSaving(false);
-    }
+  const payload: BatchUpdatePayload = {
+    questions_to_add,
+    questions_to_update,
+    questions_to_delete,
+    answers_to_add,
+    answers_to_update,
+    answers_to_delete,
   };
+
+  // 🔍 DEBUG: Cek payload
+  console.log("📦 Payload to send:", payload);
+  
+  try {
+    const res = await fetch(`/api/quiz/manage/${quizId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Gagal menyimpan perubahan.");
+    }
+
+    toast.success("Perubahan berhasil disimpan!");
+    await fetchData();
+  } catch (error) {
+    let message = "Gagal menyimpan perubahan.";
+    if (error instanceof Error) {
+      message = error.message;
+    }
+    toast.error(message);
+    console.error("❌ Save error:", error);
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading) {
     return (
