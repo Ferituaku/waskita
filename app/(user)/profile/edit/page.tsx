@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Header from "../../../../../components/Header";
+import Header from "../../../../components/Header";
 import { User, Mail, Lock, Camera, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 

@@ -70,16 +70,16 @@ const QuizDetailPage: React.FC = () => {
   // Helper: Get best score per user (for statistics only)
   const getBestScoresPerUser = () => {
     const userBestScores = new Map<string, number>();
-    
+
     results.forEach((result) => {
       const userKey = result.email || `guest_${result.nama}`;
       const currentBest = userBestScores.get(userKey) || 0;
-      
+
       if (result.nilai > currentBest) {
         userBestScores.set(userKey, result.nilai);
       }
     });
-    
+
     return Array.from(userBestScores.values());
   };
 
@@ -89,11 +89,11 @@ const QuizDetailPage: React.FC = () => {
 
     const bestScores = getBestScoresPerUser();
     const uniqueUsers = bestScores.length;
-    
+
     const average = bestScores.reduce((a, b) => a + b, 0) / bestScores.length;
     const highest = Math.max(...bestScores);
     const lowest = Math.min(...bestScores);
-    
+
     const registeredUsers = results.filter((r) => r.isRegisteredUser).length;
 
     // Calculate score ranges from BEST scores only
@@ -162,13 +162,11 @@ const QuizDetailPage: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6 border border-gray-100">
           <div className="flex justify-between items-center flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
-                {loading
-                  ? "Memuat..."
-                  : quizInfo?.judul || "Tidak Ditemukan"}
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-red-900 to-[#5C110E] bg-clip-text text-transparent mb-2">
+                {loading ? "Memuat..." : quizInfo?.judul || "Tidak Ditemukan"}
               </h1>
               <p className="text-gray-600 flex items-center gap-2">
-                <Award size={18} className="text-indigo-500" />
+                <Award size={18} className="text-yellow-500" />
                 Hasil Peserta Kuis
               </p>
             </div>
@@ -193,13 +191,17 @@ const QuizDetailPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <Users size={32} className="opacity-80" />
                 <div className="bg-white bg-opacity-20 rounded-lg px-3 py-1">
-                  <p className="text-xs font-semibold">Total</p>
+                  <p className="text-xs text-slate-800 text-slate-800 font-semibold">
+                    Total
+                  </p>
                 </div>
               </div>
               <p className="text-4xl font-bold mb-1">
                 {stats.totalParticipants}
               </p>
-              <p className="text-blue-100 text-sm">Percobaan ({stats.uniqueUsers} user)</p>
+              <p className="text-blue-100 text-sm">
+                Percobaan ({stats.uniqueUsers} user)
+              </p>
             </div>
 
             {/* Average Score */}
@@ -207,7 +209,9 @@ const QuizDetailPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <TrendingUp size={32} className="opacity-80" />
                 <div className="bg-white bg-opacity-20 rounded-lg px-3 py-1">
-                  <p className="text-xs font-semibold">Rata-rata</p>
+                  <p className="text-xs text-slate-800 font-semibold">
+                    Rata-rata
+                  </p>
                 </div>
               </div>
               <p className="text-4xl font-bold mb-1">{stats.averageScore}</p>
@@ -219,7 +223,9 @@ const QuizDetailPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <Award size={32} className="opacity-80" />
                 <div className="bg-white bg-opacity-20 rounded-lg px-3 py-1">
-                  <p className="text-xs font-semibold">Tertinggi</p>
+                  <p className="text-xs text-slate-800 font-semibold">
+                    Tertinggi
+                  </p>
                 </div>
               </div>
               <p className="text-4xl font-bold mb-1">{stats.highestScore}</p>
@@ -231,7 +237,9 @@ const QuizDetailPage: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <Award size={32} className="opacity-80" />
                 <div className="bg-white bg-opacity-20 rounded-lg px-3 py-1">
-                  <p className="text-xs font-semibold">Terendah</p>
+                  <p className="text-xs text-slate-800 font-semibold">
+                    Terendah
+                  </p>
                 </div>
               </div>
               <p className="text-4xl font-bold mb-1">{stats.lowestScore}</p>
@@ -247,7 +255,9 @@ const QuizDetailPage: React.FC = () => {
               <Award className="text-indigo-600" />
               Distribusi Nilai
             </h2>
-            <p className="text-sm text-gray-500 mb-6">Berdasarkan nilai terbaik setiap user</p>
+            <p className="text-sm text-gray-500 mb-6">
+              Berdasarkan nilai terbaik setiap user
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {/* Excellent */}
               <div className="relative group">
