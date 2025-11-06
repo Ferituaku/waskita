@@ -289,7 +289,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
 
   if (loading || quizId === null) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 overflow-hidden">
+      <div className="flex flex-col justify-center items-center h-screen bg-linear-to-br from-red-50 via-rose-50 to-pink-50 overflow-hidden">
         <div className="relative">
           <div className="w-20 h-20 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
@@ -305,7 +305,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-red-50 to-rose-100 p-4 text-center overflow-hidden">
+      <div className="flex flex-col items-center justify-center h-screen bg-linear-to-br from-red-50 to-rose-100 p-4 text-center overflow-hidden">
         <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg border-2 border-red-200">
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <X className="w-10 h-10 text-red-600" />
@@ -316,7 +316,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
           <p className="text-gray-600 mb-8 text-lg">{error}</p>
           <Link
             href="/quiz-user"
-            className="inline-block bg-gradient-to-r from-red-500 to-rose-500 text-white font-bold py-4 px-8 rounded-full hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            className="inline-block bg-linear-to-r from-red-500 to-rose-500 text-white font-bold py-4 px-8 rounded-full hover:shadow-xl transform hover:scale-105 transition-all duration-300"
           >
             Kembali ke Daftar Kuis
           </Link>
@@ -330,14 +330,14 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
   // START SCREEN - HIV Health Theme
   if (gameState === "start") {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 p-4 text-center overflow-hidden">
+      <div className="flex flex-col items-center justify-center h-screen bg-linear-to-br from-red-50 via-rose-50 to-pink-50 p-4 text-center overflow-hidden">
         <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-2xl border-2 border-red-200 transform hover:scale-105 transition-all duration-300">
           {/* Red Ribbon / Heart Icon */}
-          <div className="w-24 h-24 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-pulse">
+          <div className="w-24 h-24 bg-linear-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-pulse">
             <Heart className="w-14 h-14 text-white fill-white" />
           </div>
 
-          <h1 className="text-5xl font-extrabold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-2xl font-extrabold bg-linear-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-4">
             {quizData.title}
           </h1>
 
@@ -351,7 +351,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
 
           <button
             onClick={handleStartQuiz}
-            className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold py-5 px-8 rounded-full text-2xl transition-all duration-300 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-rose-300 mb-6"
+            className="w-full bg-linear-to-r from-red-600 to-rose-600 text-white font-bold py-5 px-8 rounded-full text-2xl transition-all duration-300 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-rose-300 mb-6"
           >
             💪 Mulai Kuis Sekarang!
           </button>
@@ -375,7 +375,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
     const percentage = (correctAnswers / totalQuestions) * 100;
 
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 p-4 text-center overflow-hidden">
+      <div className="flex flex-col items-center justify-center h-screen bg-linear-to-br from-red-50 via-rose-50 to-pink-50 p-4 text-center overflow-hidden">
         <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-3xl border-2 border-red-200 max-h-[95vh] overflow-y-auto">
           {/* Icon */}
           <div className="mb-4 animate-bounce">{scoreDetails.icon}</div>
@@ -400,7 +400,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
               </p>
               <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
                 <div
-                  className="bg-gradient-to-r from-red-500 to-rose-500 h-3 rounded-full transition-all duration-1000 ease-out"
+                  className="bg-linear-to-r from-red-500 to-rose-500 h-3 rounded-full transition-all duration-1000 ease-out"
                   style={{ width: `${percentage}%` }}
                 ></div>
               </div>
@@ -442,7 +442,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
           <div className="flex flex-col md:flex-row gap-3">
             <button
               onClick={handleRestartQuiz}
-              className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
+              className="flex-1 bg-linear-to-r from-red-600 to-rose-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
             >
               <Zap className="w-5 h-5" />
               Coba Lagi
@@ -461,7 +461,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-red-50 to-rose-50 p-4 text-center overflow-hidden">
+      <div className="flex flex-col items-center justify-center h-screen bg-linear-to-br from-red-50 to-rose-50 p-4 text-center overflow-hidden">
         <p className="text-gray-600 text-lg">Soal tidak dapat dimuat.</p>
       </div>
     );
@@ -469,7 +469,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
 
   // PLAYING SCREEN - HIV Health Theme
   return (
-    <div className="h-screen bg-gradient-to-br from-red-500 via-rose-500 to-pink-500 text-white flex flex-col p-4 md:p-6 overflow-hidden">
+    <div className="h-screen bg-linear-to-br from-red-500 via-rose-500 to-pink-500 text-white flex flex-col p-4 md:p-6 overflow-hidden">
       {/* Header */}
       <header className="flex justify-between items-center mb-4">
         <div className="bg-white/20 backdrop-blur-lg px-4 py-2 rounded-full border-2 border-white/30">
@@ -493,7 +493,7 @@ export default function UserQuizPage({ params }: UserQuizPageProps) {
       <div className="w-full max-w-4xl mx-auto mb-4">
         <div className="w-full bg-white/20 rounded-full h-2.5 backdrop-blur-lg">
           <div
-            className="bg-gradient-to-r from-white to-teal-200 h-2.5 rounded-full transition-all duration-500 ease-out shadow-lg"
+            className="bg-linear-to-r from-white to-teal-200 h-2.5 rounded-full transition-all duration-500 ease-out shadow-lg"
             style={{
               width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`,
             }}

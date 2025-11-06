@@ -16,6 +16,7 @@ import Header from "@/components/Header";
 import TabFilter from "@/components/dashboard/TabFilter";
 import Pagination from "@/components/dashboard/Pagination";
 import ChatBot from "@/components/chatbot";
+import VideoModal from "@/components/VideoModal";
 
 // TIPE DATA
 interface Article {
@@ -262,6 +263,8 @@ const BerandaPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Semua");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<VideoEdukasi | null>(null);
 
   const itemsPerPage = 6;
 
@@ -345,8 +348,14 @@ const BerandaPage: React.FC = () => {
     router.push(`/artikel/${articleId}`);
   };
 
-  const handleVideoClick = (videoLink: string) => {
-    window.open(videoLink, "_blank", "noopener,noreferrer");
+  const handleVideoClick = (video: VideoEdukasi) => {
+    setSelectedVideo(video);
+    setIsVideoModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setIsVideoModalOpen(false);
+    // Delay reset untuk animasi
+    setTimeout(() => setSelectedVideo(null), 300);
   };
 
   const { paginatedItems, totalPages } = useMemo(() => {
@@ -420,6 +429,13 @@ const BerandaPage: React.FC = () => {
     <>
       <Header title="Beranda" />
       <ChatBot />
+      <VideoModal
+        isOpen={isVideoModalOpen}
+        onClose={handleCloseModal}
+        videoUrl={selectedVideo?.link || ""}
+        title={selectedVideo?.judul || ""}
+      />
+
       <div className="p-4 md:p-8 max-w-7xl mx-auto">
         <section className="mb-5 p-6 bg-white rounded-2xl shadow-lg border border-slate-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -462,7 +478,7 @@ const BerandaPage: React.FC = () => {
                       <VideoCardComponent
                         key={`video-${video.id}`}
                         video={video}
-                        onClick={() => handleVideoClick(video.link)}
+                        onClick={() => handleVideoClick(video)}
                       />
                     );
                   }

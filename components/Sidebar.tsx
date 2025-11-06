@@ -83,7 +83,7 @@ const Sidebar: React.FC = () => {
     return (
       <aside
         className={cn(
-          "flex flex-col bg-gradient-to-b from-[#5C110E] to-[#3b0a09] text-white border-r border-black/10 shadow-sm",
+          "flex flex-col bg-linear-to-b from-[#5C110E] to-[#3b0a09] text-white border-r border-black/10 shadow-sm",
           "fixed inset-y-0 left-0 z-50 md:relative md:z-auto",
           "-translate-x-full md:translate-x-0",
           isDesktopCollapsed ? "md:w-20" : "w-72"
@@ -113,7 +113,7 @@ const Sidebar: React.FC = () => {
       <aside
         className={cn(
           // Base styles
-          "flex flex-col bg-gradient-to-b from-[#5C110E] to-[#3b0a09] text-white border-r border-black/10 shadow-sm transition-all duration-300 ease-out",
+          "flex flex-col bg-linear-to-b from-[#5C110E] to-[#3b0a09] text-white border-r border-black/10 shadow-sm transition-all duration-300 ease-out",
           // Mobile styles - fixed overlay
           "fixed inset-y-0 left-0 z-50 md:relative md:z-auto",
           // Mobile visibility
@@ -200,7 +200,7 @@ const Sidebar: React.FC = () => {
                 )}
                 title={isDesktopCollapsed ? label : undefined}
               >
-                <Icon className="h-5 w-5 opacity-90 flex-shrink-0" />
+                <Icon className="h-5 w-5 opacity-90 shrink-0" />
                 <span
                   className={cn(
                     "font-medium tracking-tight whitespace-nowrap",
