@@ -72,25 +72,47 @@ export async function POST(req: Request) {
         body: JSON.stringify({ message: cleanedMessage }),
       });
 
-      if (n8nResponse.ok) {
-        const data = await n8nResponse.json();
-        // Support various common output keys from n8n
-        const aiAnswer = data.answer || data.output || data.text || data.response;
+      // 🛡️ Always read as text first to avoid crashing on empty/malformed responses
+      const responseText = await n8nResponse.text();
+      console.log(`📥 Raw n8n response (${n8nResponse.status}):`, responseText.substring(0, 200)); // Log first 200 chars
 
-        if (aiAnswer) {
-          return NextResponse.json({ answer: aiAnswer }, { status: 200 });
-        } else {
-            console.warn("⚠️ n8n response missing answer field:", data);
-            return NextResponse.json(
-                { answer: "Maaf, saya tidak dapat memproses jawaban saat ini." },
-                { status: 502 }
-            );
-        }
-      } else {
-        console.error(`❌ n8n Error: ${n8nResponse.status} ${n8nResponse.statusText}`);
+      if (!n8nResponse.ok) {
+        console.error(`❌ n8n Error: ${n8nResponse.status} ${n8nResponse.statusText} - Body: ${responseText}`);
         return NextResponse.json(
           { answer: "Maaf, asisten virtual sedang sibuk. Coba lagi nanti ya! 🙏" },
           { status: 502 }
+        );
+      }
+
+      if (!responseText.trim()) {
+        console.warn("⚠️ n8n returned empty response body");
+         return NextResponse.json(
+            { answer: "Maaf, tidak ada respon dari server AI." },
+            { status: 502 }
+        );
+      }
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("❌ Failed to parse n8n JSON:", e);
+        return NextResponse.json(
+            { answer: "Terjadi kesalahan format data dari server AI." },
+            { status: 502 }
+        );
+      }
+
+      // Support various common output keys from n8n
+      const aiAnswer = data.answer || data.output || data.text || data.response;
+
+      if (aiAnswer) {
+        return NextResponse.json({ answer: aiAnswer }, { status: 200 });
+      } else {
+        console.warn("⚠️ n8n response missing answer field:", data);
+        return NextResponse.json(
+            { answer: "Maaf, saya tidak dapat memproses jawaban saat ini." },
+            { status: 502 }
         );
       }
     } catch (fetchError) {
