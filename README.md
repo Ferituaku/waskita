@@ -66,10 +66,3 @@ Create a `.env` file in the root directory based on your required configurations
 pnpm dev
 ```
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## 🤝 Contributing
-Contributions, issues, and feature requests are welcome!
-Feel free to check [issues page](https://github.com/Ferituaku/waskita/issues).
-
-## 📄 License
-This project is licensed under the [ISC License](LICENSE).
