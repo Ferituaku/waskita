@@ -24,7 +24,7 @@
 
 ## 🌐 Public Deployment
 Check out the live application here:
-👉 **[Waskita Live Deployment](https://your-public-deployment-link.com)** 
+👉 **[Waskita Live Deployment](https://waskita-elearning.com/)** 
 *(Note: Please update the URL above with your actual deployment link like Vercel or Railway)*
 
 ## 🛠️ Tech Stack
