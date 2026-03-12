@@ -64,7 +64,7 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
-  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "description": "Waskita (Wadah Sinau Kita) - An AI-powered learning platform for the StopHIVA initiative built with Next.js.",
   "main": "tailwind.config.js",
   "directories": {
     "lib": "lib"
