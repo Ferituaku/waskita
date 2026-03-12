@@ -5,8 +5,7 @@
   <p><strong>Wadah Sinau Kita - Our Learning Container</strong></p>
   <p>An AI-Powered Learning Ecosystem for StopHIVA</p>
 
-  <!-- IMPORTANT: Replace with your actual deployment link -->
-  <a href="https://your-public-deployment-link.com" target="_blank">
+  <a href="https://waskita-elearning.com/" target="_blank">
     <img src="https://img.shields.io/badge/Public_Deployment-Live_Now-success?style=for-the-badge&logo=vercel" alt="Public Deployment" />
   </a>
   
