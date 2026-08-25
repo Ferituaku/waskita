@@ -3,9 +3,13 @@ import mysql from "mysql2/promise";
 
 const dbConfig = {
   host: process.env.DB_HOST || "localhost",
+  port: parseInt(process.env.DB_PORT || "3306", 10),
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
-database: process.env.DB_NAME || "railway", // ← Ubah dari "waskita_db" ke "railway"
+  database: process.env.DB_NAME || "waskita_db",
+  ...(process.env.DB_SSL === "true" || process.env.DB_HOST !== "localhost"
+    ? { ssl: { rejectUnauthorized: false } }
+    : {}),
 };
 
 const CREATE_DATABASE_SQL = `CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`;
@@ -110,7 +114,6 @@ CREATE TABLE IF NOT EXISTS \`video_edukasi\` (
   PRIMARY KEY (\`id\`)
 );`;
 
-// Migration script to add user_id column if it doesn't exist
 const MIGRATE_HASIL_KUIS_SQL = `
 ALTER TABLE \`hasil_kuis\`
 ADD COLUMN IF NOT EXISTS \`user_id\` INT NULL AFTER \`id_judul\`,
@@ -121,7 +124,6 @@ ADD CONSTRAINT IF NOT EXISTS \`fk_hasil_user\`
   ON DELETE SET NULL;
 `;
 
-// Singleton pattern to ensure DB initialization runs only once
 let dbPromise: Promise<mysql.Pool> | null = null;
 let isInitialized = false;
 
@@ -134,11 +136,8 @@ async function initializeDatabase(): Promise<mysql.Pool> {
     console.log("🔄 Initializing database connection...");
 
     // 1. Connect to MySQL server without selecting a database
-    const tempConnection = await mysql.createConnection({
-      host: dbConfig.host,
-      user: dbConfig.user,
-      password: dbConfig.password,
-    });
+    const { database, ...serverConfig } = dbConfig;
+    const tempConnection = await mysql.createConnection(serverConfig);
 
     console.log("✅ Connected to MySQL server");
 
@@ -175,12 +174,10 @@ async function initializeDatabase(): Promise<mysql.Pool> {
     await pool.query(CREATE_HASIL_KUIS_TABLE_SQL);
     console.log('✅ Table "hasil_kuis" is ready');
 
-    // Try to run migration for existing databases
     try {
       await pool.query(MIGRATE_HASIL_KUIS_SQL);
       console.log('✅ Migration for "hasil_kuis" completed (if needed)');
     } catch {
-      // Migration might fail if constraints already exist, that's okay
       console.log("ℹ️ Migration skipped or already applied");
     }
 

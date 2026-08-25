@@ -63,12 +63,16 @@ export async function PUT(
 
     try {
       // 1. DELETE questions (CASCADE will delete related answers)
-      if (payload.questions_to_delete.length > 0) {
+      const qDeleteIds = Array.isArray(payload.questions_to_delete)
+        ? payload.questions_to_delete.map((x) => Number(x)).filter((n) => Number.isInteger(n))
+        : [];
+      if (qDeleteIds.length > 0) {
+        const qPlaceholders = qDeleteIds.map(() => "?").join(",");
         await connection.query(
-          `DELETE FROM soal WHERE id_soal IN (${payload.questions_to_delete.join(",")})`,
-          []
+          `DELETE FROM soal WHERE id_soal IN (${qPlaceholders})`,
+          qDeleteIds
         );
-        console.log("✅ Deleted questions:", payload.questions_to_delete);
+        console.log("✅ Deleted questions:", qDeleteIds);
       }
 
       // 2. ADD new questions
@@ -96,12 +100,16 @@ export async function PUT(
       }
 
       // 4. DELETE answers
-      if (payload.answers_to_delete.length > 0) {
+      const aDeleteIds = Array.isArray(payload.answers_to_delete)
+        ? payload.answers_to_delete.map((x) => Number(x)).filter((n) => Number.isInteger(n))
+        : [];
+      if (aDeleteIds.length > 0) {
+        const aPlaceholders = aDeleteIds.map(() => "?").join(",");
         await connection.query(
-          `DELETE FROM jawaban WHERE id_jawaban IN (${payload.answers_to_delete.join(",")})`,
-          []
+          `DELETE FROM jawaban WHERE id_jawaban IN (${aPlaceholders})`,
+          aDeleteIds
         );
-        console.log("✅ Deleted answers:", payload.answers_to_delete);
+        console.log("✅ Deleted answers:", aDeleteIds);
       }
 
       // 5. ADD new answers (map temp question IDs to real IDs)

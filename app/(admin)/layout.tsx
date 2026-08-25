@@ -5,7 +5,6 @@ import { SidebarProvider } from "@/hooks/SidebarContext";
 import ChatBot from "@/components/chatbot";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  // tambahan logic khusus user di sini jika perlu
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* ===== 1. SIDEBAR DITAMPILKAN DI SINI ===== */}

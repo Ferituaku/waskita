@@ -1,6 +1,5 @@
 // app/lib/mock-data.ts
 
-// Definisikan tipe data sesuai skema database
 export interface Judul {
     id_judul: number;
     judul: string;

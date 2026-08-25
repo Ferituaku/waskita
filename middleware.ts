@@ -9,7 +9,6 @@ const JWT_SECRET = new TextEncoder().encode(
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ⛔ Lewati middleware untuk API routes dan static files
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -22,8 +21,6 @@ export async function middleware(req: NextRequest) {
 
   const token = req.cookies.get("token")?.value;
 
-  // 🔐 PROTEKSI HALAMAN LOGIN/REGISTER
-  // Jika sudah login, redirect ke dashboard sesuai role
   if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
     if (token) {
       try {
@@ -46,12 +43,10 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 🔓 Halaman publik lainnya
   if (pathname.startsWith("/unauthorized")) {
     return NextResponse.next();
   }
 
-  // 🔒 PROTEKSI HALAMAN YANG BUTUH AUTH
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -60,7 +55,6 @@ export async function middleware(req: NextRequest) {
     const { payload } = await jwtVerify(token, JWT_SECRET);
     const userRole = payload.role as string;
 
-    // 🔵 USER ROUTES
     const userRoutes = [
       "/quiz-user",
       "/apa-itu-wpa",
@@ -76,7 +70,6 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next();
     }
 
-    // 🔴 ADMIN ROUTES
     const adminRoutes = [
       "/materi",
       "/admin/profile/edit",
@@ -95,7 +88,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next();
     }
 
-    // 🏠 ROOT PATH - Redirect ke dashboard sesuai role
+   
     if (pathname === "/") {
       if (userRole === "admin") {
         return NextResponse.redirect(new URL("/dashboard", req.url));

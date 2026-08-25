@@ -3,18 +3,23 @@
 import mysql, { ResultSetHeader } from "mysql2/promise"; // Impor ResultSetHeader
 import dotenv from "dotenv";
 
-// Load .env.local untuk kredensial Railway
-dotenv.config({ path: ".env.local" });
+import path from "path";
+import fs from "fs";
 
-// Konfigurasi DB – baca dari .env.local
+// Load .env.production (or fallback to .env)
+if (fs.existsSync(path.join(process.cwd(), ".env.production"))) {
+  dotenv.config({ path: path.join(process.cwd(), ".env.production") });
+} else {
+  dotenv.config();
+}
+
 const dbConfig = {
   host: process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_PORT || "3306"),
+  port: parseInt(process.env.DB_PORT || "4000", 10),
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "waskita_db",
-  // Fix SSL: undefined untuk lokal (no SSL), object untuk Railway
-  ...(process.env.DB_HOST !== "localhost"
+  ...(process.env.DB_HOST !== "localhost" || process.env.DB_SSL === "true"
     ? { ssl: { rejectUnauthorized: false } }
     : {}),
 };
@@ -43,9 +48,11 @@ async function insertDataQuiz() {
       }`
     );
 
-    // Buat koneksi ke DB
-    connection = await mysql.createConnection(dbConfig);
-    console.log("✅ Berhasil terhubung ke MySQL");
+    // 0. Initialise tables via getDb()
+    const { getDb } = await import("../lib/db");
+    const pool = await getDb();
+    connection = await pool.getConnection();
+    console.log("✅ Berhasil terhubung ke database TiDB Cloud!");
 
     // 1. Tambahkan Judul Kuis
     const queryJudul = "INSERT INTO judul (judul, cover) VALUES (?, ?)";
