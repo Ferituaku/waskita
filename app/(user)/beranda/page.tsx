@@ -143,7 +143,7 @@ const ArticleCardComponent: React.FC<{
           }`}
           unoptimized
           onLoad={() => setImgLoading(false)}
-          onError={(e) => {
+          onError={() => {
             console.error("Image error:", article.id, imageUrl);
             setImgError(true);
             setImgLoading(false);

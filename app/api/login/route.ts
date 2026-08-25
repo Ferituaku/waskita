@@ -91,10 +91,11 @@ export async function POST(req: Request) {
     });
 
     return res;
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
     console.error("❌ Login error:", err);
     return NextResponse.json(
-      { message: err?.message || "Terjadi kesalahan pada server", details: String(err) },
+      { message: errorMsg || "Terjadi kesalahan pada server" },
       { status: 500 }
     );
   }

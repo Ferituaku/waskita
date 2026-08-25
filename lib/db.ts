@@ -16,8 +16,6 @@ function getDbConfig() {
   };
 }
 
-const CREATE_DATABASE_SQL = `CREATE DATABASE IF NOT EXISTS \`${getDbConfig().database}\`;`;
-
 const CREATE_USERS_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS \`users\` (
   \`id\` INT NOT NULL AUTO_INCREMENT,
