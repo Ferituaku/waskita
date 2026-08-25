@@ -1,15 +1,28 @@
 // lib/db.ts
 import mysql from "mysql2/promise";
+import dns from "dns";
+
+// Force IPv4 resolution order to prevent getaddrinfo ENOTFOUND on Vercel/AWS environments
+if (typeof dns.setDefaultResultOrder === "function") {
+  dns.setDefaultResultOrder("ipv4first");
+}
 
 function getDbConfig() {
-  const host = process.env.DB_HOST || "localhost";
+  const rawHost = process.env.DB_HOST || "localhost";
+  const host = rawHost.trim().replace(/^["']|["']$/g, "");
+  const user = (process.env.DB_USER || "root").trim().replace(/^["']|["']$/g, "");
+  const password = (process.env.DB_PASSWORD || "").trim().replace(/^["']|["']$/g, "");
+  const database = (process.env.DB_NAME || "stophiva").trim().replace(/^["']|["']$/g, "");
+  const portStr = (process.env.DB_PORT || "4000").trim();
+  const port = parseInt(portStr, 10);
   const isLocal = host === "localhost" || host === "127.0.0.1";
+
   return {
     host,
-    port: parseInt(process.env.DB_PORT || "4000", 10),
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "",
-    database: process.env.DB_NAME || "stophiva",
+    port,
+    user,
+    password,
+    database,
     ...(!isLocal || process.env.DB_SSL === "true"
       ? { ssl: { rejectUnauthorized: false } }
       : {}),
