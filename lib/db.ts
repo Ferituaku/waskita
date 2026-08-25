@@ -1,18 +1,22 @@
 // lib/db.ts
 import mysql from "mysql2/promise";
 
-const dbConfig = {
-  host: process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_PORT || "3306", 10),
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "waskita_db",
-  ...(process.env.DB_SSL === "true" || process.env.DB_HOST !== "localhost"
-    ? { ssl: { rejectUnauthorized: false } }
-    : {}),
-};
+function getDbConfig() {
+  const host = process.env.DB_HOST || "localhost";
+  const isLocal = host === "localhost" || host === "127.0.0.1";
+  return {
+    host,
+    port: parseInt(process.env.DB_PORT || "4000", 10),
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "",
+    database: process.env.DB_NAME || "stophiva",
+    ...(!isLocal || process.env.DB_SSL === "true"
+      ? { ssl: { rejectUnauthorized: false } }
+      : {}),
+  };
+}
 
-const CREATE_DATABASE_SQL = `CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\`;`;
+const CREATE_DATABASE_SQL = `CREATE DATABASE IF NOT EXISTS \`${getDbConfig().database}\`;`;
 
 const CREATE_USERS_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS \`users\` (
@@ -149,9 +153,10 @@ async function ensureTablesExist(pool: mysql.Pool) {
 
 export async function getDb(): Promise<mysql.Pool> {
   if (!globalPool) {
-    console.log("🔄 Creating MySQL pool for TiDB Cloud...");
+    const config = getDbConfig();
+    console.log(`🔄 Creating MySQL pool for ${config.host}:${config.port}/${config.database}...`);
     globalPool = mysql.createPool({
-      ...dbConfig,
+      ...config,
       waitForConnections: true,
       connectionLimit: 5,
       queueLimit: 0,

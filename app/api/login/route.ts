@@ -91,10 +91,10 @@ export async function POST(req: Request) {
     });
 
     return res;
-  } catch (err) {
+  } catch (err: any) {
     console.error("❌ Login error:", err);
     return NextResponse.json(
-      { message: "Terjadi kesalahan pada server" },
+      { message: err?.message || "Terjadi kesalahan pada server", details: String(err) },
       { status: 500 }
     );
   }
