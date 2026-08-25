@@ -124,84 +124,43 @@ ADD CONSTRAINT IF NOT EXISTS \`fk_hasil_user\`
   ON DELETE SET NULL;
 `;
 
-let dbPromise: Promise<mysql.Pool> | null = null;
-let isInitialized = false;
+let globalPool: mysql.Pool | null = null;
 
-async function initializeDatabase(): Promise<mysql.Pool> {
-  if (isInitialized && dbPromise) {
-    return dbPromise;
-  }
-
+async function ensureTablesExist(pool: mysql.Pool) {
   try {
-    console.log("🔄 Initializing database connection...");
-
-    // 1. Connect to MySQL server without selecting a database
-    const { database, ...serverConfig } = dbConfig;
-    const tempConnection = await mysql.createConnection(serverConfig);
-
-    console.log("✅ Connected to MySQL server");
-
-    // 2. Create the database if it doesn't exist
-    await tempConnection.query(CREATE_DATABASE_SQL);
-    console.log(`✅ Database '${dbConfig.database}' is ready`);
-
-    await tempConnection.end();
-
-    // 3. Create a connection pool to the specific database
-    const pool = mysql.createPool({
-      ...dbConfig,
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-    });
-
-    // 4. Create tables if they don't exist (SYNCHRONOUSLY)
-    console.log("🔄 Creating tables...");
-
-    // IMPORTANT: Create users table first (it's referenced by hasil_kuis)
+    console.log("🔄 Verifying database tables...");
     await pool.query(CREATE_USERS_TABLE_SQL);
-    console.log('✅ Table "users" is ready');
-
     await pool.query(CREATE_JUDUL_TABLE_SQL);
-    console.log('✅ Table "judul" is ready');
-
     await pool.query(CREATE_SOAL_TABLE_SQL);
-    console.log('✅ Table "soal" is ready');
-
     await pool.query(CREATE_JAWABAN_TABLE_SQL);
-    console.log('✅ Table "jawaban" is ready');
-
     await pool.query(CREATE_HASIL_KUIS_TABLE_SQL);
-    console.log('✅ Table "hasil_kuis" is ready');
-
     try {
       await pool.query(MIGRATE_HASIL_KUIS_SQL);
-      console.log('✅ Migration for "hasil_kuis" completed (if needed)');
     } catch {
-      console.log("ℹ️ Migration skipped or already applied");
+      // Ignore migration errors if already applied
     }
-
     await pool.query(CREATE_ARTICLES_TABLE_SQL);
-    console.log('✅ Table "articles" is ready');
-
     await pool.query(CREATE_VIDEO_EDUKASI_TABLE_SQL);
-    console.log('✅ Table "video_edukasi" is ready');
-
-    isInitialized = true;
-    console.log("✅ Database and all tables are ready.");
-
-    return pool;
-  } catch (error) {
-    console.error("❌ Failed to initialize database:", error);
-    dbPromise = null;
-    isInitialized = false;
-    throw error;
+    console.log("✅ Tables verification completed.");
+  } catch (err) {
+    console.warn("⚠️ Warning during table verification:", err);
   }
 }
 
-export function getDb(): Promise<mysql.Pool> {
-  if (!dbPromise) {
-    dbPromise = initializeDatabase();
+export async function getDb(): Promise<mysql.Pool> {
+  if (!globalPool) {
+    console.log("🔄 Creating MySQL pool for TiDB Cloud...");
+    globalPool = mysql.createPool({
+      ...dbConfig,
+      waitForConnections: true,
+      connectionLimit: 5,
+      queueLimit: 0,
+      connectTimeout: 15000,
+    });
+    // Non-blocking table initialization
+    ensureTablesExist(globalPool).catch((err) =>
+      console.warn("⚠️ Table creation background warning:", err)
+    );
   }
-  return dbPromise;
+  return globalPool;
 }
